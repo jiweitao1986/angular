@@ -6,15 +6,31 @@
  * found in the LICENSE file at https://angular.io/license
  */
 
+
+/**
+ * 树结构
+ */
 export class Tree<T> {
   /** @internal */
   _root: TreeNode<T>;
 
-  constructor(root: TreeNode<T>) { this._root = root; }
-
-  get root(): T { return this._root.value; }
+  /**
+   * 构造函数
+   * @param root 
+   */
+  constructor(root: TreeNode<T>) {
+    this._root = root;
+  }
 
   /**
+   * 根节点的值
+   */
+  get root(): T {
+    return this._root.value;
+  }
+
+  /**
+   * 父节点的值
    * @internal
    */
   parent(t: T): T|null {
@@ -23,6 +39,7 @@ export class Tree<T> {
   }
 
   /**
+   * 子节点值集合
    * @internal
    */
   children(t: T): T[] {
@@ -31,6 +48,7 @@ export class Tree<T> {
   }
 
   /**
+   * 第一个子节点的值
    * @internal
    */
   firstChild(t: T): T|null {
@@ -39,6 +57,7 @@ export class Tree<T> {
   }
 
   /**
+   * 兄弟节点的集合
    * @internal
    */
   siblings(t: T): T[] {
@@ -50,13 +69,21 @@ export class Tree<T> {
   }
 
   /**
+   * 从当前节点到根节点路径上所有节点的值集合
    * @internal
    */
-  pathFromRoot(t: T): T[] { return findPath(t, this._root).map(s => s.value); }
+  pathFromRoot(t: T): T[] {
+    return findPath(t, this._root).map(s => s.value);
+  }
 }
 
 
 // DFS for the node matching the value
+/**
+ * 使用深度优先算法，根据节点的value查找对应节点
+ * @param value 
+ * @param node 
+ */
 function findNode<T>(value: T, node: TreeNode<T>): TreeNode<T>|null {
   if (value === node.value) return node;
 
@@ -68,6 +95,9 @@ function findNode<T>(value: T, node: TreeNode<T>): TreeNode<T>|null {
   return null;
 }
 
+/**
+ * 从node开始向下
+ */
 // Return the path to the node with the given value using DFS
 function findPath<T>(value: T, node: TreeNode<T>): TreeNode<T>[] {
   if (value === node.value) return [node];
@@ -83,10 +113,28 @@ function findPath<T>(value: T, node: TreeNode<T>): TreeNode<T>[] {
   return [];
 }
 
-export class TreeNode<T> {
-  constructor(public value: T, public children: TreeNode<T>[]) {}
 
-  toString(): string { return `TreeNode(${this.value})`; }
+/**
+ * 树节点定义
+ */
+export class TreeNode<T> {
+
+  /**
+   * 构造函数
+   * @param value 节点值
+   * @param children 后代节点集合
+   */
+  constructor(
+    public value: T,
+    public children: TreeNode<T>[]
+  ) {}
+
+  /**
+   * 节点的字符串表示
+   */
+  toString(): string {
+    return `TreeNode(${this.value})`;
+  }
 }
 
 // Return the list of T indexed by outlet name

@@ -54,12 +54,32 @@ export function anchorDef(
   };
 }
 
+/**
+ * 定义Element
+ * @params { number }    checkIndex        标记检查顺序的索引？？？
+ * @params { NodeFlags } flags             元素状态
+ * @params { Array }     matchedQueriesDsl
+ * @params { number }    ngContentIndex    
+ * @params { number }    childCount       子元素或者子节点？？？的数量
+ * @params { string }    namespaceAndName 元素的命名空间和名称
+ * @params {[string, string][]} fixedAttrs 属性数组，每个属性时一个数组，数组中第一个元素是属性名，第二个是属性值
+ * @params bindings
+ * @params outputs
+ * @params handleEvent
+ * @params componentView
+ * @params componentRendererType
+ */
 export function elementDef(
-    checkIndex: number, flags: NodeFlags,
-    matchedQueriesDsl: null | [string | number, QueryValueType][], ngContentIndex: null | number,
-    childCount: number, namespaceAndName: string | null, fixedAttrs: null | [string, string][] = [],
+    checkIndex: number,
+    flags: NodeFlags,
+    matchedQueriesDsl: null | [string | number, QueryValueType][],
+    ngContentIndex: null | number,
+    childCount: number,
+    namespaceAndName: string | null,
+    fixedAttrs: null | [string, string][] = [],
     bindings?: null | [BindingFlags, string, string | SecurityContext | null][],
-    outputs?: null | ([string, string])[], handleEvent?: null | ElementHandleEventFn,
+    outputs?: null | ([string, string])[],
+    handleEvent?: null | ElementHandleEventFn,
     componentView?: null | ViewDefinitionFactory,
     componentRendererType?: RendererType2 | null): NodeDef {
   if (!handleEvent) {

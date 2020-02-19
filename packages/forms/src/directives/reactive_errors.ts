@@ -9,6 +9,9 @@
 
 import {FormErrorExamples as Examples} from './error_examples';
 
+/**
+ * ReactiveErros
+ */
 export class ReactiveErrors {
   static controlParentException(): void {
     throw new Error(

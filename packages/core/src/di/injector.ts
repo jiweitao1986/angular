@@ -47,24 +47,37 @@ class _NullInjector implements Injector {
  * @stable
  */
 export abstract class Injector {
+
+  //
   static THROW_IF_NOT_FOUND = _THROW_IF_NOT_FOUND;
+
+  //
   static NULL: Injector = new _NullInjector();
 
   /**
+   * 从注入器中获取一个实例
    * Retrieves an instance from the injector based on the provided token.
+   * 
+   * 如果找不到：
+   * 如果notFoundValue没有设置，则抛出一个异常，否则返回notFoundValue
+
    * If not found:
    * - Throws an error if no `notFoundValue` that is not equal to
    * Injector.THROW_IF_NOT_FOUND is given
    * - Returns the `notFoundValue` otherwise
    */
   abstract get<T>(token: Type<T>|InjectionToken<T>, notFoundValue?: T): T;
+  
+  
   /**
+   * 4.0后已废弃
    * @deprecated from v4.0.0 use Type<T> or InjectionToken<T>
    * @suppress {duplicate}
    */
   abstract get(token: any, notFoundValue?: any): any;
 
   /**
+   * 创建一个用StaticProvider作为配置的注入器
    * Create a new Injector which is configure using `StaticProvider`s.
    *
    * ### Example
@@ -81,45 +94,108 @@ export abstract class Injector {
 const IDENT = function<T>(value: T): T {
   return value;
 };
+
+//
 const EMPTY = <any[]>[];
+
+//
 const CIRCULAR = IDENT;
+
+//
 const MULTI_PROVIDER_FN = function(): any[] {
   return Array.prototype.slice.call(arguments);
 };
+
+//
 const GET_PROPERTY_NAME = {} as any;
+
+//
 const USE_VALUE =
     getClosureSafeProperty<ValueProvider>({provide: String, useValue: GET_PROPERTY_NAME});
+
+//
 const NG_TOKEN_PATH = 'ngTokenPath';
+
+//
 const NG_TEMP_TOKEN_PATH = 'ngTempTokenPath';
+
+//
 const enum OptionFlags {
   Optional = 1 << 0,
   CheckSelf = 1 << 1,
   CheckParent = 1 << 2,
   Default = CheckSelf | CheckParent
 }
+
+//
 const NULL_INJECTOR = Injector.NULL;
+
+//
 const NEW_LINE = /\n/gm;
+
+//
 const NO_NEW_LINE = 'ɵ';
 
+
+/**
+ * StaticInjector
+ */
 export class StaticInjector implements Injector {
+
+  /**
+   * 父注入器
+   */
   readonly parent: Injector;
 
+  /**
+   * 
+   */
   private _records: Map<any, Record>;
 
-  constructor(providers: StaticProvider[], parent: Injector = NULL_INJECTOR) {
+
+  /**
+   * 
+   * @param providers 
+   * @param parent 
+   */
+  constructor(
+    providers: StaticProvider[],
+    parent: Injector = NULL_INJECTOR
+) {
     this.parent = parent;
     const records = this._records = new Map<any, Record>();
     records.set(
-        Injector, <Record>{token: Injector, fn: IDENT, deps: EMPTY, value: this, useNew: false});
+        Injector,
+        <Record>{
+          token: Injector,
+          fn: IDENT,
+          deps: EMPTY,
+          value: this,
+          useNew: false
+        }
+    );
     recursivelyProcessProviders(records, providers);
   }
 
+  /**
+   * 获取一个实例
+   * @param token 
+   * @param notFoundValue 
+   */
   get<T>(token: Type<T>|InjectionToken<T>, notFoundValue?: T): T;
   get(token: any, notFoundValue?: any): any;
   get(token: any, notFoundValue?: any): any {
     const record = this._records.get(token);
     try {
-      return tryResolveToken(token, record, this._records, this.parent, notFoundValue);
+
+      return tryResolveToken(
+        token,
+        record,
+        this._records,
+        this.parent,
+        notFoundValue
+      );
+
     } catch (e) {
       const tokenPath: any[] = e[NG_TEMP_TOKEN_PATH];
       e.message = formatError('\n' + e.message, tokenPath);
@@ -129,6 +205,9 @@ export class StaticInjector implements Injector {
     }
   }
 
+  /**
+   * toString
+   */
   toString() {
     const tokens = <string[]>[], records = this._records;
     records.forEach((v, token) => tokens.push(stringify(token)));
@@ -136,9 +215,26 @@ export class StaticInjector implements Injector {
   }
 }
 
-type SupportedProvider =
-    ValueProvider | ExistingProvider | StaticClassProvider | ConstructorProvider | FactoryProvider;
 
+
+/**
+ * 支持的Provider类型
+ */
+type SupportedProvider =
+    ValueProvider |
+    ExistingProvider |
+    StaticClassProvider |
+    ConstructorProvider |
+    FactoryProvider;
+
+
+/**
+ * Record
+ * fn
+ * useNew
+ * deps
+ * value
+ */
 interface Record {
   fn: Function;
   useNew: boolean;
@@ -146,19 +242,36 @@ interface Record {
   value: any;
 }
 
+
+/**
+ * DependencyRecord
+ */
 interface DependencyRecord {
   token: any;
   options: number;
 }
 
+
+
 type TokenPath = Array<any>;
 
+
+/**
+ * resolveProvider
+ * @param provider 
+ */
 function resolveProvider(provider: SupportedProvider): Record {
+
   const deps = computeDeps(provider);
+
   let fn: Function = IDENT;
+
   let value: any = EMPTY;
+
+  
   let useNew: boolean = false;
   let provide = resolveForwardRef(provider.provide);
+  
   if (USE_VALUE in provider) {
     // We need to use USE_VALUE in provider since provider.useValue could be defined as undefined.
     value = (provider as ValueProvider).useValue;
@@ -180,13 +293,27 @@ function resolveProvider(provider: SupportedProvider): Record {
   return {deps, fn, useNew, value};
 }
 
+
+
 function multiProviderMixError(token: any) {
   return staticError('Cannot mix multi providers and regular providers', token);
 }
 
-function recursivelyProcessProviders(records: Map<any, Record>, provider: StaticProvider) {
+
+/**
+ * 递归处理providers
+ * @param records 
+ * @param provider 
+ */
+function recursivelyProcessProviders(
+  records: Map<any, Record>,
+  provider: StaticProvider
+) {
+
   if (provider) {
+
     provider = resolveForwardRef(provider);
+
     if (provider instanceof Array) {
       // if we have an array recurse into the array
       for (let i = 0; i < provider.length; i++) {
@@ -229,9 +356,20 @@ function recursivelyProcessProviders(records: Map<any, Record>, provider: Static
     } else {
       throw staticError('Unexpected provider', provider);
     }
+
+
   }
 }
 
+
+/**
+ * 尝试处理Token
+ * @param token 
+ * @param record 
+ * @param records 
+ * @param parent 
+ * @param notFoundValue 
+ */
 function tryResolveToken(
     token: any, record: Record | undefined, records: Map<any, Record>, parent: Injector,
     notFoundValue: any): any {
@@ -252,6 +390,15 @@ function tryResolveToken(
   }
 }
 
+
+/**
+ * 处理token
+ * @param token
+ * @param record 
+ * @param records 
+ * @param parent 
+ * @param notFoundValue 
+ */
 function resolveToken(
     token: any, record: Record | undefined, records: Map<any, Record>, parent: Injector,
     notFoundValue: any): any {
@@ -299,6 +446,10 @@ function resolveToken(
 }
 
 
+/**
+ * 计算依赖
+ * @param provider
+ */
 function computeDeps(provider: StaticProvider): DependencyRecord[] {
   let deps: DependencyRecord[] = EMPTY;
   const providerDeps: any[] =
@@ -336,6 +487,12 @@ function computeDeps(provider: StaticProvider): DependencyRecord[] {
   return deps;
 }
 
+
+/**
+ * 格式化错误信息
+ * @param text
+ * @param obj 
+ */
 function formatError(text: string, obj: any): string {
   text = text && text.charAt(0) === '\n' && text.charAt(1) == NO_NEW_LINE ? text.substr(2) : text;
   let context = stringify(obj);
@@ -355,10 +512,21 @@ function formatError(text: string, obj: any): string {
   return `StaticInjectorError[${context}]: ${text.replace(NEW_LINE, '\n  ')}`;
 }
 
+
+/**
+ * 静态错误
+ * @param text 
+ * @param obj 
+ */
 function staticError(text: string, obj: any): Error {
   return new Error(formatError(text, obj));
 }
 
+
+/**
+ * 获取闭包安全的属性
+ * @param objWithPropertyToExtract 
+ */
 function getClosureSafeProperty<T>(objWithPropertyToExtract: T): string {
   for (let key in objWithPropertyToExtract) {
     if (objWithPropertyToExtract[key] === GET_PROPERTY_NAME) {

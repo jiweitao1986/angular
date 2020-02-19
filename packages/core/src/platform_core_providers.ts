@@ -12,11 +12,22 @@ import {Console} from './console';
 import {Injector, StaticProvider} from './di';
 import {TestabilityRegistry} from './testability/testability';
 
+/**
+ * platformCore的依赖注入配置
+ */
 const _CORE_PLATFORM_PROVIDERS: StaticProvider[] = [
+
+  // PLATFORM_ID
   // Set a default platform name for platforms that don't set it explicitly.
   {provide: PLATFORM_ID, useValue: 'unknown'},
+
+  // PlatformRef
   {provide: PlatformRef, deps: [Injector]},
+
+  // TestabilityRegistry
   {provide: TestabilityRegistry, deps: []},
+
+  // Console
   {provide: Console, deps: []},
 ];
 
@@ -25,4 +36,8 @@ const _CORE_PLATFORM_PROVIDERS: StaticProvider[] = [
  *
  * @experimental
  */
-export const platformCore = createPlatformFactory(null, 'core', _CORE_PLATFORM_PROVIDERS);
+export const platformCore = createPlatformFactory(
+  null,
+  'core',
+  _CORE_PLATFORM_PROVIDERS
+);

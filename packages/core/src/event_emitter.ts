@@ -9,6 +9,10 @@
 import {Subject} from 'rxjs/Subject';
 
 /**
+ * ----------------------------------------
+ * 自定义事件
+ * ----------------------------------------
+ * 
  * Use by directives and components to emit custom Events.
  *
  * ### Examples
@@ -56,6 +60,7 @@ import {Subject} from 'rxjs/Subject';
  * @stable
  */
 export class EventEmitter<T> extends Subject<T> {
+
   // TODO: mark this as internal once all the facades are gone
   // we can't mark it as internal now because EventEmitter exported via @angular/core would not
   // contain this property making it incompatible with all the code that uses EventEmitter via
@@ -77,34 +82,51 @@ export class EventEmitter<T> extends Subject<T> {
 
   emit(value?: T) { super.next(value); }
 
+  /**
+   * 
+   * @param generatorOrNext 事件订阅
+   * @param error 
+   * @param complete 
+   */
   subscribe(generatorOrNext?: any, error?: any, complete?: any): any {
+
     let schedulerFn: (t: any) => any;
     let errorFn = (err: any): any => null;
     let completeFn = (): any => null;
 
+    // 如果generatorOrNext是对象，则是一个generatior
     if (generatorOrNext && typeof generatorOrNext === 'object') {
+      
+      //schedulerFn
       schedulerFn = this.__isAsync ? (value: any) => {
         setTimeout(() => generatorOrNext.next(value));
       } : (value: any) => { generatorOrNext.next(value); };
 
+      //errorFn
       if (generatorOrNext.error) {
         errorFn = this.__isAsync ? (err) => { setTimeout(() => generatorOrNext.error(err)); } :
                                    (err) => { generatorOrNext.error(err); };
       }
 
+      //completeFn
       if (generatorOrNext.complete) {
         completeFn = this.__isAsync ? () => { setTimeout(() => generatorOrNext.complete()); } :
                                       () => { generatorOrNext.complete(); };
       }
+
     } else {
+
+      // schedulerFn
       schedulerFn = this.__isAsync ? (value: any) => { setTimeout(() => generatorOrNext(value)); } :
                                      (value: any) => { generatorOrNext(value); };
 
+      // errorFn
       if (error) {
         errorFn =
             this.__isAsync ? (err) => { setTimeout(() => error(err)); } : (err) => { error(err); };
       }
 
+      // completeFn
       if (complete) {
         completeFn =
             this.__isAsync ? () => { setTimeout(() => complete()); } : () => { complete(); };

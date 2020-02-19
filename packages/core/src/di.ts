@@ -7,6 +7,7 @@
  */
 
 /**
+ * “di”模块用来提供依赖注入容器服务
  * @module
  * @description
  * The `di` module provides dependency injection container services.
@@ -18,7 +19,8 @@ export {forwardRef, resolveForwardRef, ForwardRefFn} from './di/forward_ref';
 
 export {Injector} from './di/injector';
 export {ReflectiveInjector} from './di/reflective_injector';
-export {StaticProvider, ValueProvider, ExistingProvider, FactoryProvider, Provider, TypeProvider, ClassProvider} from './di/provider';
+export {StaticProvider,
+  ValueProvider, ExistingProvider, FactoryProvider, Provider, TypeProvider, ClassProvider} from './di/provider';
 export {ResolvedReflectiveFactory, ResolvedReflectiveProvider} from './di/reflective_provider';
 export {ReflectiveKey} from './di/reflective_key';
 export {InjectionToken} from './di/injection_token';

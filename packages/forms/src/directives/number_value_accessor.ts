@@ -26,6 +26,10 @@ export const NUMBER_VALUE_ACCESSOR: any = {
  *  ```
  */
 @Directive({
+  // 选择器
+  // input[type=number][formControlName]
+  // input[type=number][formControl]
+  // input[type=number][ngModel]
   selector:
       'input[type=number][formControlName],input[type=number][formControl],input[type=number][ngModel]',
   host: {
@@ -36,9 +40,22 @@ export const NUMBER_VALUE_ACCESSOR: any = {
   providers: [NUMBER_VALUE_ACCESSOR]
 })
 export class NumberValueAccessor implements ControlValueAccessor {
+
+  /**
+   * onChange
+   */
   onChange = (_: any) => {};
+
+  /**
+   * onTouched
+   */
   onTouched = () => {};
 
+  /**
+   * 构造函数
+   * @param _renderer
+   * @param _elementRef 
+   */
   constructor(private _renderer: Renderer2, private _elementRef: ElementRef) {}
 
   writeValue(value: number): void {
@@ -47,11 +64,24 @@ export class NumberValueAccessor implements ControlValueAccessor {
     this._renderer.setProperty(this._elementRef.nativeElement, 'value', normalizedValue);
   }
 
+  /**
+   * registerOnChange
+   * @param fn 
+   */
   registerOnChange(fn: (_: number|null) => void): void {
     this.onChange = (value) => { fn(value == '' ? null : parseFloat(value)); };
   }
+
+  /**
+   * registerOnTouched
+   * @param fn 
+   */
   registerOnTouched(fn: () => void): void { this.onTouched = fn; }
 
+  /**
+   * setDisabledState
+   * @param isDisabled 
+   */
   setDisabledState(isDisabled: boolean): void {
     this._renderer.setProperty(this._elementRef.nativeElement, 'disabled', isDisabled);
   }

@@ -18,42 +18,126 @@ export {GetterFn, MethodFn, SetterFn} from './types';
  * to power dependency injection and compilation.
  */
 export class Reflector {
-  constructor(public reflectionCapabilities: PlatformReflectionCapabilities) {}
 
-  updateCapabilities(caps: PlatformReflectionCapabilities) { this.reflectionCapabilities = caps; }
+  /**
+   * 构造函数
+   * @param reflectionCapabilities 
+   */
+  constructor(
+    public reflectionCapabilities: PlatformReflectionCapabilities
+  ) {}
 
-  factory(type: Type<any>): Function { return this.reflectionCapabilities.factory(type); }
+  /**
+   * updateCapabilities
+   * @param caps 
+   */
+  updateCapabilities(caps: PlatformReflectionCapabilities) {
+    this.reflectionCapabilities = caps;
+  }
 
+  /**
+   * 工厂方法
+   * @param type
+   */
+  factory(type: Type<any>): Function {
+    return this.reflectionCapabilities.factory(type);
+  }
+
+  /**
+   * 参数
+   * @param typeOrFunc 
+   */
   parameters(typeOrFunc: Type<any>): any[][] {
     return this.reflectionCapabilities.parameters(typeOrFunc);
   }
 
+  /**
+   * 
+   * @param typeOrFunc
+   */
   annotations(typeOrFunc: Type<any>): any[] {
     return this.reflectionCapabilities.annotations(typeOrFunc);
   }
 
+  /**
+   * 属性元数据
+   * @param typeOrFunc 
+   */
   propMetadata(typeOrFunc: Type<any>): {[key: string]: any[]} {
     return this.reflectionCapabilities.propMetadata(typeOrFunc);
   }
 
+  /**
+   * 
+   * @param type 
+   * @param lcProperty 
+   */
   hasLifecycleHook(type: any, lcProperty: string): boolean {
     return this.reflectionCapabilities.hasLifecycleHook(type, lcProperty);
   }
 
-  getter(name: string): GetterFn { return this.reflectionCapabilities.getter(name); }
-
-  setter(name: string): SetterFn { return this.reflectionCapabilities.setter(name); }
-
-  method(name: string): MethodFn { return this.reflectionCapabilities.method(name); }
-
-  importUri(type: any): string { return this.reflectionCapabilities.importUri(type); }
-
-  resourceUri(type: any): string { return this.reflectionCapabilities.resourceUri(type); }
-
-  resolveIdentifier(name: string, moduleUrl: string, members: string[], runtime: any): any {
-    return this.reflectionCapabilities.resolveIdentifier(name, moduleUrl, members, runtime);
+  /**
+   * getter
+   * @param name
+   */
+  getter(name: string): GetterFn {
+    return this.reflectionCapabilities.getter(name);
   }
 
+  /**
+   * setter
+   * @param name 
+   */
+  setter(name: string): SetterFn {
+    return this.reflectionCapabilities.setter(name);
+  }
+
+  /**
+   * method
+   * @param name 
+   */
+  method(name: string): MethodFn {
+    return this.reflectionCapabilities.method(name);
+  }
+
+  /**
+   * importUri
+   * @param type 
+   */
+  importUri(type: any): string {
+    return this.reflectionCapabilities.importUri(type);
+  }
+
+  /**
+   * importUri
+   * @param type 
+   */
+  resourceUri(type: any): string {
+    return this.reflectionCapabilities.resourceUri(type);
+  }
+
+  /**
+   * resolveIdentifier
+   * @param name 
+   * @param moduleUrl 
+   * @param members 
+   * @param runtime 
+   */
+  resolveIdentifier(
+    name: string,
+    moduleUrl: string,
+    members: string[],
+    runtime: any
+  ): any {
+    return this.reflectionCapabilities.resolveIdentifier(
+      name, moduleUrl, members, runtime);
+  }
+
+  /**
+   * resolveEnum
+   * @param identifier 
+   * @param name 
+   */
   resolveEnum(identifier: any, name: string): any {
     return this.reflectionCapabilities.resolveEnum(identifier, name);
   }

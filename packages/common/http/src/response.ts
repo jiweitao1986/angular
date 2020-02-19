@@ -10,43 +10,53 @@ import {HttpHeaders} from './headers';
 
 /**
  * Type enumeration for the different kinds of `HttpEvent`.
- *
+ * HttpEvent的类型
  * @stable
  */
 export enum HttpEventType {
+
   /**
    * The request was sent out over the wire.
+   * 请求已发送事件
    */
   Sent,
 
   /**
    * An upload progress event was received.
+   * 上传进度事件
    */
   UploadProgress,
 
   /**
    * The response status code and headers were received.
+   * 收到响应的（header）
    */
   ResponseHeader,
 
   /**
    * A download progress event was received.
+   * 下载进程事件
    */
   DownloadProgress,
 
   /**
    * The full response including the body was received.
+   * 收到完整的响应（headers、body）
    */
   Response,
 
   /**
    * A custom event from an interceptor or a backend.
+   * 自定义事件
    */
   User,
 }
 
+
 /**
  * Base interface for progress events.
+ * 
+ * 上传、下载事件
  *
  * @stable
  */
@@ -70,10 +80,11 @@ export interface HttpProgressEvent {
 
 /**
  * A download progress event.
- *
+ * 下载事件
  * @stable
  */
 export interface HttpDownloadProgressEvent extends HttpProgressEvent {
+
   type: HttpEventType.DownloadProgress;
 
   /**
@@ -86,7 +97,7 @@ export interface HttpDownloadProgressEvent extends HttpProgressEvent {
 
 /**
  * An upload progress event.
- *
+ * 上传事件
  * @stable
  */
 export interface HttpUploadProgressEvent extends HttpProgressEvent {
@@ -100,7 +111,9 @@ export interface HttpUploadProgressEvent extends HttpProgressEvent {
  *
  * @stable
  */
-export interface HttpSentEvent { type: HttpEventType.Sent; }
+export interface HttpSentEvent {
+  type: HttpEventType.Sent;
+}
 
 /**
  * A user-defined event.
@@ -134,6 +147,10 @@ export interface HttpJsonParseError {
  */
 export type HttpEvent<T> =
     HttpSentEvent | HttpHeaderResponse | HttpResponse<T>| HttpProgressEvent | HttpUserEvent<T>;
+
+
+
+
 
 /**
  * Base class for both `HttpResponse` and `HttpHeaderResponse`.
@@ -199,6 +216,9 @@ export abstract class HttpResponseBase {
   }
 }
 
+
+
+
 /**
  * A partial HTTP response which only includes the status and header data,
  * but no response body.
@@ -239,6 +259,10 @@ export class HttpHeaderResponse extends HttpResponseBase {
     });
   }
 }
+
+
+
+
 
 /**
  * A full HTTP response, including a typed response body (which may be `null`
@@ -285,6 +309,11 @@ export class HttpResponse<T> extends HttpResponseBase {
     });
   }
 }
+
+
+
+
+
 
 /**
  * A response that represents an error or failure, either from a

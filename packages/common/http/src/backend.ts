@@ -13,10 +13,14 @@ import {HttpEvent} from './response';
 /**
  * Transforms an `HttpRequest` into a stream of `HttpEvent`s, one of which will likely be a
  * `HttpResponse`.
+ * 将一个HttpRequest转换成一个HttpEvent流，流中的一个HttpEvent很可能是一个HttpResponse
  *
  * `HttpHandler` is injectable. When injected, the handler instance dispatches requests to the
  * first interceptor in the chain, which dispatches to the second, etc, eventually reaching the
  * `HttpBackend`.
+ * 
+ * HttpHandler是可注入的。当别注入时，Handler示例派发请求到拦截器链中的第一个，然后依次派发到第二个、第三个。。。
+ * 最终到达HttpBackend
  *
  * In an `HttpInterceptor`, the `HttpHandler` parameter is the next interceptor in the chain.
  *

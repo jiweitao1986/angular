@@ -10,6 +10,10 @@ import {Provider} from '../di';
 import {Type} from '../type';
 import {TypeDecorator, makeDecorator} from '../util/decorators';
 
+
+
+
+
 /**
  * A wrapper around a module that also includes the providers.
  *
@@ -55,11 +59,14 @@ export const NO_ERRORS_SCHEMA: SchemaMetadata = {
  * @stable
  */
 export interface NgModuleDecorator {
+
   /**
    * Defines an NgModule.
    */
   (obj?: NgModule): TypeDecorator;
+
   new (obj?: NgModule): NgModule;
+
 }
 
 /**

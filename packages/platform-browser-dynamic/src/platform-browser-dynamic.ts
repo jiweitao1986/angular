@@ -23,7 +23,18 @@ export const RESOURCE_CACHE_PROVIDER: Provider[] =
     [{provide: ResourceLoader, useClass: CachedResourceLoader, deps: []}];
 
 /**
+ * --------------------------------------------------------------------------------
+ * platformBrowserDynamic是一个工厂方法，执行它返回一个platform
+ * 
+ * 它有3个参数：
+ * 1、platformCoreDynamic
+ * 2、
+ * 
+ * --------------------------------------------------------------------------------
  * @stable
  */
 export const platformBrowserDynamic = createPlatformFactory(
-    platformCoreDynamic, 'browserDynamic', INTERNAL_BROWSER_DYNAMIC_PLATFORM_PROVIDERS);
+    platformCoreDynamic,
+    'browserDynamic',
+    INTERNAL_BROWSER_DYNAMIC_PLATFORM_PROVIDERS
+);

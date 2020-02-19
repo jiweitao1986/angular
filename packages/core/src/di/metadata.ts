@@ -9,6 +9,15 @@
 import {makeDecorator, makeParamDecorator} from '../util/decorators';
 
 
+
+
+
+
+
+
+
+
+
 /**
  * Type of the Inject decorator / constructor function.
  *
@@ -45,12 +54,24 @@ export interface InjectDecorator {
   new (token: any): Inject;
 }
 
+
+
+
+
+
+
+
+
+
+
 /**
  * Type of the Inject metadata.
  *
  * @stable
  */
-export interface Inject { token: any; }
+export interface Inject {
+  token: any;
+}
 
 /**
  * Inject decorator and metadata.
@@ -58,7 +79,20 @@ export interface Inject { token: any; }
  * @stable
  * @Annotation
  */
-export const Inject: InjectDecorator = makeParamDecorator('Inject', (token: any) => ({token}));
+export const Inject: InjectDecorator = makeParamDecorator(
+  'Inject',
+  (token: any) => ({token})
+);
+
+
+
+
+
+
+
+
+
+
 
 
 /**
@@ -105,6 +139,16 @@ export interface Optional {}
  * @Annotation
  */
 export const Optional: OptionalDecorator = makeParamDecorator('Optional');
+
+
+
+
+
+
+
+
+
+
 
 /**
  * Type of the Injectable decorator / constructor function.
@@ -153,6 +197,16 @@ export interface Injectable {}
  */
 export const Injectable: InjectableDecorator = makeDecorator('Injectable');
 
+
+
+
+
+
+
+
+
+
+
 /**
  * Type of the Self decorator / constructor function.
  *
@@ -198,6 +252,15 @@ export interface Self {}
 export const Self: SelfDecorator = makeParamDecorator('Self');
 
 
+
+
+
+
+
+
+
+
+
 /**
  * Type of the SkipSelf decorator / constructor function.
  *
@@ -241,6 +304,15 @@ export interface SkipSelf {}
  * @Annotation
  */
 export const SkipSelf: SkipSelfDecorator = makeParamDecorator('SkipSelf');
+
+
+
+
+
+
+
+
+
 
 /**
  * Type of the Host decorator / constructor function.

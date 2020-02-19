@@ -22,6 +22,15 @@ export const formControlBinding: any = {
 };
 
 /**
+ * --------------------------------------------------------------------------------
+ *  FormControl的任务是从Commponet对象上获取一个FormControl对象，然后和界面绑定在一起。
+ *  FormControl与Form
+ * --------------------------------------------------------------------------------
+ * 
+ * 
+ * 
+ * 
+ * 
  * @whatItDoes Syncs a standalone {@link FormControl} instance to a form control element.
  *
  * In other words, this directive ensures that any values written to the {@link FormControl}
@@ -63,58 +72,129 @@ export const formControlBinding: any = {
  *
  *  @stable
  */
-@Directive({selector: '[formControl]', providers: [formControlBinding], exportAs: 'ngForm'})
+@Directive({
+  selector: '[formControl]',
+  providers: [formControlBinding],
+  exportAs: 'ngForm'
+})
 
 export class FormControlDirective extends NgControl implements OnChanges {
+
+  //视图模型
+  /**
+   * viewModel
+   */
   viewModel: any;
 
+  /**
+   * formControl
+   */
   @Input('formControl') form: FormControl;
+
+  /**
+   * ngModel
+   */
   @Input('ngModel') model: any;
+
+  /**
+   * ngModelChange
+   */
   @Output('ngModelChange') update = new EventEmitter();
 
+  /**
+   * 
+   */
   @Input('disabled')
-  set isDisabled(isDisabled: boolean) { ReactiveErrors.disabledAttrWarning(); }
+  set isDisabled(isDisabled: boolean) {
+    ReactiveErrors.disabledAttrWarning();
+  }
 
-  constructor(@Optional() @Self() @Inject(NG_VALIDATORS) validators: Array<Validator|ValidatorFn>,
-              @Optional() @Self() @Inject(NG_ASYNC_VALIDATORS) asyncValidators: Array<AsyncValidator|AsyncValidatorFn>,
-              @Optional() @Self() @Inject(NG_VALUE_ACCESSOR)
-              valueAccessors: ControlValueAccessor[]) {
-                super();
-                this._rawValidators = validators || [];
-                this._rawAsyncValidators = asyncValidators || [];
-                this.valueAccessor = selectValueAccessor(this, valueAccessors);
-              }
+  /**
+   * 构造函数
+   * @param validators
+   * @param asyncValidators 
+   * @param valueAccessors 
+   */
+  constructor(
+    @Optional() @Self() @Inject(NG_VALIDATORS) validators: Array<Validator|ValidatorFn>,
+    @Optional() @Self() @Inject(NG_ASYNC_VALIDATORS) asyncValidators: Array<AsyncValidator|AsyncValidatorFn>,
+    @Optional() @Self() @Inject(NG_VALUE_ACCESSOR) valueAccessors: ControlValueAccessor[]
+  ) {
+    super();
+    this._rawValidators = validators || [];
+    this._rawAsyncValidators = asyncValidators || [];
+    this.valueAccessor = selectValueAccessor(this, valueAccessors);
+  }
 
-              ngOnChanges(changes: SimpleChanges): void {
-                if (this._isControlChanged(changes)) {
-                  setUpControl(this.form, this);
-                  if (this.control.disabled && this.valueAccessor !.setDisabledState) {
-                    this.valueAccessor !.setDisabledState !(true);
-                  }
-                  this.form.updateValueAndValidity({emitEvent: false});
-                }
-                if (isPropertyUpdated(changes, this.viewModel)) {
-                  this.form.setValue(this.model);
-                  this.viewModel = this.model;
-                }
-              }
+  /**
+   * ngOnChanges
+   * @param changes
+   */
+  ngOnChanges(changes: SimpleChanges): void {
 
-              get path(): string[] { return []; }
 
-              get validator(): ValidatorFn|null { return composeValidators(this._rawValidators); }
+    if (this._isControlChanged(changes)) {
 
-              get asyncValidator(): AsyncValidatorFn|null {
-                return composeAsyncValidators(this._rawAsyncValidators);
-              }
+      setUpControl(this.form, this);
 
-              get control(): FormControl { return this.form; }
+      if (this.control.disabled && this.valueAccessor !.setDisabledState) {
+        this.valueAccessor !.setDisabledState !(true);
+      }
 
-              viewToModelUpdate(newValue: any): void {
-                this.viewModel = newValue;
-                this.update.emit(newValue);
-              }
+      this.form.updateValueAndValidity({emitEvent: false});
+    }
 
-              private _isControlChanged(changes: {[key: string]: any}): boolean {
-                return changes.hasOwnProperty('form');
-              }
+
+    if (isPropertyUpdated(changes, this.viewModel)) {
+      this.form.setValue(this.model);
+      this.viewModel = this.model;
+    }
+
+  }
+
+  /**
+   * path
+   */
+  get path(): string[] {
+    return [];
+  }
+
+  /**
+   * 验证器
+   */
+  get validator(): ValidatorFn|null {
+    return composeValidators(this._rawValidators);
+  }
+
+  /**
+   * 异步验证器
+   */
+  get asyncValidator(): AsyncValidatorFn|null {
+    return composeAsyncValidators(this._rawAsyncValidators);
+  }
+
+  /**
+   * 关联的FormControl
+   */
+  get control(): FormControl {
+    return this.form;
+  }
+
+  /**
+   * 将视图传递过来的值写入到viewModel中，同时触发一个update事件
+   * newValue作为参数传递给update的事件处理器中
+   * @param newValue 
+   */
+  viewToModelUpdate(newValue: any): void {
+    this.viewModel = newValue;
+    this.update.emit(newValue);
+  }
+
+  /**
+   * 检测与之绑定的FormControl是否发生变化
+   * @param changes
+   */
+  private _isControlChanged(changes: {[key: string]: any}): boolean {
+    return changes.hasOwnProperty('form');
+  }
 }

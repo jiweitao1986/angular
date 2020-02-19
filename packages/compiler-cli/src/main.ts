@@ -22,22 +22,52 @@ import {exitCodeFromResult, performCompilation, readConfiguration, formatDiagnos
 import {performWatchCompilation, createPerformWatchHost} from './perform_watch';
 import {isSyntaxError} from '@angular/compiler';
 
+
+
+/**
+ * 入口函数
+ */
 export function main(
-    args: string[], consoleError: (s: string) => void = console.error,
-    config?: NgcParsedConfiguration): number {
-  let {project, rootNames, options, errors: configErrors, watch, emitFlags} =
-      config || readNgcCommandLineAndConfiguration(args);
+  args: string[],
+  consoleError: (s: string) => void = console.error,
+  config?: NgcParsedConfiguration
+): number {
+
+  // 读取ngc配置
+  let {
+    project,
+    rootNames,
+    options,
+    errors: configErrors,
+    watch,
+    emitFlags
+  } = config || readNgcCommandLineAndConfiguration(args);
+
+  // 如果读取配置过程中有错误，则报错并退出
   if (configErrors.length) {
     return reportErrorsAndExit(configErrors, /*options*/ undefined, consoleError);
   }
+
+  // 启用watch，失败则报错并退出
   if (watch) {
     const result = watchMode(project, options, consoleError);
     return reportErrorsAndExit(result.firstCompileResult, options, consoleError);
   }
-  const {diagnostics: compileDiags} = performCompilation(
-      {rootNames, options, emitFlags, emitCallback: createEmitCallback(options)});
+
+  // 执行编译
+  const {
+    diagnostics: compileDiags
+  } = performCompilation({
+    rootNames,
+    options,
+    emitFlags,
+    emitCallback: createEmitCallback(options)
+  });
   return reportErrorsAndExit(compileDiags, options, consoleError);
 }
+
+
+
 
 function createEmitCallback(options: api.CompilerOptions): api.TsEmitCallback|undefined {
   const transformDecorators = options.annotationsAs !== 'decorators';

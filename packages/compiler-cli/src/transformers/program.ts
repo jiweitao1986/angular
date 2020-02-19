@@ -40,6 +40,23 @@ const defaultEmitCallback: TsEmitCallback =
         program.emit(
             targetSourceFile, writeFile, cancellationToken, emitOnlyDtsFiles, customTransformers);
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 class AngularCompilerProgram implements Program {
   private metadataCache: LowerMetadataCache;
   private oldProgramLibrarySummaries: Map<string, LibrarySummary>|undefined;
@@ -61,12 +78,19 @@ class AngularCompilerProgram implements Program {
   private _optionsDiagnostics: Diagnostic[] = [];
 
   constructor(
-      private rootNames: string[], private options: CompilerOptions, private host: CompilerHost,
-      private oldProgram?: Program) {
+      private rootNames: string[],
+      private options: CompilerOptions,
+      private host: CompilerHost,
+      private oldProgram?: Program
+  ) {
+
+    // 判断ts版本
     const [major, minor] = ts.version.split('.');
     if (Number(major) < 2 || (Number(major) === 2 && Number(minor) < 4)) {
       throw new Error('The Angular Compiler requires TypeScript >= 2.4.');
     }
+
+    // oldTsProgram
     this.oldTsProgram = oldProgram ? oldProgram.getTsProgram() : undefined;
     if (oldProgram) {
       this.oldProgramLibrarySummaries = oldProgram.getLibrarySummaries();
@@ -93,6 +117,9 @@ class AngularCompilerProgram implements Program {
     this.metadataCache = new LowerMetadataCache({quotedNames: true}, !!options.strictMetadataEmit);
   }
 
+  /**
+   * getLibrarySummaries ???
+   */
   getLibrarySummaries(): Map<string, LibrarySummary> {
     const result = new Map<string, LibrarySummary>();
     if (this.oldProgramLibrarySummaries) {
@@ -105,6 +132,9 @@ class AngularCompilerProgram implements Program {
     return result;
   }
 
+  /**
+   * getEmittedGeneratedFiles ???
+   */
   getEmittedGeneratedFiles(): Map<string, GeneratedFile> {
     const result = new Map<string, GeneratedFile>();
     if (this.oldProgramEmittedGeneratedFiles) {
@@ -117,6 +147,9 @@ class AngularCompilerProgram implements Program {
     return result;
   }
 
+  /**
+   * getEmittedSourceFiles ???
+   */
   getEmittedSourceFiles(): Map<string, ts.SourceFile> {
     const result = new Map<string, ts.SourceFile>();
     if (this.oldProgramEmittedSourceFiles) {
@@ -128,25 +161,52 @@ class AngularCompilerProgram implements Program {
     return result;
   }
 
-  getTsProgram(): ts.Program { return this.tsProgram; }
+  /**
+   * getTsProgram ???
+   */
+  getTsProgram(): ts.Program {
+    return this.tsProgram;
+  }
 
+  /**
+   * getTsOptionDiagnostics ???
+   * @param cancellationToken 
+   */
   getTsOptionDiagnostics(cancellationToken?: ts.CancellationToken) {
     return this.tsProgram.getOptionsDiagnostics(cancellationToken);
   }
 
+  /**
+   * getNgOptionDiagnostics ???
+   * @param cancellationToken 
+   */
   getNgOptionDiagnostics(cancellationToken?: ts.CancellationToken): Diagnostic[] {
     return [...this._optionsDiagnostics, ...getNgOptionDiagnostics(this.options)];
   }
 
+
+  /**
+   * getTsSyntacticDiagnostics ???
+   */
   getTsSyntacticDiagnostics(sourceFile?: ts.SourceFile, cancellationToken?: ts.CancellationToken):
       ts.Diagnostic[] {
     return this.tsProgram.getSyntacticDiagnostics(sourceFile, cancellationToken);
   }
 
+  /**
+   * getNgStructuralDiagnostics
+   * @param cancellationToken 
+   */
   getNgStructuralDiagnostics(cancellationToken?: ts.CancellationToken): Diagnostic[] {
     return this.structuralDiagnostics;
   }
 
+
+  /**
+   * getTsSemanticDiagnostics
+   * @param sourceFile 
+   * @param cancellationToken 
+   */
   getTsSemanticDiagnostics(sourceFile?: ts.SourceFile, cancellationToken?: ts.CancellationToken):
       ts.Diagnostic[] {
     const sourceFiles = sourceFile ? [sourceFile] : this.tsProgram.getSourceFiles();
@@ -159,6 +219,9 @@ class AngularCompilerProgram implements Program {
     return diags;
   }
 
+  /**
+   * getNgSemanticDiagnostics
+   */
   getNgSemanticDiagnostics(fileName?: string, cancellationToken?: ts.CancellationToken):
       Diagnostic[] {
     let diags: ts.Diagnostic[] = [];
@@ -171,6 +234,9 @@ class AngularCompilerProgram implements Program {
     return ng;
   }
 
+  /**
+   * loadNgStructureAsync
+   */
   loadNgStructureAsync(): Promise<void> {
     if (this._analyzedModules) {
       throw new Error('Angular structure already loaded');
@@ -188,12 +254,20 @@ class AngularCompilerProgram implements Program {
         .catch(e => this._createProgramOnError(e));
   }
 
+
+  /**
+   * listLazyRoutes
+   */
   listLazyRoutes(route?: string): LazyRoute[] {
     // Note: Don't analyzedModules if a route is given
     // to be fast enough.
     return this.compiler.listLazyRoutes(route, route ? undefined : this.analyzedModules);
   }
 
+  /**
+   * emit
+   * @param param0 
+   */
   emit(
       {emitFlags = EmitFlags.Default, cancellationToken, customTransformers,
        emitCallback = defaultEmitCallback}: {
@@ -356,6 +430,9 @@ class AngularCompilerProgram implements Program {
   }
 
   // Private members
+  /**
+   * 创建Compiler
+   */
   private get compiler(): AotCompiler {
     if (!this._compiler) {
       this._createCompiler();
@@ -363,6 +440,9 @@ class AngularCompilerProgram implements Program {
     return this._compiler !;
   }
 
+  /**
+   * hostAdapter
+   */
   private get hostAdapter(): TsCompilerAotCompilerTypeCheckHostAdapter {
     if (!this._hostAdapter) {
       this._createCompiler();
@@ -370,6 +450,9 @@ class AngularCompilerProgram implements Program {
     return this._hostAdapter !;
   }
 
+  /**
+   * analyzedModules
+   */
   private get analyzedModules(): NgAnalyzedModules {
     if (!this._analyzedModules) {
       this.initSync();
@@ -377,6 +460,9 @@ class AngularCompilerProgram implements Program {
     return this._analyzedModules !;
   }
 
+  /**
+   * structural
+   */
   private get structuralDiagnostics(): Diagnostic[] {
     if (!this._structuralDiagnostics) {
       this.initSync();
@@ -384,6 +470,9 @@ class AngularCompilerProgram implements Program {
     return this._structuralDiagnostics !;
   }
 
+  /**
+   * tsProgram
+   */
   private get tsProgram(): ts.Program {
     if (!this._tsProgram) {
       this.initSync();
@@ -391,9 +480,17 @@ class AngularCompilerProgram implements Program {
     return this._tsProgram !;
   }
 
+  /**
+   * calculateTransforms
+   * @param genFiles 
+   * @param customTransformers 
+   */
   private calculateTransforms(
       genFiles: Map<string, GeneratedFile>,
-      customTransformers?: CustomTransformers): ts.CustomTransformers {
+      customTransformers?: CustomTransformers
+  ): ts.CustomTransformers {
+
+    // beforeTs
     const beforeTs: ts.TransformerFactory<ts.SourceFile>[] = [];
     if (!this.options.disableExpressionLowering) {
       beforeTs.push(getExpressionLoweringTransformFactory(this.metadataCache, this.tsProgram));
@@ -402,11 +499,23 @@ class AngularCompilerProgram implements Program {
     if (customTransformers && customTransformers.beforeTs) {
       beforeTs.push(...customTransformers.beforeTs);
     }
+
+    // afterTs
     const afterTs = customTransformers ? customTransformers.afterTs : undefined;
-    return {before: beforeTs, after: afterTs};
+
+    // return
+    return {
+      before: beforeTs,
+      after: afterTs
+    };
   }
 
+  /**
+   * initSync
+   */
   private initSync() {
+
+    // 如果已经分析过了，返回
     if (this._analyzedModules) {
       return;
     }
@@ -419,30 +528,49 @@ class AngularCompilerProgram implements Program {
     }
   }
 
+  /**
+   * 创建编译器
+   */
   private _createCompiler() {
+
+    // 代码生成器
     const codegen: CodeGenerator = {
-      generateFile: (genFileName, baseFileName) =>
-                        this._compiler.emitBasicStub(genFileName, baseFileName),
+      generateFile: (genFileName, baseFileName) => this._compiler.emitBasicStub(genFileName, baseFileName),
       findGeneratedFileNames: (fileName) => this._compiler.findGeneratedFileNames(fileName),
     };
 
+    // TsCompilerAotCompilerTypeCheckHostAdapter
     this._hostAdapter = new TsCompilerAotCompilerTypeCheckHostAdapter(
-        this.rootNames, this.options, this.host, this.metadataCache, codegen,
-        this.oldProgramLibrarySummaries);
+        this.rootNames,
+        this.options,
+        this.host,
+        this.metadataCache,
+        codegen,
+        this.oldProgramLibrarySummaries
+    );
     const aotOptions = getAotCompilerOptions(this.options);
+
+    // errorCollector
     this._structuralDiagnostics = [];
     const errorCollector =
-        (this.options.collectAllErrors || this.options.fullTemplateTypeCheck) ? (err: any) => {
+        (this.options.collectAllErrors || this.options.fullTemplateTypeCheck) ?
+        (err: any) => {
           this._structuralDiagnostics !.push({
             messageText: err.toString(),
             category: ts.DiagnosticCategory.Error,
             source: SOURCE,
             code: DEFAULT_ERROR_CODE
           });
-        } : undefined;
+        } :
+        undefined;
+    
+    // compiler
     this._compiler = createAotCompiler(this._hostAdapter, aotOptions, errorCollector).compiler;
   }
 
+  /**
+   * _createProgramWithBasicStubs
+   */
   private _createProgramWithBasicStubs(): {
     tmpProgram: ts.Program,
     rootNames: string[],
@@ -456,8 +584,7 @@ class AngularCompilerProgram implements Program {
     this.oldTsProgram = undefined;
 
     const codegen: CodeGenerator = {
-      generateFile: (genFileName, baseFileName) =>
-                        this.compiler.emitBasicStub(genFileName, baseFileName),
+      generateFile: (genFileName, baseFileName) => this.compiler.emitBasicStub(genFileName, baseFileName),
       findGeneratedFileNames: (fileName) => this.compiler.findGeneratedFileNames(fileName),
     };
 
@@ -488,6 +615,12 @@ class AngularCompilerProgram implements Program {
     return {tmpProgram, sourceFiles, rootNames};
   }
 
+  /**
+   * _updateProgramWithTypeCheckStubs
+   * @param tmpProgram 
+   * @param analyzedModules 
+   * @param rootNames 
+   */
   private _updateProgramWithTypeCheckStubs(
       tmpProgram: ts.Program, analyzedModules: NgAnalyzedModules, rootNames: string[]) {
     this._analyzedModules = analyzedModules;
@@ -604,6 +737,15 @@ class AngularCompilerProgram implements Program {
     return sourceFilesToEmit;
   }
 
+  /**
+   * writeFile
+   * @param outFileName 
+   * @param outData 
+   * @param writeByteOrderMark 
+   * @param onError 
+   * @param genFile 
+   * @param sourceFiles 
+   */
   private writeFile(
       outFileName: string, outData: string, writeByteOrderMark: boolean,
       onError?: (message: string) => void, genFile?: GeneratedFile,
@@ -659,13 +801,40 @@ class AngularCompilerProgram implements Program {
   }
 }
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/**
+ * 创建Angular
+ * @param param0 
+ */
 export function createProgram(
     {rootNames, options, host, oldProgram}:
-        {rootNames: string[], options: CompilerOptions, host: CompilerHost, oldProgram?: Program}):
-    Program {
+        {rootNames: string[], options: CompilerOptions, host: CompilerHost, oldProgram?: Program}
+): Program {
   return new AngularCompilerProgram(rootNames, options, host, oldProgram);
 }
 
+
+
+
+/**
+ * 获取Aot编译器配置选项
+ */
 // Compute the AotCompiler options
 function getAotCompilerOptions(options: CompilerOptions): AotCompilerOptions {
   let missingTranslation = core.MissingTranslationStrategy.Warning;
@@ -703,6 +872,10 @@ function getAotCompilerOptions(options: CompilerOptions): AotCompilerOptions {
   };
 }
 
+/**
+ * 
+ * @param options 
+ */
 function getNgOptionDiagnostics(options: CompilerOptions): Diagnostic[] {
   if (options.annotationsAs) {
     switch (options.annotationsAs) {

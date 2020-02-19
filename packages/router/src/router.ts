@@ -27,7 +27,16 @@ import {recognize} from './recognize';
 import {DefaultRouteReuseStrategy, DetachedRouteHandleInternal, RouteReuseStrategy} from './route_reuse_strategy';
 import {RouterConfigLoader} from './router_config_loader';
 import {ChildrenOutletContexts} from './router_outlet_context';
-import {ActivatedRoute, ActivatedRouteSnapshot, RouterState, RouterStateSnapshot, advanceActivatedRoute, createEmptyState} from './router_state';
+
+import {
+  ActivatedRoute,
+  ActivatedRouteSnapshot,
+  RouterState,
+  RouterStateSnapshot,
+  advanceActivatedRoute,
+  createEmptyState
+} from './router_state';
+
 import {Params, isNavigationCancelingError} from './shared';
 import {DefaultUrlHandlingStrategy, UrlHandlingStrategy} from './url_handling_strategy';
 import {UrlSerializer, UrlTree, containsTree, createEmptyUrlTree} from './url_tree';
@@ -42,6 +51,7 @@ declare let Zone: any;
  * @stable
  */
 export interface NavigationExtras {
+
   /**
    * Enables relative navigation from the current ActivatedRoute.
    *
@@ -164,17 +174,40 @@ function defaultErrorHandler(error: any): any {
   throw error;
 }
 
+/**
+ * NavigationSource
+ */
 type NavigationSource = 'imperative' | 'popstate' | 'hashchange';
 
+
+/**
+ * NavigationParams
+ */
 type NavigationParams = {
+
+  // id
   id: number,
+
+  // rawUrl
   rawUrl: UrlTree,
+
+  // extras
   extras: NavigationExtras,
+
+  // resolve
   resolve: any,
+
+  // reject
   reject: any,
+
+  // promise
   promise: Promise<boolean>,
+
+  // source
   source: NavigationSource,
 };
+
+
 
 /**
  * @internal
@@ -188,7 +221,27 @@ function defaultRouterHook(snapshot: RouterStateSnapshot): Observable<void> {
   return of (null) as any;
 }
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 /**
+ * 提供导航和URL操作能力
  * @whatItDoes Provides the navigation and url manipulation capabilities.
  *
  * See {@link Routes} for more details and examples.
@@ -198,16 +251,54 @@ function defaultRouterHook(snapshot: RouterStateSnapshot): Observable<void> {
  * @stable
  */
 export class Router {
+
+  /**
+   * 当前UrlTree
+   */
   private currentUrlTree: UrlTree;
+
+  /**
+   * rawUrlTree
+   */
   private rawUrlTree: UrlTree;
+  
+  /**
+   * navigations
+   */
   private navigations = new BehaviorSubject<NavigationParams>(null !);
 
+
+  /**
+   * locationSubscription
+   */
   private locationSubscription: Subscription;
+  
+
+  /**
+   * navigationId
+   */
   private navigationId: number = 0;
+  
+
+  /**
+   * configLoader
+   */
   private configLoader: RouterConfigLoader;
+  
+
+  /**
+   * ngModule
+   */
   private ngModule: NgModuleRef<any>;
 
+  /**
+   * events
+   */
   public readonly events: Observable<Event> = new Subject<Event>();
+  
+  /**
+   * routerState
+   */
   public readonly routerState: RouterState;
 
   /**
@@ -221,6 +312,7 @@ export class Router {
 
   /**
    * Indicates if at least one navigation happened.
+   * 指明至少有一个导航发生
    */
   navigated: boolean = false;
 
@@ -235,13 +327,21 @@ export class Router {
   };
 
   /**
+   * 提取、合并Urls，用于从AngularJS迁移到Angular。
    * Extracts and merges URLs. Used for AngularJS to Angular migrations.
    */
   urlHandlingStrategy: UrlHandlingStrategy = new DefaultUrlHandlingStrategy();
 
+  /**
+   * routeReuseStrategy
+   */
   routeReuseStrategy: RouteReuseStrategy = new DefaultRouteReuseStrategy();
 
   /**
+   * 定义当收到一个与当前URL一样的导航请求时，router应该如何处理。
+   * 默认的，router会忽略这个导航请求，但这样会阻止诸如 “刷新”按钮这样的特性。
+   * 用这个选项去配置导航到当前URL的行为，默认是ignore。
+   * 
    * Define what the router should do if it receives a navigation request to the current URL.
    * By default, the router will ignore this navigation. However, this prevents features such
    * as a "refresh" button. Use this option to configure the behavior when navigating to the
@@ -250,13 +350,23 @@ export class Router {
   onSameUrlNavigation: 'reload'|'ignore' = 'ignore';
 
   /**
+   * 构造 函数
+   * 创建router服务
    * Creates the router service.
+   * @param rootComponentType
+   * @param urlSerializer
    */
   // TODO: vsavkin make internal after the final is out.
   constructor(
-      private rootComponentType: Type<any>|null, private urlSerializer: UrlSerializer,
-      private rootContexts: ChildrenOutletContexts, private location: Location, injector: Injector,
-      loader: NgModuleFactoryLoader, compiler: Compiler, public config: Routes) {
+      private rootComponentType: Type<any>|null,
+      private urlSerializer: UrlSerializer,
+      private rootContexts: ChildrenOutletContexts,
+      private location: Location,
+      injector: Injector,
+      loader: NgModuleFactoryLoader,
+      compiler: Compiler,
+      public config: Routes
+) {
     const onLoadStart = (r: Route) => this.triggerEvent(new RouteConfigLoadStart(r));
     const onLoadEnd = (r: Route) => this.triggerEvent(new RouteConfigLoadEnd(r));
 
@@ -302,20 +412,29 @@ export class Router {
       this.locationSubscription = <any>this.location.subscribe(Zone.current.wrap((change: any) => {
         const rawUrlTree = this.urlSerializer.parse(change['url']);
         const source: NavigationSource = change['type'] === 'popstate' ? 'popstate' : 'hashchange';
-        setTimeout(() => { this.scheduleNavigation(rawUrlTree, source, {replaceUrl: true}); }, 0);
+        setTimeout(() => {
+          this.scheduleNavigation(rawUrlTree, source, {replaceUrl: true});
+        }, 0);
       }));
     }
   }
 
+  /**
+   * 当前url，通过序列化currentUrlTree获得
+   */
   /** The current url */
-  get url(): string { return this.serializeUrl(this.currentUrlTree); }
+  get url(): string {
+    return this.serializeUrl(this.currentUrlTree);
+  }
 
   /** @internal */
-  triggerEvent(e: Event): void { (this.events as Subject<Event>).next(e); }
+  triggerEvent(e: Event): void {
+    (this.events as Subject<Event>).next(e);
+  }
 
   /**
    * Resets the configuration used for navigation and generating links.
-   *
+   * 重置路由配置
    * ### Usage
    *
    * ```
@@ -334,8 +453,13 @@ export class Router {
   }
 
   /** @docsNotRequired */
-  ngOnDestroy(): void { this.dispose(); }
+  ngOnDestroy(): void {
+    this.dispose();
+  }
 
+  /**
+   * 注销操作，用于注销相关订阅
+   */
   /** Disposes of the router */
   dispose(): void {
     if (this.locationSubscription) {
@@ -386,8 +510,15 @@ export class Router {
    * ```
    */
   createUrlTree(commands: any[], navigationExtras: NavigationExtras = {}): UrlTree {
-    const {relativeTo,          queryParams,         fragment,
-           preserveQueryParams, queryParamsHandling, preserveFragment} = navigationExtras;
+    const {
+      relativeTo,
+      queryParams,
+      fragment,
+      preserveQueryParams,
+      queryParamsHandling,
+      preserveFragment
+    } = navigationExtras;
+    
     if (isDevMode() && preserveQueryParams && <any>console && <any>console.warn) {
       console.warn('preserveQueryParams is deprecated, use queryParamsHandling instead.');
     }
@@ -395,17 +526,27 @@ export class Router {
     const f = preserveFragment ? this.currentUrlTree.fragment : fragment;
     let q: Params|null = null;
     if (queryParamsHandling) {
+      
       switch (queryParamsHandling) {
         case 'merge':
+
+          // 合并currentUrlTree上的queryParams和当前的queryParams
           q = {...this.currentUrlTree.queryParams, ...queryParams};
           break;
         case 'preserve':
+
+          // 只保留currentUrlTree上的queryParams
           q = this.currentUrlTree.queryParams;
           break;
         default:
+          // 默认只保留当前传递进来的queryParams
           q = queryParams || null;
       }
     } else {
+
+      // 4.0.0之前，没有queryParamsHandling
+      // 如果preserveQueryParams为true，则只保留currentUrlTree上的queryParams
+      // 如果preserveQueryParams为false，只保留传递进来的queryParams
       q = preserveQueryParams ? this.currentUrlTree.queryParams : queryParams || null;
     }
     return createUrlTree(a, this.currentUrlTree, commands, q !, f !);
@@ -470,10 +611,14 @@ export class Router {
   }
 
   /** Serializes a {@link UrlTree} into a string */
-  serializeUrl(url: UrlTree): string { return this.urlSerializer.serialize(url); }
+  serializeUrl(url: UrlTree): string {
+    return this.urlSerializer.serialize(url);
+  }
 
   /** Parses a string into a {@link UrlTree} */
-  parseUrl(url: string): UrlTree { return this.urlSerializer.parse(url); }
+  parseUrl(url: string): UrlTree {
+    return this.urlSerializer.parse(url);
+  }
 
   /** Returns whether the url is activated */
   isActive(url: string|UrlTree, exact: boolean): boolean {
@@ -495,6 +640,9 @@ export class Router {
     }, {});
   }
 
+  /**
+   * 处理导航
+   */
   private processNavigations(): void {
     concatMap
         .call(
@@ -773,6 +921,25 @@ export class Router {
   }
 }
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 class ActivateRoutes {
   constructor(
       private routeReuseStrategy: RouteReuseStrategy, private futureState: RouterState,
@@ -941,10 +1108,31 @@ class ActivateRoutes {
   }
 }
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 function advanceActivatedRouteNodeAndItsChildren(node: TreeNode<ActivatedRoute>): void {
   advanceActivatedRoute(node.value);
   node.children.forEach(advanceActivatedRouteNodeAndItsChildren);
 }
+
+
 
 function parentLoadedConfig(snapshot: ActivatedRouteSnapshot): LoadedRouterConfig|null {
   for (let s = snapshot.parent; s; s = s.parent) {
@@ -955,6 +1143,8 @@ function parentLoadedConfig(snapshot: ActivatedRouteSnapshot): LoadedRouterConfi
 
   return null;
 }
+
+
 
 function validateCommands(commands: string[]): void {
   for (let i = 0; i < commands.length; i++) {

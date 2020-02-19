@@ -121,14 +121,27 @@ export class JitCompiler {
     });
   }
 
+  /**
+   * 加载模块、依赖的模块、组件、指令
+   * @param mainModule
+   * @param isSync 
+   */
   private _loadModules(mainModule: any, isSync: boolean): SyncAsync<any> {
+    
+    // 加载中的模块
     const loading: Promise<any>[] = [];
+    
+    // 获取mainModule元数据
     const mainNgModule = this._metadataResolver.getNgModuleMetadata(mainModule) !;
+    
+    // 遍历所有mainModule引用的模块
     // Note: for runtime compilation, we want to transitively compile all modules,
     // so we also need to load the declared directives / pipes for all nested modules.
     this._filterJitIdentifiers(mainNgModule.transitiveModule.modules).forEach((nestedNgModule) => {
       // getNgModuleMetadata only returns null if the value passed in is not an NgModule
       const moduleMeta = this._metadataResolver.getNgModuleMetadata(nestedNgModule) !;
+      
+      // 加载所有的指令（组件）
       this._filterJitIdentifiers(moduleMeta.declaredDirectives).forEach((ref) => {
         const promise =
             this._metadataResolver.loadDirectiveMetadata(moduleMeta.type.reference, ref, isSync);
@@ -136,6 +149,8 @@ export class JitCompiler {
           loading.push(promise);
         }
       });
+      
+      // 加载管道
       this._filterJitIdentifiers(moduleMeta.declaredPipes)
           .forEach((ref) => this._metadataResolver.getOrLoadPipeMetadata(ref));
     });

@@ -10,7 +10,10 @@ import {BindingDef, BindingFlags, NodeDef, NodeFlags, TextData, ViewData, asText
 import {checkAndUpdateBinding, getParentRenderElement} from './util';
 
 export function textDef(
-    checkIndex: number, ngContentIndex: number | null, staticText: string[]): NodeDef {
+    checkIndex: number,
+    ngContentIndex: number | null,
+    staticText: string[]
+): NodeDef {
   const bindings: BindingDef[] = new Array(staticText.length - 1);
   for (let i = 1; i < staticText.length; i++) {
     bindings[i - 1] = {

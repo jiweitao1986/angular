@@ -42,6 +42,15 @@ enum StubEmitFlags {
   All = TypeCheck | Basic
 }
 
+
+
+
+
+
+
+
+
+
 export class AotCompiler {
   private _templateAstCache =
       new Map<StaticSymbol, {template: TemplateAst[], pipes: CompilePipeSummary[]}>();
@@ -591,6 +600,15 @@ export class AotCompiler {
     }
   }
 }
+
+
+
+
+
+
+
+
+
 
 function _createEmptyStub(outputCtx: OutputContext) {
   // Note: We need to produce at least one import statement so that

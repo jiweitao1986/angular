@@ -70,19 +70,31 @@ abstract class HTMLCollection {
  * @stable
  */
 @Directive({
+
+  //选择器：
+  // select[multiple][formControlName]
+  // select[multiple][formControl]
+  // select[multiple][ngModel]
   selector:
       'select[multiple][formControlName],select[multiple][formControl],select[multiple][ngModel]',
-  host: {'(change)': 'onChange($event.target)', '(blur)': 'onTouched()'},
+  host: {
+    '(change)': 'onChange($event.target)',
+    '(blur)': 'onTouched()'
+  },
   providers: [SELECT_MULTIPLE_VALUE_ACCESSOR]
 })
 export class SelectMultipleControlValueAccessor implements ControlValueAccessor {
+
   value: any;
+
   /** @internal */
   _optionMap: Map<string, NgSelectMultipleOption> = new Map<string, NgSelectMultipleOption>();
+
   /** @internal */
   _idCounter: number = 0;
 
   onChange = (_: any) => {};
+
   onTouched = () => {};
 
   @Input()
@@ -110,6 +122,10 @@ export class SelectMultipleControlValueAccessor implements ControlValueAccessor 
     this._optionMap.forEach(optionSelectedStateSetter);
   }
 
+  /**
+   * registerOnChange
+   * @param fn 
+   */
   registerOnChange(fn: (value: any) => any): void {
     this.onChange = (_: any) => {
       const selected: Array<any> = [];
@@ -136,8 +152,19 @@ export class SelectMultipleControlValueAccessor implements ControlValueAccessor 
       fn(selected);
     };
   }
+
+
+  /**
+   * registerOnTouched
+   * @param fn 
+   */
   registerOnTouched(fn: () => any): void { this.onTouched = fn; }
 
+
+  /**
+   * setDisabledState
+   * @param isDisabled 
+   */
   setDisabledState(isDisabled: boolean): void {
     this._renderer.setProperty(this._elementRef.nativeElement, 'disabled', isDisabled);
   }
@@ -163,6 +190,10 @@ export class SelectMultipleControlValueAccessor implements ControlValueAccessor 
     return this._optionMap.has(id) ? this._optionMap.get(id) !._value : valueString;
   }
 }
+
+
+
+
 
 /**
  * Marks `<option>` as dynamic, so Angular can be notified when options change.

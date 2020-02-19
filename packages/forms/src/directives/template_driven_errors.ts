@@ -8,6 +8,9 @@
 
 import {FormErrorExamples as Examples} from './error_examples';
 
+/**
+ *TemplateDrivenErrors
+ */
 export class TemplateDrivenErrors {
   static modelParentException(): void {
     throw new Error(`

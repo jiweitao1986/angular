@@ -13,17 +13,32 @@ import {ControlContainer} from './control_container';
 import {NgControl} from './ng_control';
 
 export class AbstractControlStatus {
+
   private _cd: AbstractControlDirective;
 
   constructor(cd: AbstractControlDirective) { this._cd = cd; }
 
-  get ngClassUntouched(): boolean { return this._cd.control ? this._cd.control.untouched : false; }
-  get ngClassTouched(): boolean { return this._cd.control ? this._cd.control.touched : false; }
-  get ngClassPristine(): boolean { return this._cd.control ? this._cd.control.pristine : false; }
-  get ngClassDirty(): boolean { return this._cd.control ? this._cd.control.dirty : false; }
-  get ngClassValid(): boolean { return this._cd.control ? this._cd.control.valid : false; }
-  get ngClassInvalid(): boolean { return this._cd.control ? this._cd.control.invalid : false; }
-  get ngClassPending(): boolean { return this._cd.control ? this._cd.control.pending : false; }
+  get ngClassUntouched(): boolean {
+    return this._cd.control ? this._cd.control.untouched : false;
+  }
+  get ngClassTouched(): boolean {
+    return this._cd.control ? this._cd.control.touched : false;
+  }
+  get ngClassPristine(): boolean {
+    return this._cd.control ? this._cd.control.pristine : false;
+  }
+  get ngClassDirty(): boolean {
+    return this._cd.control ? this._cd.control.dirty : false;
+  }
+  get ngClassValid(): boolean {
+    return this._cd.control ? this._cd.control.valid : false;
+  }
+  get ngClassInvalid(): boolean {
+    return this._cd.control ? this._cd.control.invalid : false;
+  }
+  get ngClassPending(): boolean {
+    return this._cd.control ? this._cd.control.pending : false;
+  }
 }
 
 export const ngControlStatusHost = {
@@ -51,7 +66,10 @@ export const ngControlStatusHost = {
  *
  * @stable
  */
-@Directive({selector: '[formControlName],[ngModel],[formControl]', host: ngControlStatusHost})
+@Directive({
+  selector: '[formControlName],[ngModel],[formControl]',
+  host: ngControlStatusHost
+})
 export class NgControlStatus extends AbstractControlStatus {
   constructor(@Self() cd: NgControl) { super(cd); }
 }

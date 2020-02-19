@@ -14,6 +14,11 @@ import {stringify} from '../util';
 import {ReflectiveInjector} from './reflective_injector';
 import {ReflectiveKey} from './reflective_key';
 
+
+
+/**
+ * findFirstClosedCycle
+ */
 function findFirstClosedCycle(keys: any[]): any[] {
   const res: any[] = [];
   for (let i = 0; i < keys.length; ++i) {
@@ -26,6 +31,15 @@ function findFirstClosedCycle(keys: any[]): any[] {
   return res;
 }
 
+
+
+
+
+
+/**
+ * constructResolvingPath
+ * @param keys 
+ */
 function constructResolvingPath(keys: any[]): string {
   if (keys.length > 1) {
     const reversed = findFirstClosedCycle(keys.slice().reverse());
@@ -36,35 +50,93 @@ function constructResolvingPath(keys: any[]): string {
   return '';
 }
 
+
+
+
+
+
+/**
+ * InjectionError
+ */
 export interface InjectionError extends Error {
+
+  /**
+   * keys
+   */
   keys: ReflectiveKey[];
+
+  /**
+   * injectors
+   */
   injectors: ReflectiveInjector[];
+
+  /**
+   * constructResolvingMessage
+   */
   constructResolvingMessage: (keys: ReflectiveKey[]) => string;
+
+  /**
+   * addKeys
+   */
   addKey(injector: ReflectiveInjector, key: ReflectiveKey): void;
 }
 
+
+
+
+
+
+/**
+ * injectionError
+ * @param injector 
+ * @param key 
+ * @param constructResolvingMessage 
+ * @param originalError 
+ */
 function injectionError(
     injector: ReflectiveInjector, key: ReflectiveKey,
     constructResolvingMessage: (keys: ReflectiveKey[]) => string,
-    originalError?: Error): InjectionError {
+    originalError?: Error
+): InjectionError {
+
   const keys = [key];
   const errMsg = constructResolvingMessage(keys);
-  const error =
-      (originalError ? wrappedError(errMsg, originalError) : Error(errMsg)) as InjectionError;
-  error.addKey = addKey;
+  const error = (originalError ?
+        wrappedError(errMsg, originalError) :
+        Error(errMsg)) as InjectionError;
+
+        error.addKey = addKey;
   error.keys = keys;
   error.injectors = [injector];
   error.constructResolvingMessage = constructResolvingMessage;
   (error as any)[ERROR_ORIGINAL_ERROR] = originalError;
+
   return error;
+
 }
 
+
+
+
+
+
+/**
+ * add key
+ * @param this 
+ * @param injector 
+ * @param key 
+ */
 function addKey(this: InjectionError, injector: ReflectiveInjector, key: ReflectiveKey): void {
   this.injectors.push(injector);
   this.keys.push(key);
   // Note: This updated message won't be reflected in the `.stack` property
   this.message = this.constructResolvingMessage(this.keys);
 }
+
+
+
+
+
 
 /**
  * Thrown when trying to retrieve a dependency by key from {@link Injector}, but the
@@ -86,6 +158,11 @@ export function noProviderError(injector: ReflectiveInjector, key: ReflectiveKey
     return `No provider for ${first}!${constructResolvingPath(keys)}`;
   });
 }
+
+
+
+
+
 
 /**
  * Thrown when dependencies form a cycle.
@@ -109,6 +186,11 @@ export function cyclicDependencyError(
     return `Cannot instantiate cyclic dependency!${constructResolvingPath(keys)}`;
   });
 }
+
+
+
+
+
 
 /**
  * Thrown when a constructing type returns with an Error.
@@ -145,6 +227,11 @@ export function instantiationError(
   }, originalException);
 }
 
+
+
+
+
+
 /**
  * Thrown when an object other then {@link Provider} (or `Type`) is passed to {@link Injector}
  * creation.
@@ -159,6 +246,11 @@ export function invalidProviderError(provider: any) {
   return Error(
       `Invalid provider - only instances of Provider and Type are allowed, got: ${provider}`);
 }
+
+
+
+
+
 
 /**
  * Thrown when the class has no annotation information.
@@ -206,6 +298,11 @@ export function noAnnotationError(typeOrFunc: Type<any>| Function, params: any[]
       stringify(typeOrFunc) + '\' is decorated with Injectable.');
 }
 
+
+
+
+
+
 /**
  * Thrown when getting an object by index.
  *
@@ -223,6 +320,11 @@ export function noAnnotationError(typeOrFunc: Type<any>| Function, params: any[]
 export function outOfBoundsError(index: number) {
   return Error(`Index ${index} is out-of-bounds.`);
 }
+
+
+
+
+
 
 // TODO: add a working example after alpha38 is released
 /**

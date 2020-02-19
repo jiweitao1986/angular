@@ -44,6 +44,10 @@ export const NG_ASYNC_VALIDATORS =
 const EMAIL_REGEXP =
     /^(?=.{1,254}$)(?=.{1,64}@)[-!#$%&'*+/0-9=?A-Z^_`a-z{|}~]+(\.[-!#$%&'*+/0-9=?A-Z^_`a-z{|}~]+)*@[A-Za-z0-9]([A-Za-z0-9-]{0,61}[A-Za-z0-9])?(\.[A-Za-z0-9]([A-Za-z0-9-]{0,61}[A-Za-z0-9])?)*$/;
 
+
+
+
+
 /**
  * Provides a set of validators used by form controls.
  *
@@ -59,7 +63,10 @@ const EMAIL_REGEXP =
  * @stable
  */
 export class Validators {
+
   /**
+   * 最小值验证器
+   * 
    * Validator that requires controls to have a value greater than a number.
    */
   static min(min: number): ValidatorFn {
@@ -75,6 +82,8 @@ export class Validators {
   }
 
   /**
+   * 最大值验证器
+   * 
    * Validator that requires controls to have a value less than a number.
    */
   static max(max: number): ValidatorFn {
@@ -90,6 +99,7 @@ export class Validators {
   }
 
   /**
+   * 必填验证器
    * Validator that requires controls to have a non-empty value.
    */
   static required(control: AbstractControl): ValidationErrors|null {
@@ -97,6 +107,7 @@ export class Validators {
   }
 
   /**
+   * ture验证器
    * Validator that requires control value to be true.
    */
   static requiredTrue(control: AbstractControl): ValidationErrors|null {
@@ -104,6 +115,7 @@ export class Validators {
   }
 
   /**
+   * email验证器
    * Validator that performs email validation.
    */
   static email(control: AbstractControl): ValidationErrors|null {
@@ -111,6 +123,7 @@ export class Validators {
   }
 
   /**
+   * 字符串最小长度验证器
    * Validator that requires controls to have a value of a minimum length.
    */
   static minLength(minLength: number): ValidatorFn {
@@ -126,6 +139,8 @@ export class Validators {
   }
 
   /**
+   * 字符串最大长度验证器
+   * 
    * Validator that requires controls to have a value of a maximum length.
    */
   static maxLength(maxLength: number): ValidatorFn {
@@ -138,6 +153,8 @@ export class Validators {
   }
 
   /**
+   * 表达式验证器
+   * 
    * Validator that requires a control to match a regex to its value.
    */
   static pattern(pattern: string|RegExp): ValidatorFn {
@@ -162,6 +179,7 @@ export class Validators {
   }
 
   /**
+   * No-op验证器
    * No-op validator.
    */
   static nullValidator(c: AbstractControl): ValidationErrors|null { return null; }
@@ -172,9 +190,13 @@ export class Validators {
    */
   static compose(validators: null): null;
   static compose(validators: (ValidatorFn|null|undefined)[]): ValidatorFn|null;
-  static compose(validators: (ValidatorFn|null|undefined)[]|null): ValidatorFn|null {
+  static compose(validators: (ValidatorFn|null|undefined)[]|null)
+    : ValidatorFn|null {
+    
     if (!validators) return null;
-    const presentValidators: ValidatorFn[] = validators.filter(isPresent) as any;
+
+    const presentValidators: ValidatorFn[]
+      = validators.filter(isPresent) as any;
     if (presentValidators.length == 0) return null;
 
     return function(control: AbstractControl) {
@@ -183,17 +205,31 @@ export class Validators {
   }
 
   static composeAsync(validators: (AsyncValidatorFn|null)[]): AsyncValidatorFn|null {
-    if (!validators) return null;
-    const presentValidators: AsyncValidatorFn[] = validators.filter(isPresent) as any;
-    if (presentValidators.length == 0) return null;
+    if (!validators)
+      return null;
+
+      const presentValidators: AsyncValidatorFn[] =
+        validators.filter(isPresent) as any;
+
+    if (presentValidators.length == 0)
+      return null;
 
     return function(control: AbstractControl) {
-      const observables = _executeAsyncValidators(control, presentValidators).map(toObservable);
+      const observables = _executeAsyncValidators(
+        control, presentValidators
+      ).map(toObservable);
       return map.call(forkJoin(observables), _mergeErrors);
     };
   }
 }
 
+
+
+
+/**
+ * 检测o是否有值
+ * @param o
+ */
 function isPresent(o: any): boolean {
   return o != null;
 }
@@ -206,14 +242,28 @@ export function toObservable(r: any): Observable<any> {
   return obs;
 }
 
+/**
+ * 依次执行验证器集合内的验证器
+ * @param control 
+ * @param validators 
+ */
 function _executeValidators(control: AbstractControl, validators: ValidatorFn[]): any[] {
   return validators.map(v => v(control));
 }
 
+/**
+ * 依次执行异步验证器集合内的验证器
+ * @param control 
+ * @param validators 
+ */
 function _executeAsyncValidators(control: AbstractControl, validators: AsyncValidatorFn[]): any[] {
   return validators.map(v => v(control));
 }
 
+/**
+ * 合并错误，将错误集合合并成一个错误对象
+ * @param arrayOfErrors 
+ */
 function _mergeErrors(arrayOfErrors: ValidationErrors[]): ValidationErrors|null {
   const res: {[key: string]: any} =
       arrayOfErrors.reduce((res: ValidationErrors | null, errors: ValidationErrors | null) => {

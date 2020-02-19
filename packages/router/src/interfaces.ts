@@ -12,6 +12,14 @@ import {Route} from './config';
 import {ActivatedRouteSnapshot, RouterStateSnapshot} from './router_state';
 
 
+
+
+
+
+
+
+
+
 /**
  * @whatItDoes Interface that a class can implement to be a guard deciding if a route can be
  * activated.
@@ -79,9 +87,20 @@ import {ActivatedRouteSnapshot, RouterStateSnapshot} from './router_state';
  * @stable
  */
 export interface CanActivate {
-  canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot):
-      Observable<boolean>|Promise<boolean>|boolean;
+  canActivate(
+    route: ActivatedRouteSnapshot,
+    state: RouterStateSnapshot
+  ): Observable<boolean>|Promise<boolean>|boolean;
 }
+
+
+
+
+
+
+
+
+
 
 /**
  * @whatItDoes Interface that a class can implement to be a guard deciding if a child route can be
@@ -160,9 +179,20 @@ export interface CanActivate {
  * @stable
  */
 export interface CanActivateChild {
-  canActivateChild(childRoute: ActivatedRouteSnapshot, state: RouterStateSnapshot):
-      Observable<boolean>|Promise<boolean>|boolean;
+  canActivateChild(
+    childRoute: ActivatedRouteSnapshot,
+    state: RouterStateSnapshot
+  ): Observable<boolean>|Promise<boolean>|boolean;
 }
+
+
+
+
+
+
+
+
+
 
 /**
  * @whatItDoes Interface that a class can implement to be a guard deciding if a route can be
@@ -235,9 +265,21 @@ export interface CanActivateChild {
  */
 export interface CanDeactivate<T> {
   canDeactivate(
-      component: T, currentRoute: ActivatedRouteSnapshot, currentState: RouterStateSnapshot,
-      nextState?: RouterStateSnapshot): Observable<boolean>|Promise<boolean>|boolean;
+      component: T,
+      currentRoute: ActivatedRouteSnapshot,
+      currentState: RouterStateSnapshot,
+      nextState?: RouterStateSnapshot
+  ): Observable<boolean>|Promise<boolean>|boolean;
 }
+
+
+
+
+
+
+
+
+
 
 /**
  * @whatItDoes Interface that class can implement to be a data provider.
@@ -307,8 +349,19 @@ export interface CanDeactivate<T> {
  * @stable
  */
 export interface Resolve<T> {
-  resolve(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): Observable<T>|Promise<T>|T;
+  resolve(
+    route: ActivatedRouteSnapshot,
+    state: RouterStateSnapshot
+  ): Observable<T>|Promise<T>|T;
 }
+
+
+
+
+
+
+
+
 
 
 /**
@@ -376,4 +429,6 @@ export interface Resolve<T> {
  *
  * @stable
  */
-export interface CanLoad { canLoad(route: Route): Observable<boolean>|Promise<boolean>|boolean; }
+export interface CanLoad {
+  canLoad(route: Route): Observable<boolean>|Promise<boolean>|boolean;
+}

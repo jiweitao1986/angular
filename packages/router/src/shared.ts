@@ -26,6 +26,9 @@ export type Params = {
   [key: string]: any
 };
 
+
+
+
 /**
  * Matrix and Query parameters.
  *
@@ -39,26 +42,45 @@ export type Params = {
  * @stable
  */
 export interface ParamMap {
-  has(name: string): boolean;
+
   /**
+   * 是否有key是name的param
+   */
+  has(name: string): boolean;
+
+  /**
+   * 根据给定的key获取单个参数值
+   *  - 如果该参数只有一个值，则返回这个值
+   *  - 如果该参数有多个值，则返回第一个；
+   *  - 如果没有对应参数，则返回null
    * Return a single value for the given parameter name:
    * - the value when the parameter has a single value,
    * - the first value if the parameter has multiple values,
    * - `null` when there is no such parameter.
    */
   get(name: string): string|null;
+
   /**
+   * 返回参数名为name的值数组，如果没有对应参数，返回空数组
    * Return an array of values for the given parameter name.
    *
    * If there is no such parameter, an empty array is returned.
    */
   getAll(name: string): string[];
 
+
   /** Name of the parameters */
   readonly keys: string[];
 }
 
+
+
+
+/**
+ * ParamsAsMap
+ */
 class ParamsAsMap implements ParamMap {
+
   private params: Params;
 
   constructor(params: Params) { this.params = params || {}; }
@@ -86,7 +108,11 @@ class ParamsAsMap implements ParamMap {
   get keys(): string[] { return Object.keys(this.params); }
 }
 
+
+
+
 /**
+ * 将Params转换为ParamMap（ParamsMap）
  * Convert a {@link Params} instance to a {@link ParamMap}.
  *
  * @stable
@@ -95,6 +121,11 @@ export function convertToParamMap(params: Params): ParamMap {
   return new ParamsAsMap(params);
 }
 
+
+
+/**
+ * 导航取消失败
+ */
 const NAVIGATION_CANCELING_ERROR = 'ngNavigationCancelingError';
 
 export function navigationCancelingError(message: string) {
@@ -107,9 +138,15 @@ export function isNavigationCancelingError(error: Error) {
   return error && (error as any)[NAVIGATION_CANCELING_ERROR];
 }
 
+
+
 // Matches the route configuration (`route`) against the actual URL (`segments`).
 export function defaultUrlMatcher(
-    segments: UrlSegment[], segmentGroup: UrlSegmentGroup, route: Route): UrlMatchResult|null {
+    segments: UrlSegment[],
+    segmentGroup: UrlSegmentGroup,
+    route: Route
+): UrlMatchResult|null {
+
   const parts = route.path !.split('/');
 
   if (parts.length > segments.length) {

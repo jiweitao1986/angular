@@ -26,10 +26,20 @@ export function recognize(
   return new Recognizer(rootComponentType, config, urlTree, url).recognize();
 }
 
+
+
+
+
+
+
+
 class Recognizer {
   constructor(
-      private rootComponentType: Type<any>|null, private config: Routes, private urlTree: UrlTree,
-      private url: string) {}
+      private rootComponentType: Type<any>|null,
+      private config: Routes,
+      private urlTree: UrlTree,
+      private url: string
+  ) {}
 
   recognize(): Observable<RouterStateSnapshot> {
     try {
@@ -145,6 +155,12 @@ class Recognizer {
     return [new TreeNode<ActivatedRouteSnapshot>(snapshot, children)];
   }
 }
+
+
+
+
+
+
 
 function sortActivatedRouteSnapshots(nodes: TreeNode<ActivatedRouteSnapshot>[]): void {
   nodes.sort((a, b) => {

@@ -57,9 +57,12 @@ export class StyleCompiler {
   }
 
   private _compileStyles(
-      outputCtx: OutputContext, comp: CompileDirectiveMetadata,
-      stylesheet: CompileStylesheetMetadata, shim: boolean,
-      isComponentStylesheet: boolean): CompiledStylesheet {
+      outputCtx: OutputContext,
+      comp: CompileDirectiveMetadata,
+      stylesheet: CompileStylesheetMetadata,
+      shim: boolean,
+      isComponentStylesheet: boolean
+  ): CompiledStylesheet {
     const styleExpressions: o.Expression[] =
         stylesheet.styles.map(plainStyle => o.literal(this._shimIfNeeded(plainStyle, shim)));
     const dependencies: StylesCompileDependency[] = [];

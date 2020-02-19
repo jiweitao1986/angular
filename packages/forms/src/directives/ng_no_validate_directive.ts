@@ -9,6 +9,8 @@
 import {Directive} from '@angular/core';
 
 /**
+ * 添加novalidate属性到form标签上
+ * 
  * @whatItDoes Adds `novalidate` attribute to all forms by default.
  *
  * `novalidate` is used to disable browser's native form validation.
@@ -23,7 +25,9 @@ import {Directive} from '@angular/core';
  */
 @Directive({
   selector: 'form:not([ngNoForm]):not([ngNativeValidate])',
-  host: {'novalidate': ''},
+  host: {
+    'novalidate': ''
+  },
 })
 export class NgNoValidate {
 }

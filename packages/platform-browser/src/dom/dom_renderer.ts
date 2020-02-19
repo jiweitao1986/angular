@@ -68,10 +68,14 @@ export class DomRendererFactory2 implements RendererFactory2 {
   }
 
   createRenderer(element: any, type: RendererType2|null): Renderer2 {
+    
+    
     if (!element || !type) {
       return this.defaultRenderer;
     }
+
     switch (type.encapsulation) {
+
       case ViewEncapsulation.Emulated: {
         let renderer = this.rendererByCompId.get(type.id);
         if (!renderer) {
@@ -82,8 +86,10 @@ export class DomRendererFactory2 implements RendererFactory2 {
         (<EmulatedEncapsulationDomRenderer2>renderer).applyToHost(element);
         return renderer;
       }
+
       case ViewEncapsulation.Native:
         return new ShadowDomRenderer(this.eventManager, this.sharedStylesHost, element, type);
+
       default: {
         if (!this.rendererByCompId.has(type.id)) {
           const styles = flattenStyles(type.id, type.styles, []);

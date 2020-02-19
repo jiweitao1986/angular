@@ -15,6 +15,9 @@
  *
  * Forms providers are not included in default providers; you must import these providers
  * explicitly.
+ * 
+ * 这个模块将包含FormControl的FormGroup对象映射到Dom来处理用户输入。
+ * 在默认的providers中，没有包含表单的provider，你必须明确的将他们导入。
  */
 
 

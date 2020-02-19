@@ -6,6 +6,9 @@
  * found in the LICENSE file at https://angular.io/license
  */
 
+ /**
+  * FormErrorExamples
+  */
 export const FormErrorExamples = {
   formControlName: `
     <div [formGroup]="myGroup">

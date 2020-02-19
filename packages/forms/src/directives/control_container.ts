@@ -18,15 +18,24 @@ import {Form} from './form_interface';
  * @stable
  */
 export abstract class ControlContainer extends AbstractControlDirective {
+
+  /**
+   * container的名称
+   */
   name: string;
 
   /**
+   * 获取container所属的Form（Form Directive Instance）
    * Get the form to which this container belongs.
    */
-  get formDirective(): Form|null { return null; }
+  get formDirective(): Form|null {
+    return null;
+  }
 
   /**
    * Get the path to this container.
    */
-  get path(): string[]|null { return null; }
+  get path(): string[]|null {
+    return null;
+  }
 }

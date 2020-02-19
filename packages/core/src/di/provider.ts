@@ -8,6 +8,16 @@
 
 import {Type} from '../type';
 
+
+
+
+
+
+
+
+
+
+
 /**
  * @whatItDoes Configures the {@link Injector} to return a value for a token.
  * @howToUse
@@ -45,6 +55,16 @@ export interface ValueProvider {
    */
   multi?: boolean;
 }
+
+
+
+
+
+
+
+
+
+
 
 /**
  * @whatItDoes Configures the {@link Injector} to return an instance of `useClass` for a token.
@@ -98,6 +118,16 @@ export interface StaticClassProvider {
   multi?: boolean;
 }
 
+
+
+
+
+
+
+
+
+
+
 /**
  * @whatItDoes Configures the {@link Injector} to return an instance of a token.
  * @howToUse
@@ -140,6 +170,16 @@ export interface ConstructorProvider {
   multi?: boolean;
 }
 
+
+
+
+
+
+
+
+
+
+
 /**
  * @whatItDoes Configures the {@link Injector} to return a value of another `useExisting` token.
  * @howToUse
@@ -177,6 +217,16 @@ export interface ExistingProvider {
    */
   multi?: boolean;
 }
+
+
+
+
+
+
+
+
+
+
 
 /**
  * @whatItDoes Configures the {@link Injector} to return a value by invoking a `useFactory`
@@ -229,6 +279,16 @@ export interface FactoryProvider {
   multi?: boolean;
 }
 
+
+
+
+
+
+
+
+
+
+
 /**
  * @whatItDoes Describes how the {@link Injector} should be configured in a static way (Without
  * reflection).
@@ -240,8 +300,21 @@ export interface FactoryProvider {
  *
  * @stable
  */
-export type StaticProvider = ValueProvider | ExistingProvider | StaticClassProvider |
-    ConstructorProvider | FactoryProvider | any[];
+export type StaticProvider =
+  ValueProvider |
+  ExistingProvider |
+  StaticClassProvider |
+  ConstructorProvider |
+  FactoryProvider | any[];
+
+
+
+
+
+
+
+
+
 
 
 /**
@@ -269,6 +342,12 @@ export type StaticProvider = ValueProvider | ExistingProvider | StaticClassProvi
  * @stable
  */
 export interface TypeProvider extends Type<any> {}
+
+
+
+
+
+
 
 /**
  * @whatItDoes Configures the {@link Injector} to return an instance of `useClass` for a token.
@@ -314,6 +393,16 @@ export interface ClassProvider {
   multi?: boolean;
 }
 
+
+
+
+
+
+
+
+
+
+
 /**
  * @whatItDoes Describes how the {@link Injector} should be configured.
  * @howToUse
@@ -325,4 +414,8 @@ export interface ClassProvider {
  * @stable
  */
 export type Provider =
-    TypeProvider | ValueProvider | ClassProvider | ExistingProvider | FactoryProvider | any[];
+    TypeProvider |
+    ValueProvider |
+    ClassProvider |
+    ExistingProvider |
+    FactoryProvider | any[];

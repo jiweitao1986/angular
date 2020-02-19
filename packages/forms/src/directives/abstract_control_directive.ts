@@ -11,6 +11,11 @@ import {AbstractControl} from '../model';
 import {ValidationErrors} from './validators';
 
 /**
+ * control directive的基类
+ * 只在forms module内部使用
+ * 
+ * 该类是对AbstractControl的一个包装，方便直接通过control directive访问control的属性和方法。
+ * 
  * Base class for control directives.
  *
  * Only used internally in the forms module.
@@ -18,12 +23,21 @@ import {ValidationErrors} from './validators';
  * @stable
  */
 export abstract class AbstractControlDirective {
+
+
+
   /**
+   * 
    * The {@link FormControl}, {@link FormGroup}, or {@link FormArray}
    * that backs this directive. Most properties fall through to that
    * instance.
    */
   abstract get control(): AbstractControl|null;
+
+
+
+
+
 
   /** The value of the control. */
   get value(): any { return this.control ? this.control.value : null; }
@@ -53,6 +67,8 @@ export abstract class AbstractControlDirective {
   get pending(): boolean|null { return this.control ? this.control.pending : null; }
 
   /**
+   * 当一个control的status===DISABLED时，这个control是disabled的。
+   * 
    * A control is `disabled` when its `status === DISABLED`.
    *
    * Disabled controls are exempt from validation checks and
@@ -76,6 +92,9 @@ export abstract class AbstractControlDirective {
   get errors(): ValidationErrors|null { return this.control ? this.control.errors : null; }
 
   /**
+   * 如果一个控件是pristine状态，说明增控件的值在UI层没有被用户修改过。
+   * 注意：通过编程的方式改变control的value，不会改变pristine的值。
+   * 
    * A control is `pristine` if the user has not yet changed
    * the value in the UI.
    *
@@ -85,6 +104,8 @@ export abstract class AbstractControlDirective {
   get pristine(): boolean|null { return this.control ? this.control.pristine : null; }
 
   /**
+   * 如果一个控件是dirty状态，说明用户在UI层修改过这个控件的值
+   * 注意：通过编程的方式不会改变控件的value，不会改变dirty状态。
    * A control is `dirty` if the user has changed the value
    * in the UI.
    *
@@ -94,11 +115,14 @@ export abstract class AbstractControlDirective {
   get dirty(): boolean|null { return this.control ? this.control.dirty : null; }
 
   /**
+   * 如果一个控件被标记为touched状态，说明这个控件的blur事件，触发过
+   * 
    * A control is marked `touched` once the user has triggered
    * a `blur` event on it.
    */
   get touched(): boolean|null { return this.control ? this.control.touched : null; }
 
+  
   get status(): string|null { return this.control ? this.control.status : null; }
 
   /**
@@ -124,6 +148,7 @@ export abstract class AbstractControlDirective {
   }
 
   /**
+   * 返回一个表示从顶层form到当前control的路径数组，数组的每一个值是对应控件的name。
    * Returns an array that represents the path from the top-level form
    * to this control. Each index is the string name of the control on
    * that level.
@@ -131,6 +156,10 @@ export abstract class AbstractControlDirective {
   get path(): string[]|null { return null; }
 
   /**
+   * 重置一个控件
+   * 1、标记为pristine；
+   * 2、标记为untouched；
+   * 3、设置value为null。
    * Resets the form control. This means by default:
    *
    * * it is marked as `pristine`

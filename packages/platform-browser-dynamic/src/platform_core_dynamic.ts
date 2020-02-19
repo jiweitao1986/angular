@@ -11,10 +11,21 @@ import {JitCompilerFactory} from './compiler_factory';
 
 /**
  * A platform that included corePlatform and the compiler.
- *
+ * 一个包含corePlatform和compiler的platform工厂
  * @experimental
  */
-export const platformCoreDynamic = createPlatformFactory(platformCore, 'coreDynamic', [
-  {provide: COMPILER_OPTIONS, useValue: {}, multi: true},
-  {provide: CompilerFactory, useClass: JitCompilerFactory, deps: [COMPILER_OPTIONS]},
-]);
+export const platformCoreDynamic = createPlatformFactory(
+
+  // 父工厂
+  platformCore,
+
+  // 名称
+  'coreDynamic',
+
+  // 注入配置！！！
+  // 注意：JitCompilerFactory是这个时候传递进去的
+  [
+    { provide: COMPILER_OPTIONS, useValue: {}, multi: true },
+    { provide: CompilerFactory, useClass: JitCompilerFactory, deps: [COMPILER_OPTIONS] },
+  ]
+);

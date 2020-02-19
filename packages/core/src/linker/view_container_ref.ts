@@ -16,20 +16,26 @@ import {EmbeddedViewRef, ViewRef} from './view_ref';
 
 /**
  * Represents a container where one or more Views can be attached.
+ * 代表了一个可以附加一个或多个View的容器
  *
  * The container can contain two kinds of Views. Host Views, created by instantiating a
  * {@link Component} via {@link #createComponent}, and Embedded Views, created by instantiating an
  * {@link TemplateRef Embedded Template} via {@link #createEmbeddedView}.
+ * 这个容器可以包含两种类型的View：Host View（可以通过ComponentRef获取）和Embedded View（可以通过TemplateRef获取）
  *
  * The location of the View Container within the containing View is specified by the Anchor
  * `element`. Each View Container can have only one Anchor Element and each Anchor Element can only
  * have a single View Container.
+ * View Container的位置可以通过一个Anchor element来指定。没有ViewContainer只能有一个Anchor Element，
+ * 每个Anchor Element也只能有一个ViewContainer。
  *
  * Root elements of Views attached to this container become siblings of the Anchor Element in
  * the Rendered View.
+ * ？？？？？？？？？？？？
  *
  * To access a `ViewContainerRef` of an Element, you can either place a {@link Directive} injected
  * with `ViewContainerRef` on the Element, or you obtain it via a {@link ViewChild} query.
+ * 访问方式。。。。。。
  * @stable
  */
 export abstract class ViewContainerRef {

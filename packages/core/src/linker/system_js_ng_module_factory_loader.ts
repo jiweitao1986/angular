@@ -36,10 +36,22 @@ export abstract class SystemJsNgModuleLoaderConfig {
   factoryPathSuffix: string;
 }
 
+/**
+ * SystemJs模块加载器配置
+ */
 const DEFAULT_CONFIG: SystemJsNgModuleLoaderConfig = {
+
+  /**
+   * 前缀
+   */
   factoryPathPrefix: '',
+
+  /**
+   * 后缀
+   */
   factoryPathSuffix: '.ngfactory',
 };
+
 
 /**
  * NgModuleFactoryLoader that uses SystemJS to load NgModuleFactory
@@ -47,17 +59,32 @@ const DEFAULT_CONFIG: SystemJsNgModuleLoaderConfig = {
  */
 @Injectable()
 export class SystemJsNgModuleLoader implements NgModuleFactoryLoader {
+
+  /**
+   * 加载器配置
+   */
   private _config: SystemJsNgModuleLoaderConfig;
 
-  constructor(private _compiler: Compiler, @Optional() config?: SystemJsNgModuleLoaderConfig) {
+  constructor(
+    private _compiler: Compiler,
+    @Optional() config?: SystemJsNgModuleLoaderConfig
+  ) {
     this._config = config || DEFAULT_CONFIG;
   }
 
+  /**
+   * 加载指定路径的模块工厂
+   * @param path 
+   */
   load(path: string): Promise<NgModuleFactory<any>> {
     const offlineMode = this._compiler instanceof Compiler;
     return offlineMode ? this.loadFactory(path) : this.loadAndCompile(path);
   }
 
+  /**
+   * 加载并编译
+   * @param path 
+   */
   private loadAndCompile(path: string): Promise<NgModuleFactory<any>> {
     let [module, exportName] = path.split(_SEPARATOR);
     if (exportName === undefined) {
@@ -70,6 +97,10 @@ export class SystemJsNgModuleLoader implements NgModuleFactoryLoader {
         .then((type: any) => this._compiler.compileModuleAsync(type));
   }
 
+  /**
+   * 加载工厂
+   * @param path 
+   */
   private loadFactory(path: string): Promise<NgModuleFactory<any>> {
     let [module, exportName] = path.split(_SEPARATOR);
     let factoryClassSuffix = FACTORY_CLASS_SUFFIX;
@@ -84,6 +115,12 @@ export class SystemJsNgModuleLoader implements NgModuleFactoryLoader {
   }
 }
 
+/**
+ * 检查是否为空
+ * @param value
+ * @param modulePath 
+ * @param exportName 
+ */
 function checkNotEmpty(value: any, modulePath: string, exportName: string): any {
   if (!value) {
     throw new Error(`Cannot find '${exportName}' in '${modulePath}'`);

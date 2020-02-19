@@ -336,26 +336,71 @@ export type QueryParamsHandling = 'merge' | 'preserve' | '';
  */
 export type RunGuardsAndResolvers = 'paramsChange' | 'paramsOrQueryParamsChange' | 'always';
 
+
+
+
 /**
  * See {@link Routes} for more details.
  * @stable
  */
 export interface Route {
+
+  // 路径
   path?: string;
+
+  // 匹配策略
+  // 默认是prefix，还有一个是full
+  // 当时full时，比如url完全匹配时才生效；
+  // prefix时，url前半部分匹配，就生效
   pathMatch?: string;
+
+  // 自定义一个匹配策略，取代内置的通过path和pathMatch
   matcher?: UrlMatcher;
+
+  // 路由对应的组件类型
   component?: Type<any>;
+
+  // 重定向
   redirectTo?: string;
+
+  //组件容器outlet的名称，当有多个outlet时， 可以用它设置渲染的outlet；
+  // 如果有多个outlet，默认是第一个？
   outlet?: string;
+
+  // 路由激活Handler的注入Token
   canActivate?: any[];
+
+
+  // 子路由激活Handler的注入Token
   canActivateChild?: any[];
+  
+  /**
+   * 
+   */
   canDeactivate?: any[];
+  
+  
   canLoad?: any[];
+  
+  
   data?: Data;
+  
+  
   resolve?: ResolveData;
+
+  /**
+   * 子路由配置
+   */
   children?: Routes;
+
+  /**
+   * 异步加载子模块
+   */
   loadChildren?: LoadChildren;
+
+  //
   runGuardsAndResolvers?: RunGuardsAndResolvers;
+
   /**
    * Filled for routes with `loadChildren` once the module has been loaded
    * @internal
@@ -363,10 +408,28 @@ export interface Route {
   _loadedConfig?: LoadedRouterConfig;
 }
 
+
+
+
+/**
+ * 被加载的路由配置
+ */
 export class LoadedRouterConfig {
+
+  /**
+   * 构造函数
+   * @param routes 配置数组
+   * @param module 模块引用
+   */
   constructor(public routes: Route[], public module: NgModuleRef<any>) {}
 }
 
+
+/**
+ * 遍历路由配置，判断是否合法
+ * @param config
+ * @param parentPath 
+ */
 export function validateConfig(config: Routes, parentPath: string = ''): void {
   // forEach doesn't iterate undefined values
   for (let i = 0; i < config.length; i++) {
@@ -376,6 +439,12 @@ export function validateConfig(config: Routes, parentPath: string = ''): void {
   }
 }
 
+
+/**
+ * 验证Route是否合法
+ * @param route
+ * @param fullPath 
+ */
 function validateNode(route: Route, fullPath: string): void {
   if (!route) {
     throw new Error(`
@@ -443,17 +512,33 @@ function validateNode(route: Route, fullPath: string): void {
   }
 }
 
+/**
+ * 
+ * @param parentPath 
+ * @param currentRoute 
+ */
 function getFullPath(parentPath: string, currentRoute: Route): string {
+  
+  // 如果当前路由存在，则返回父路径
   if (!currentRoute) {
     return parentPath;
   }
+
   if (!parentPath && !currentRoute.path) {
+
     return '';
   } else if (parentPath && !currentRoute.path) {
+
+    // route中的path为空，返回父路径
+    // 注意：父路径后边追加了一个/
     return `${parentPath}/`;
   } else if (!parentPath && currentRoute.path) {
+
+    // 父路径不存在，使用当前路径
     return currentRoute.path;
   } else {
+
+    // 拼接父子路径
     return `${parentPath}/${currentRoute.path}`;
   }
 }

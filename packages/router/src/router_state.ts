@@ -18,8 +18,13 @@ import {shallowEqual, shallowEqualArrays} from './utils/collection';
 import {Tree, TreeNode} from './utils/tree';
 
 
+
+
+
+
 /**
  * @whatItDoes Represents the state of the router.
+ * 描绘（反应）router的状态
  *
  * @howToUse
  *
@@ -37,25 +42,43 @@ import {Tree, TreeNode} from './utils/tree';
  * ```
  *
  * @description
- * RouterState is a tree of activated routes. Every node in this tree knows about the "consumed" URL
+ * RouterState is a tree of activated routes.
+ * Every node in this tree knows about the "consumed" URL
  * segments, the extracted parameters, and the resolved data.
+ * 
+ * 路由状态（RouterState）是一个activated route树。树上的每一个节点知道以下信息
+ * 1、consumed（被使用、占用？？？）的URL片段
+ * 2、被提取出来的参数；
+ * 3、被resolved的数据。
+ * 
  *
  * See {@link ActivatedRoute} for more information.
  *
  * @stable
  */
 export class RouterState extends Tree<ActivatedRoute> {
-  /** @internal */
+  
+  /**
+   * 构造函数
+   * @param root
+   * @param snapshot The current snapshot of the router state
+   * @internal
+   */
   constructor(
       root: TreeNode<ActivatedRoute>,
-      /** The current snapshot of the router state */
-      public snapshot: RouterStateSnapshot) {
+      public snapshot: RouterStateSnapshot
+  ) {
     super(root);
     setRouterState(<RouterState>this, root);
   }
 
-  toString(): string { return this.snapshot.toString(); }
+  toString(): string {
+    return this.snapshot.toString();
+  }
 }
+
+
+
 
 export function createEmptyState(urlTree: UrlTree, rootComponent: Type<any>| null): RouterState {
   const snapshot = createEmptyStateSnapshot(urlTree, rootComponent);
@@ -83,9 +106,15 @@ export function createEmptyStateSnapshot(
   return new RouterStateSnapshot('', new TreeNode<ActivatedRouteSnapshot>(activated, []));
 }
 
+
+
+
 /**
+ * 包含了一个路由及其与该路由相关组件的的信息
  * @whatItDoes Contains the information about a route associated with a component loaded in an
  * outlet.
+ * 
+ * 一个ActiveedRoute可以用来便利路由状态树
  * An `ActivatedRoute` can also be used to traverse the router state tree.
  *
  * @howToUse
@@ -105,23 +134,58 @@ export function createEmptyStateSnapshot(
  * @stable
  */
 export class ActivatedRoute {
+
+  /**
+   * 路由快照
+   */
   /** The current snapshot of this route */
   snapshot: ActivatedRouteSnapshot;
+
+
+  /**
+   * 即将使用的快照
+   */
   /** @internal */
   _futureSnapshot: ActivatedRouteSnapshot;
+
+
+  /**
+   * 当前路由的状态信息
+   */
   /** @internal */
   _routerState: RouterState;
+
+
+  /**
+   * 参数字典，用来取代params
+   */
   /** @internal */
   _paramMap: Observable<ParamMap>;
+
+
+  /**
+   * 
+   */
   /** @internal */
   _queryParamMap: Observable<ParamMap>;
 
+
+  /**
+   * 构造函数
+   * @url 路由地址
+   */
   /** @internal */
   constructor(
+
+      // 路由的url：一组
       /** An observable of the URL segments matched by this route */
       public url: Observable<UrlSegment[]>,
+
+      // 路由的参数
       /** An observable of the matrix parameters scoped to this route */
       public params: Observable<Params>,
+
+      //
       /** An observable of the query parameters shared by all the routes */
       public queryParams: Observable<Params>,
       /** An observable of the URL fragment shared by all the routes */
@@ -137,22 +201,33 @@ export class ActivatedRoute {
   }
 
   /** The configuration used to match this route */
-  get routeConfig(): Route|null { return this._futureSnapshot.routeConfig; }
+  get routeConfig(): Route|null {
+    return this._futureSnapshot.routeConfig;
+  }
 
   /** The root of the router state */
-  get root(): ActivatedRoute { return this._routerState.root; }
+  get root(): ActivatedRoute {
+    return this._routerState.root;
+  }
 
   /** The parent of this route in the router state tree */
-  get parent(): ActivatedRoute|null { return this._routerState.parent(this); }
+  get parent(): ActivatedRoute|null {
+    return this._routerState.parent(this);
+  }
 
   /** The first child of this route in the router state tree */
-  get firstChild(): ActivatedRoute|null { return this._routerState.firstChild(this); }
+  get firstChild(): ActivatedRoute|null {
+    return this._routerState.firstChild(this);
+  }
 
   /** The children of this route in the router state tree */
-  get children(): ActivatedRoute[] { return this._routerState.children(this); }
+  get children(): ActivatedRoute[] {
+    return this._routerState.children(this); }
 
   /** The path from the root of the router state tree to this route */
-  get pathFromRoot(): ActivatedRoute[] { return this._routerState.pathFromRoot(this); }
+  get pathFromRoot(): ActivatedRoute[] {
+    return this._routerState.pathFromRoot(this);
+  }
 
   get paramMap(): Observable<ParamMap> {
     if (!this._paramMap) {
@@ -173,6 +248,11 @@ export class ActivatedRoute {
     return this.snapshot ? this.snapshot.toString() : `Future(${this._futureSnapshot})`;
   }
 }
+
+
+
+
+
 
 /** @internal */
 export type Inherited = {
@@ -211,7 +291,17 @@ export function inheritedParamsDataResolve(route: ActivatedRouteSnapshot): Inher
   }, <any>{params: {}, data: {}, resolve: {}});
 }
 
+
+
+
+
+
+
+
+
+
 /**
+ * 职责：包含路由及其关联组件在某一时刻的信息。ActivatedRouteSnapshot同时可以用来遍历路由状态树。
  * @whatItDoes Contains the information about a route associated with a component loaded in an
  * outlet
  * at a particular moment in time. ActivatedRouteSnapshot can also be used to traverse the router
@@ -233,22 +323,46 @@ export function inheritedParamsDataResolve(route: ActivatedRouteSnapshot): Inher
  * @stable
  */
 export class ActivatedRouteSnapshot {
+
+  /**
+   * route配置
+   */
   /** The configuration used to match this route **/
   public readonly routeConfig: Route|null;
+
+  /**
+   * urlSegment
+   */
   /** @internal **/
   _urlSegment: UrlSegmentGroup;
+
+  /**
+   * 
+   */
   /** @internal */
   _lastPathIndex: number;
+
+  /**
+   * _resolve
+   */
   /** @internal */
   _resolve: ResolveData;
+
+  /**
+   * _resolvedData
+   */
   /** @internal */
   _resolvedData: Data;
+
   /** @internal */
   _routerState: RouterStateSnapshot;
+
   /** @internal */
   _paramMap: ParamMap;
+
   /** @internal */
   _queryParamMap: ParamMap;
+
 
   /** @internal */
   constructor(
@@ -265,28 +379,44 @@ export class ActivatedRouteSnapshot {
       /** The outlet name of the route */
       public outlet: string,
       /** The component of the route */
-      public component: Type<any>|string|null, routeConfig: Route|null, urlSegment: UrlSegmentGroup,
-      lastPathIndex: number, resolve: ResolveData) {
+      public component: Type<any>|string|null,
+      routeConfig: Route|null,
+      urlSegment: UrlSegmentGroup,
+      lastPathIndex: number,
+      resolve: ResolveData
+  ) {
     this.routeConfig = routeConfig;
     this._urlSegment = urlSegment;
     this._lastPathIndex = lastPathIndex;
     this._resolve = resolve;
   }
 
-  /** The root of the router state */
-  get root(): ActivatedRouteSnapshot { return this._routerState.root; }
+  /**
+   * The root of the router state
+   */
+  get root(): ActivatedRouteSnapshot {
+    return this._routerState.root;
+  }
 
   /** The parent of this route in the router state tree */
-  get parent(): ActivatedRouteSnapshot|null { return this._routerState.parent(this); }
+  get parent(): ActivatedRouteSnapshot|null {
+    return this._routerState.parent(this);
+  }
 
   /** The first child of this route in the router state tree */
-  get firstChild(): ActivatedRouteSnapshot|null { return this._routerState.firstChild(this); }
+  get firstChild(): ActivatedRouteSnapshot|null {
+    return this._routerState.firstChild(this);
+  }
 
   /** The children of this route in the router state tree */
-  get children(): ActivatedRouteSnapshot[] { return this._routerState.children(this); }
+  get children(): ActivatedRouteSnapshot[] {
+    return this._routerState.children(this);
+  }
 
   /** The path from the root of the router state tree to this route */
-  get pathFromRoot(): ActivatedRouteSnapshot[] { return this._routerState.pathFromRoot(this); }
+  get pathFromRoot(): ActivatedRouteSnapshot[] {
+    return this._routerState.pathFromRoot(this);
+  }
 
   get paramMap(): ParamMap {
     if (!this._paramMap) {
@@ -308,6 +438,10 @@ export class ActivatedRouteSnapshot {
     return `Route(url:'${url}', path:'${matched}')`;
   }
 }
+
+
+
+
 
 /**
  * @whatItDoes Represents the state of the router at a moment in time.
@@ -335,10 +469,13 @@ export class ActivatedRouteSnapshot {
  * @stable
  */
 export class RouterStateSnapshot extends Tree<ActivatedRouteSnapshot> {
+  
   /** @internal */
   constructor(
       /** The url from which this snapshot was created */
-      public url: string, root: TreeNode<ActivatedRouteSnapshot>) {
+      public url: string,
+      root: TreeNode<ActivatedRouteSnapshot>
+  ) {
     super(root);
     setRouterState(<RouterStateSnapshot>this, root);
   }
@@ -346,13 +483,29 @@ export class RouterStateSnapshot extends Tree<ActivatedRouteSnapshot> {
   toString(): string { return serializeNode(this._root); }
 }
 
-function setRouterState<U, T extends{_routerState: U}>(state: U, node: TreeNode<T>): void {
+
+/**
+ * 设置路由状态
+ * @param state 
+ * @param node 
+ */
+function setRouterState<U, T extends{_routerState: U}>(
+  state: U,
+  node: TreeNode<T>
+): void {
   node.value._routerState = state;
   node.children.forEach(c => setRouterState(state, c));
 }
 
+
+/**
+ * 序列化节点
+ * @param node 
+ */
 function serializeNode(node: TreeNode<ActivatedRouteSnapshot>): string {
-  const c = node.children.length > 0 ? ` { ${node.children.map(serializeNode).join(", ")} } ` : '';
+  const c = node.children.length > 0 ?
+              ` { ${node.children.map(serializeNode).join(", ")} } ` :
+              '';
   return `${node.value}${c}`;
 }
 

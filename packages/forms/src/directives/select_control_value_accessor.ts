@@ -16,6 +16,10 @@ export const SELECT_VALUE_ACCESSOR: StaticProvider = {
   multi: true
 };
 
+
+/**
+ * 构造值字符串
+ */
 function _buildValueString(id: string | null, value: any): string {
   if (id == null) return `${value}`;
   if (value && typeof value === 'object') value = 'Object';

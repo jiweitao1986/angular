@@ -45,14 +45,26 @@ export const modelGroupProvider: any = {
  *
  * @stable
  */
-@Directive({selector: '[ngModelGroup]', providers: [modelGroupProvider], exportAs: 'ngModelGroup'})
+@Directive({
+  selector: '[ngModelGroup]',
+  providers: [modelGroupProvider],
+  exportAs: 'ngModelGroup'
+})
 export class NgModelGroup extends AbstractFormGroupDirective implements OnInit, OnDestroy {
+
   @Input('ngModelGroup') name: string;
 
   constructor(
-      @Host() @SkipSelf() parent: ControlContainer,
-      @Optional() @Self() @Inject(NG_VALIDATORS) validators: any[],
-      @Optional() @Self() @Inject(NG_ASYNC_VALIDATORS) asyncValidators: any[]) {
+    //父容器
+    @Host() @SkipSelf() parent: ControlContainer,
+
+    //验证器
+    @Optional() @Self() @Inject(NG_VALIDATORS) validators: any[],
+
+    //异步验证器
+    @Optional() @Self() @Inject(NG_ASYNC_VALIDATORS) asyncValidators: any[]
+  ) {
+
     super();
     this._parent = parent;
     this._validators = validators;
@@ -61,6 +73,8 @@ export class NgModelGroup extends AbstractFormGroupDirective implements OnInit, 
 
   /** @internal */
   _checkParentType(): void {
+
+    // 如果父容器既不是NgModelGroup也不是NgForm，则抛出异常
     if (!(this._parent instanceof NgModelGroup) && !(this._parent instanceof NgForm)) {
       TemplateDrivenErrors.modelGroupParentException();
     }

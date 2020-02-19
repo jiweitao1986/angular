@@ -84,6 +84,9 @@ export abstract class EmbeddedViewRef<C> extends ViewRef {
   abstract get rootNodes(): any[];
 }
 
+/**
+ * 内部的ViewRef
+ */
 export interface InternalViewRef extends ViewRef {
   detachFromAppRef(): void;
   attachToAppRef(appRef: ApplicationRef): void;

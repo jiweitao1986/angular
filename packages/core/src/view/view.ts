@@ -21,8 +21,11 @@ import {NOOP, checkBindingNoChanges, isComponentView, markParentViewsForCheckPro
 import {detachProjectedView} from './view_attach';
 
 export function viewDef(
-    flags: ViewFlags, nodes: NodeDef[], updateDirectives?: null | ViewUpdateFn,
-    updateRenderer?: null | ViewUpdateFn): ViewDefinition {
+    flags: ViewFlags,
+    nodes: NodeDef[],
+    updateDirectives?: null | ViewUpdateFn,
+    updateRenderer?: null | ViewUpdateFn
+): ViewDefinition {
   // clone nodes and set auto calculated values
   let viewBindingCount = 0;
   let viewDisposableCount = 0;

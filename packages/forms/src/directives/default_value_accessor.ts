@@ -17,6 +17,9 @@ export const DEFAULT_VALUE_ACCESSOR: any = {
 };
 
 /**
+ * --------------------------------------------------------------------------------
+ * 通过UserAgentagent判断是否是android浏览器，因为android和ios的事件构成是不同的。
+ * --------------------------------------------------------------------------------
  * We must check whether the agent is Android because composition events
  * behave differently between iOS and Android.
  */
@@ -43,46 +46,95 @@ export const COMPOSITION_BUFFER_MODE = new InjectionToken<boolean>('CompositionE
  *  @stable
  */
 @Directive({
+
+  //选择器
+  // input:not([type=checkbox])[formControlName],
+  // textarea[formControlName],
+  // input:not([type=checkbox])[formControl],
+  // textarea[formControl],
+  // input:not([type=checkbox])[ngModel],
+  // textarea[ngModel],
+  // [ngDefaultControl],
+  
   selector:
       'input:not([type=checkbox])[formControlName],textarea[formControlName],input:not([type=checkbox])[formControl],textarea[formControl],input:not([type=checkbox])[ngModel],textarea[ngModel],[ngDefaultControl]',
   // TODO: vsavkin replace the above selector with the one below it once
   // https://github.com/angular/angular/issues/3011 is implemented
   // selector: '[ngModel],[formControl],[formControlName]',
+
+
   host: {
     '(input)': '_handleInput($event.target.value)',
     '(blur)': 'onTouched()',
     '(compositionstart)': '_compositionStart()',
     '(compositionend)': '_compositionEnd($event.target.value)'
   },
+
   providers: [DEFAULT_VALUE_ACCESSOR]
+
 })
 export class DefaultValueAccessor implements ControlValueAccessor {
+
   onChange = (_: any) => {};
+
   onTouched = () => {};
 
   /** Whether the user is creating a composition string (IME events). */
   private _composing = false;
 
+  /**
+   * 构造函数
+   * @param _renderer
+   * @param _elementRef 
+   * @param _compositionMode 
+   */
   constructor(
-      private _renderer: Renderer2, private _elementRef: ElementRef,
-      @Optional() @Inject(COMPOSITION_BUFFER_MODE) private _compositionMode: boolean) {
+      private _renderer: Renderer2,
+      private _elementRef: ElementRef,
+      @Optional() @Inject(COMPOSITION_BUFFER_MODE) private _compositionMode: boolean
+  ) {
     if (this._compositionMode == null) {
       this._compositionMode = !_isAndroid();
     }
   }
 
+  /**
+   * 写入值
+   * @param value 要写入的值
+   */
   writeValue(value: any): void {
     const normalizedValue = value == null ? '' : value;
     this._renderer.setProperty(this._elementRef.nativeElement, 'value', normalizedValue);
   }
 
-  registerOnChange(fn: (_: any) => void): void { this.onChange = fn; }
-  registerOnTouched(fn: () => void): void { this.onTouched = fn; }
+  /**
+   * 注册OnChagne事件回调
+   * @param fn 
+   */
+  registerOnChange(fn: (_: any) => void): void {
+    this.onChange = fn;
+  }
 
+  /**
+   * 注册OnTouched事件回调
+   * @param fn 
+   */
+  registerOnTouched(fn: () => void): void {
+    this.onTouched = fn;
+  }
+
+  /**
+   * 设置禁用状态
+   * @param fn 
+   */
   setDisabledState(isDisabled: boolean): void {
     this._renderer.setProperty(this._elementRef.nativeElement, 'disabled', isDisabled);
   }
 
+  /**
+   * 处理Input事件
+   * @param fn 
+   */
   /** @internal */
   _handleInput(value: any): void {
     if (!this._compositionMode || (this._compositionMode && !this._composing)) {
@@ -91,7 +143,9 @@ export class DefaultValueAccessor implements ControlValueAccessor {
   }
 
   /** @internal */
-  _compositionStart(): void { this._composing = true; }
+  _compositionStart(): void {
+    this._composing = true;
+  }
 
   /** @internal */
   _compositionEnd(value: any): void {

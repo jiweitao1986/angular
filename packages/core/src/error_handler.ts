@@ -11,6 +11,12 @@ import {ERROR_ORIGINAL_ERROR, getDebugContext, getErrorLogger, getOriginalError}
 
 
 /**
+ * --------------------------------------------------------------------------------
+ * 为集中管理错误提供一个钩子
+ * ErrorHandler默认处理是通过console将错误信息输出到控制台
+ * 为了更适应app，可以通过编写一个自定义的异常处理器替换掉默认的异常处理，来截获错误。
+ * --------------------------------------------------------------------------------
+ * 
  * @whatItDoes Provides a hook for centralized exception handling.
  *
  * @description
@@ -42,6 +48,10 @@ export class ErrorHandler {
    */
   _console: Console = console;
 
+  /**
+   * 处理错误
+   * @param error
+   */
   handleError(error: any): void {
     const originalError = this._findOriginalError(error);
     const context = this._findContext(error);
@@ -58,6 +68,9 @@ export class ErrorHandler {
     }
   }
 
+  /**
+   * 获取上下文
+   */
   /** @internal */
   _findContext(error: any): any {
     if (error) {
@@ -68,6 +81,9 @@ export class ErrorHandler {
     return null;
   }
 
+  /**
+   * 获取原始的错误
+   */
   /** @internal */
   _findOriginalError(error: Error): any {
     let e = getOriginalError(error);
@@ -79,6 +95,12 @@ export class ErrorHandler {
   }
 }
 
+
+/**
+ * 
+ * @param message wrappedError
+ * @param originalError 
+ */
 export function wrappedError(message: string, originalError: any): Error {
   const msg =
       `${message} caused by: ${originalError instanceof Error ? originalError.message: originalError }`;

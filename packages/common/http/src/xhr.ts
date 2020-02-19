@@ -46,7 +46,9 @@ export abstract class XhrFactory { abstract build(): XMLHttpRequest; }
 @Injectable()
 export class BrowserXhr implements XhrFactory {
   constructor() {}
-  build(): any { return <any>(new XMLHttpRequest()); }
+  build(): any {
+    return <any>(new XMLHttpRequest());
+  }
 }
 
 /**
@@ -58,6 +60,11 @@ interface PartialResponse {
   statusText: string;
   url: string;
 }
+
+
+
+
+
 
 /**
  * An `HttpBackend` which uses the XMLHttpRequest API to send
@@ -71,8 +78,10 @@ export class HttpXhrBackend implements HttpBackend {
 
   /**
    * Process a request and return a stream of response events.
+   * 处理一个请求并返回一个response events流
    */
   handle(req: HttpRequest<any>): Observable<HttpEvent<any>> {
+
     // Quick check to give a better error message when a user attempts to use
     // HttpClient.jsonp() without installing the JsonpClientModule
     if (req.method === 'JSONP') {
@@ -331,6 +340,8 @@ export class HttpXhrBackend implements HttpBackend {
         // Finally, abort the in-flight request.
         xhr.abort();
       };
+
+
     });
   }
 }

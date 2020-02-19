@@ -19,6 +19,8 @@ export type ValidationErrors = {
 };
 
 /**
+ * 验证器接口，验证器需要实现该接口
+ * 
  * An interface that can be implemented by classes that can act as validators.
  *
  * ## Usage
@@ -42,17 +44,36 @@ export interface Validator {
   registerOnValidatorChange?(fn: () => void): void;
 }
 
+
+/**
+ * 异步验证器接口
+ */
 /** @experimental */
 export interface AsyncValidator extends Validator {
   validate(c: AbstractControl): Promise<ValidationErrors|null>|Observable<ValidationErrors|null>;
 }
 
+
+
+/**
+ * --------------------------------------------------------------------------------
+ * required
+ * --------------------------------------------------------------------------------
+ */
+
+
+/**
+ * 必填验证器Provider
+ */
 export const REQUIRED_VALIDATOR: StaticProvider = {
   provide: NG_VALIDATORS,
   useExisting: forwardRef(() => RequiredValidator),
   multi: true
 };
 
+/**
+ * 复选框必填Provider
+ */
 export const CHECKBOX_REQUIRED_VALIDATOR: StaticProvider = {
   provide: NG_VALIDATORS,
   useExisting: forwardRef(() => CheckboxRequiredValidator),
@@ -61,6 +82,8 @@ export const CHECKBOX_REQUIRED_VALIDATOR: StaticProvider = {
 
 
 /**
+ * 必填指令，必填指令会添加一个必填验证器到持有required属性的控件上去
+ * 
  * A Directive that adds the `required` validator to any controls marked with the
  * `required` attribute, via the {@link NG_VALIDATORS} binding.
  *
@@ -74,12 +97,23 @@ export const CHECKBOX_REQUIRED_VALIDATOR: StaticProvider = {
  */
 @Directive({
   selector:
+      // :not([type=checkbox])[required][formControlName],
+      // :not([type=checkbox])[required][formControl],
+      // :not([type=checkbox])[required][ngModel]
       ':not([type=checkbox])[required][formControlName],:not([type=checkbox])[required][formControl],:not([type=checkbox])[required][ngModel]',
   providers: [REQUIRED_VALIDATOR],
   host: {'[attr.required]': 'required ? "" : null'}
 })
 export class RequiredValidator implements Validator {
+
+  /**
+   * 必填标志
+   */
   private _required: boolean;
+
+  /**
+   * require变化事件
+   */
   private _onChange: () => void;
 
   @Input()
@@ -90,15 +124,26 @@ export class RequiredValidator implements Validator {
     if (this._onChange) this._onChange();
   }
 
+  /**
+   * 验证
+   * @param c 
+   */
   validate(c: AbstractControl): ValidationErrors|null {
     return this.required ? Validators.required(c) : null;
   }
 
-  registerOnValidatorChange(fn: () => void): void { this._onChange = fn; }
+  /**
+   * 注册reqiured变化标志
+   * @param fn
+   */
+  registerOnValidatorChange(fn: () => void): void {
+    this._onChange = fn;
+  }
 }
 
 
 /**
+ * 复选框必填指令，该指令添加required验证器到复选框上
  * A Directive that adds the `required` validator to checkbox controls marked with the
  * `required` attribute, via the {@link NG_VALIDATORS} binding.
  *
@@ -117,10 +162,23 @@ export class RequiredValidator implements Validator {
   host: {'[attr.required]': 'required ? "" : null'}
 })
 export class CheckboxRequiredValidator extends RequiredValidator {
+  /**
+   * 验证复选框
+   * @param c 
+   */
   validate(c: AbstractControl): ValidationErrors|null {
     return this.required ? Validators.requiredTrue(c) : null;
   }
 }
+
+
+
+/**
+ * --------------------------------------------------------------------------------
+ * email
+ * --------------------------------------------------------------------------------
+ */
+
 
 /**
  * Provider which adds {@link EmailValidator} to {@link NG_VALIDATORS}.
@@ -166,6 +224,8 @@ export class EmailValidator implements Validator {
   registerOnValidatorChange(fn: () => void): void { this._onChange = fn; }
 }
 
+
+
 /**
  * @stable
  */
@@ -177,6 +237,15 @@ export interface ValidatorFn { (c: AbstractControl): ValidationErrors|null; }
 export interface AsyncValidatorFn {
   (c: AbstractControl): Promise<ValidationErrors|null>|Observable<ValidationErrors|null>;
 }
+
+
+
+/**
+ * --------------------------------------------------------------------------------
+ * minLength   maxLength
+ * --------------------------------------------------------------------------------
+ */
+
 
 /**
  * Provider which adds {@link MinLengthValidator} to {@link NG_VALIDATORS}.
@@ -227,6 +296,9 @@ export class MinLengthValidator implements Validator,
   }
 }
 
+
+
+
 /**
  * Provider which adds {@link MaxLengthValidator} to {@link NG_VALIDATORS}.
  *
@@ -259,6 +331,10 @@ export class MaxLengthValidator implements Validator,
 
   @Input() maxlength: string;
 
+  /**
+   * 
+   * @param changes
+   */
   ngOnChanges(changes: SimpleChanges): void {
     if ('maxlength' in changes) {
       this._createValidator();
@@ -276,6 +352,16 @@ export class MaxLengthValidator implements Validator,
     this._validator = Validators.maxLength(parseInt(this.maxlength, 10));
   }
 }
+
+
+
+
+/**
+ * --------------------------------------------------------------------------------
+ * pattern validator
+ * --------------------------------------------------------------------------------
+ */
+
 
 
 export const PATTERN_VALIDATOR: any = {

@@ -51,21 +51,22 @@ export function createAotUrlResolver(host: {
 
 /**
  * Creates a new AotCompiler based on options and a host.
+ * 基于options和host创建一个新的AotCompiler
  */
 export function createAotCompiler(
-    compilerHost: AotCompilerHost, options: AotCompilerOptions,
-    errorCollector?: (error: any, type?: any) =>
-        void): {compiler: AotCompiler, reflector: StaticReflector} {
+    compilerHost: AotCompilerHost,
+    options: AotCompilerOptions,
+    errorCollector?: (error: any, type?: any) => void
+): {compiler: AotCompiler, reflector: StaticReflector} {
+
   let translations: string = options.translations || '';
 
   const urlResolver = createAotUrlResolver(compilerHost);
   const symbolCache = new StaticSymbolCache();
   const summaryResolver = new AotSummaryResolver(compilerHost, symbolCache);
   const symbolResolver = new StaticSymbolResolver(compilerHost, symbolCache, summaryResolver);
-  const staticReflector =
-      new StaticReflector(summaryResolver, symbolResolver, [], [], errorCollector);
-  const htmlParser = new I18NHtmlParser(
-      new HtmlParser(), translations, options.i18nFormat, options.missingTranslation, console);
+  const staticReflector = new StaticReflector(summaryResolver, symbolResolver, [], [], errorCollector);
+  const htmlParser = new I18NHtmlParser(new HtmlParser(), translations, options.i18nFormat, options.missingTranslation, console);
   const config = new CompilerConfig({
     defaultEncapsulation: ViewEncapsulation.Emulated,
     useJit: false,
@@ -74,12 +75,10 @@ export function createAotCompiler(
     preserveWhitespaces: options.preserveWhitespaces,
     strictInjectionParameters: options.strictInjectionParameters,
   });
-  const normalizer = new DirectiveNormalizer(
-      {get: (url: string) => compilerHost.loadResource(url)}, urlResolver, htmlParser, config);
+  const normalizer = new DirectiveNormalizer({get: (url: string) => compilerHost.loadResource(url)}, urlResolver, htmlParser, config);
   const expressionParser = new Parser(new Lexer());
   const elementSchemaRegistry = new DomElementSchemaRegistry();
-  const tmplParser = new TemplateParser(
-      config, staticReflector, expressionParser, elementSchemaRegistry, htmlParser, console, []);
+  const tmplParser = new TemplateParser(config, staticReflector, expressionParser, elementSchemaRegistry, htmlParser, console, []);
   const resolver = new CompileMetadataResolver(
       config, htmlParser, new NgModuleResolver(staticReflector),
       new DirectiveResolver(staticReflector), new PipeResolver(staticReflector), summaryResolver,
@@ -87,10 +86,12 @@ export function createAotCompiler(
   // TODO(vicb): do not pass options.i18nFormat here
   const viewCompiler = new ViewCompiler(staticReflector);
   const typeCheckCompiler = new TypeCheckCompiler(options, staticReflector);
+
   const compiler = new AotCompiler(
       config, options, compilerHost, staticReflector, resolver, tmplParser,
       new StyleCompiler(urlResolver), viewCompiler, typeCheckCompiler,
       new NgModuleCompiler(staticReflector), new TypeScriptEmitter(), summaryResolver,
       symbolResolver);
+
   return {compiler, reflector: staticReflector};
 }

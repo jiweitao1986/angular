@@ -24,6 +24,7 @@ describe('url serializer', () => {
     expect(url.serialize(tree)).toEqual('/one/two');
   });
 
+
   it('should parse multiple secondary segments', () => {
     const tree = url.parse('/one/two(left:three//right:four)');
 
@@ -34,6 +35,7 @@ describe('url serializer', () => {
     expect(url.serialize(tree)).toEqual('/one/two(left:three//right:four)');
   });
 
+
   it('should parse top-level nodes with only secondary segment', () => {
     const tree = url.parse('/(left:one)');
 
@@ -42,6 +44,7 @@ describe('url serializer', () => {
 
     expect(url.serialize(tree)).toEqual('/(left:one)');
   });
+
 
   it('should parse nodes with only secondary segment', () => {
     const tree = url.parse('/one/(left:two)');
@@ -54,10 +57,12 @@ describe('url serializer', () => {
     expect(url.serialize(tree)).toEqual('/one/(left:two)');
   });
 
+
   it('should not parse empty path segments with params', () => {
     expect(() => url.parse('/one/two/(;a=1//right:;b=2)'))
         .toThrowError(/Empty path url segment cannot have parameters/);
   });
+
 
   it('should parse scoped secondary segments', () => {
     const tree = url.parse('/one/(two//left:three)');
@@ -71,6 +76,8 @@ describe('url serializer', () => {
     expect(url.serialize(tree)).toEqual('/one/(two//left:three)');
   });
 
+
+
   it('should parse scoped secondary segments with unscoped ones', () => {
     const tree = url.parse('/one/(two//left:three)(right:four)');
 
@@ -82,6 +89,8 @@ describe('url serializer', () => {
 
     expect(url.serialize(tree)).toEqual('/one/(two//left:three)(right:four)');
   });
+
+
 
   it('should parse secondary segments that have children', () => {
     const tree = url.parse('/one(left:two/three)');

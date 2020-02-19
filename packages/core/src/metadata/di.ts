@@ -46,6 +46,21 @@ import {makeParamDecorator, makePropDecorator} from '../util/decorators';
  */
 export const ANALYZE_FOR_ENTRY_COMPONENTS = new InjectionToken<any>('AnalyzeForEntryComponents');
 
+
+
+
+
+
+
+
+
+
+/**
+ * --------------------------------------------------------------------------------
+ * Attribute
+ * --------------------------------------------------------------------------------
+ */
+
 /**
  * Type of the Attribute decorator / constructor function.
  *
@@ -109,6 +124,22 @@ export interface Attribute { attributeName?: string; }
 export const Attribute: AttributeDecorator =
     makeParamDecorator('Attribute', (attributeName?: string) => ({attributeName}));
 
+
+
+
+
+
+
+
+
+
+/**
+ * --------------------------------------------------------------------------------
+ * Query
+ * --------------------------------------------------------------------------------
+ */
+
+
 /**
  * Type of the Query metadata.
  *
@@ -131,6 +162,22 @@ export interface Query {
  * @stable
  */
 export abstract class Query {}
+
+
+
+
+
+
+
+
+
+
+
+/**
+ * --------------------------------------------------------------------------------
+ * ContentChildren
+ * --------------------------------------------------------------------------------
+ */
 
 /**
  * Type of the ContentChildren decorator / constructor function.
@@ -195,7 +242,22 @@ export const ContentChildren: ContentChildrenDecorator = makePropDecorator(
         ({selector, first: false, isViewQuery: false, descendants: false, ...data}),
     Query);
 
+
+
+
+
+
+
+
+
+
 /**
+ * --------------------------------------------------------------------------------
+ * ContentChild
+ * --------------------------------------------------------------------------------
+ */
+
+ /**
  * Type of the ContentChild decorator / constructor function.
  *
  *
@@ -254,6 +316,20 @@ export const ContentChild: ContentChildDecorator = makePropDecorator(
     'ContentChild', (selector?: any, data: any = {}) =>
                         ({selector, first: true, isViewQuery: false, descendants: true, ...data}),
     Query);
+
+
+
+
+
+
+
+
+
+/**
+ * --------------------------------------------------------------------------------
+ * ViewChildren
+ * --------------------------------------------------------------------------------
+ */
 
 /**
  * Type of the ViewChildren decorator / constructor function.
@@ -314,7 +390,22 @@ export const ViewChildren: ViewChildrenDecorator = makePropDecorator(
                         ({selector, first: false, isViewQuery: true, descendants: true, ...data}),
     Query);
 
+
+
+
+
+
+
+
+
+
 /**
+ * --------------------------------------------------------------------------------
+ * ViewChild
+ * --------------------------------------------------------------------------------
+ */
+
+ /**
  * Type of the ViewChild decorator / constructor function.
  *
  * See {@link ViewChild}

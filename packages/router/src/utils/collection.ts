@@ -49,11 +49,14 @@ export function flatten<T>(arr: T[][]): T[] {
 }
 
 /**
+ * 获取数组中的最后一个元素
  * Return the last element of an array.
  */
 export function last<T>(a: T[]): T|null {
   return a.length > 0 ? a[a.length - 1] : null;
 }
+
+
 
 /**
  * Verifys all booleans in an array are `true`.
@@ -62,6 +65,13 @@ export function and(bools: boolean[]): boolean {
   return !bools.some(v => !v);
 }
 
+
+
+/**
+ * 遍历字典，将callback作用于每一个元素
+ * @param map
+ * @param callback 
+ */
 export function forEach<K, V>(map: {[key: string]: V}, callback: (v: V, k: string) => void): void {
   for (const prop in map) {
     if (map.hasOwnProperty(prop)) {
@@ -70,8 +80,18 @@ export function forEach<K, V>(map: {[key: string]: V}, callback: (v: V, k: strin
   }
 }
 
+
+
+/**
+ * waitForMap
+ * @param obj 
+ * @param fn 
+ */
 export function waitForMap<A, B>(
-    obj: {[k: string]: A}, fn: (k: string, a: A) => Observable<B>): Observable<{[k: string]: B}> {
+    obj: {[k: string]: A},
+    fn: (k: string, a: A) => Observable<B>
+): Observable<{[k: string]: B}> {
+
   if (Object.keys(obj).length === 0) {
     return of ({});
   }
@@ -94,17 +114,26 @@ export function waitForMap<A, B>(
   return map.call(last$, () => res);
 }
 
+
 /**
  * ANDs Observables by merging all input observables, reducing to an Observable verifying all
  * input Observables return `true`.
  */
-export function andObservables(observables: Observable<Observable<any>>): Observable<boolean> {
+export function andObservables(
+  observables: Observable<Observable<any>>
+): Observable<boolean> {
   const merged$ = mergeAll.call(observables);
   return every.call(merged$, (result: any) => result === true);
 }
 
-export function wrapIntoObservable<T>(value: T | NgModuleFactory<T>| Promise<T>| Observable<T>):
-    Observable<T> {
+/**
+ * 将value包装成Observable对象
+ * @param value
+ */
+export function wrapIntoObservable<T>(
+  value: T | NgModuleFactory<T>| Promise<T>| Observable<T>
+): Observable<T> {
+
   if (isObservable(value)) {
     return value;
   }

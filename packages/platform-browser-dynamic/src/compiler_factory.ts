@@ -6,9 +6,22 @@
  * found in the LICENSE file at https://angular.io/license
  */
 
-import {Compiler, CompilerFactory, ComponentFactory, CompilerOptions, ModuleWithComponentFactories, Inject, InjectionToken, Optional, PACKAGE_ROOT_URL, PlatformRef, StaticProvider, TRANSLATIONS, Type, isDevMode, platformCore, ɵConsole as Console, ViewEncapsulation, Injector, NgModuleFactory, TRANSLATIONS_FORMAT, MissingTranslationStrategy,} from '@angular/core';
+import {
+  Compiler, CompilerFactory, ComponentFactory, CompilerOptions, ModuleWithComponentFactories,
+  Inject, InjectionToken, Optional, PACKAGE_ROOT_URL, PlatformRef, StaticProvider, TRANSLATIONS, Type,
+  isDevMode, platformCore, ɵConsole as Console, ViewEncapsulation, Injector, NgModuleFactory,
+  TRANSLATIONS_FORMAT, MissingTranslationStrategy,
+} from '@angular/core';
 
-import {StaticSymbolCache, JitCompiler, ProviderMeta, ExternalReference, I18NHtmlParser, Identifiers, ViewCompiler, CompileMetadataResolver, UrlResolver, TemplateParser, NgModuleCompiler, JitSummaryResolver, SummaryResolver, StyleCompiler, PipeResolver, ElementSchemaRegistry, DomElementSchemaRegistry, ResourceLoader, NgModuleResolver, HtmlParser, CompileReflector, CompilerConfig, DirectiveNormalizer, DirectiveResolver, Lexer, Parser} from '@angular/compiler';
+import {
+  StaticSymbolCache, JitCompiler, ProviderMeta, ExternalReference,
+  I18NHtmlParser, Identifiers, ViewCompiler, CompileMetadataResolver,
+  UrlResolver, TemplateParser, NgModuleCompiler, JitSummaryResolver,
+  SummaryResolver, StyleCompiler, PipeResolver, ElementSchemaRegistry,
+  DomElementSchemaRegistry, ResourceLoader, NgModuleResolver, HtmlParser,
+  CompileReflector, CompilerConfig, DirectiveNormalizer,
+  DirectiveResolver, Lexer, Parser
+} from '@angular/compiler';
 
 import {JitReflector} from './compiler_reflector';
 
@@ -30,9 +43,35 @@ const _NO_RESOURCE_LOADER: ResourceLoader = {
 
 const baseHtmlParser = new InjectionToken('HtmlParser');
 
+
+/**
+ * JitCompilerImpl实现
+ */
 export class CompilerImpl implements Compiler {
+
+  /**
+   * 
+   */
   private _delegate: JitCompiler;
+
+  /**
+   * 注入器
+   */
   public readonly injector: Injector;
+
+  /**
+   * 构造函数
+   * @param injector 
+   * @param _metadataResolver 
+   * @param templateParser 
+   * @param styleCompiler 
+   * @param viewCompiler 
+   * @param ngModuleCompiler 
+   * @param summaryResolver 
+   * @param compileReflector 
+   * @param compilerConfig 
+   * @param console 
+   */
   constructor(
       injector: Injector, private _metadataResolver: CompileMetadataResolver,
       templateParser: TemplateParser, styleCompiler: StyleCompiler, viewCompiler: ViewCompiler,
@@ -45,6 +84,9 @@ export class CompilerImpl implements Compiler {
     this.injector = injector;
   }
 
+  /**
+   * 
+   */
   private getExtraNgModuleProviders() {
     return [this._metadataResolver.getProviderMetadata(
         new ProviderMeta(Compiler, {useValue: this}))];
@@ -53,9 +95,13 @@ export class CompilerImpl implements Compiler {
   compileModuleSync<T>(moduleType: Type<T>): NgModuleFactory<T> {
     return this._delegate.compileModuleSync(moduleType) as NgModuleFactory<T>;
   }
+
+
   compileModuleAsync<T>(moduleType: Type<T>): Promise<NgModuleFactory<T>> {
     return this._delegate.compileModuleAsync(moduleType) as Promise<NgModuleFactory<T>>;
   }
+
+
   compileModuleAndAllComponentsSync<T>(moduleType: Type<T>): ModuleWithComponentFactories<T> {
     const result = this._delegate.compileModuleAndAllComponentsSync(moduleType);
     return {
@@ -63,6 +109,8 @@ export class CompilerImpl implements Compiler {
       componentFactories: result.componentFactories as ComponentFactory<any>[],
     };
   }
+
+
   compileModuleAndAllComponentsAsync<T>(moduleType: Type<T>):
       Promise<ModuleWithComponentFactories<T>> {
     return this._delegate.compileModuleAndAllComponentsAsync(moduleType)
@@ -71,18 +119,35 @@ export class CompilerImpl implements Compiler {
                 componentFactories: result.componentFactories as ComponentFactory<any>[],
               }));
   }
+
+
   loadAotSummaries(summaries: () => any[]) { this._delegate.loadAotSummaries(summaries); }
+
+
   hasAotSummary(ref: Type<any>): boolean { return this._delegate.hasAotSummary(ref); }
+
+
   getComponentFactory<T>(component: Type<T>): ComponentFactory<T> {
     return this._delegate.getComponentFactory(component) as ComponentFactory<T>;
   }
+
+  /**
+   * 清空缓存
+   */
   clearCache(): void { this._delegate.clearCache(); }
+
+  /**
+   * 清空某种类型的缓存
+   * @param type 
+   */
   clearCacheFor(type: Type<any>) { this._delegate.clearCacheFor(type); }
 }
+
 
 /**
  * A set of providers that provide `JitCompiler` and its dependencies to use for
  * template compilation.
+ * 一组providers，它们提供了JitCompiler和它相关依赖，用来进行模板编译
  */
 export const COMPILER_PROVIDERS = <StaticProvider[]>[
   {provide: CompileReflector, useValue: new JitReflector()},
@@ -137,11 +202,14 @@ export const COMPILER_PROVIDERS = <StaticProvider[]>[
   { provide: ViewCompiler, deps: [CompileReflector]},
   { provide: NgModuleCompiler, deps: [CompileReflector] },
   { provide: CompilerConfig, useValue: new CompilerConfig()},
-  { provide: Compiler, useClass: CompilerImpl, deps: [Injector, CompileMetadataResolver,
-                                TemplateParser, StyleCompiler,
-                                ViewCompiler, NgModuleCompiler,
-                                SummaryResolver, CompileReflector, CompilerConfig,
-                                Console]},
+  {
+    provide: Compiler,
+    useClass: CompilerImpl,
+    deps: [
+      Injector, CompileMetadataResolver, TemplateParser, StyleCompiler,
+      ViewCompiler, NgModuleCompiler, SummaryResolver, CompileReflector, CompilerConfig, Console
+    ]
+  },
   { provide: DomElementSchemaRegistry, deps: []},
   { provide: ElementSchemaRegistry, useExisting: DomElementSchemaRegistry},
   { provide: UrlResolver, deps: [PACKAGE_ROOT_URL]},
@@ -150,8 +218,21 @@ export const COMPILER_PROVIDERS = <StaticProvider[]>[
   { provide: NgModuleResolver, deps: [CompileReflector]},
 ];
 
+
+/**
+ * JitCompilerFactory
+ */
 export class JitCompilerFactory implements CompilerFactory {
+
+  /**
+   * 默认配置
+   */
   private _defaultOptions: CompilerOptions[];
+
+  /**
+   * 构造函数
+   * @param defaultOptions 
+   */
   constructor(defaultOptions: CompilerOptions[]) {
     const compilerOptions: CompilerOptions = {
       useJit: true,
@@ -162,8 +243,17 @@ export class JitCompilerFactory implements CompilerFactory {
 
     this._defaultOptions = [compilerOptions, ...defaultOptions];
   }
+
+  /**
+   * 工厂方法，创建Compiler
+   * @param options 
+   */
   createCompiler(options: CompilerOptions[] = []): Compiler {
+
+    // 合并CompilerOptions
     const opts = _mergeOptions(this._defaultOptions.concat(options));
+
+    // 编译器工厂
     const injector = Injector.create([
       COMPILER_PROVIDERS, {
         provide: CompilerConfig,
@@ -189,6 +279,12 @@ export class JitCompilerFactory implements CompilerFactory {
   }
 }
 
+
+/**
+ * 合并多个CompilerOptions为一个CompilerOptions，合并的原则如下
+ * 先从所有的CompilerOptions中提取某一个配置，保存到一个数组中，然后从后往前遍历这个数组，找到第一个有效的值。
+ * @param optionsArr 
+ */
 function _mergeOptions(optionsArr: CompilerOptions[]): CompilerOptions {
   return {
     useJit: _lastDefined(optionsArr.map(options => options.useJit)),
@@ -200,6 +296,11 @@ function _mergeOptions(optionsArr: CompilerOptions[]): CompilerOptions {
   };
 }
 
+
+/**
+ * 从后向前查找args中第一个不是undefined的项
+ * @param args 
+ */
 function _lastDefined<T>(args: T[]): T|undefined {
   for (let i = args.length - 1; i >= 0; i--) {
     if (args[i] !== undefined) {
@@ -209,6 +310,11 @@ function _lastDefined<T>(args: T[]): T|undefined {
   return undefined;
 }
 
+
+/**
+ * 合并数组：将一个二维数组转换为一个一维数组
+ * @param parts
+ */
 function _mergeArrays(parts: any[][]): any[] {
   const result: any[] = [];
   parts.forEach((part) => part && result.push(...part));

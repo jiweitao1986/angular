@@ -29,6 +29,9 @@ export function isNgDiagnostic(diagnostic: any): diagnostic is Diagnostic {
   return diagnostic != null && diagnostic.source === 'angular';
 }
 
+/**
+ * 编译配置选项
+ */
 export interface CompilerOptions extends ts.CompilerOptions {
   // Write statistics about compilation (e.g. total time, ...)
   // Note: this is the --diagnostics command line option from TS (which is @internal

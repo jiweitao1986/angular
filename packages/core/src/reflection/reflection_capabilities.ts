@@ -19,17 +19,50 @@ import {GetterFn, MethodFn, SetterFn} from './types';
  */
 export const DELEGATE_CTOR = /^function\s+\S+\(\)\s*{[\s\S]+\.apply\(this,\s*arguments\)/;
 
-export class ReflectionCapabilities implements PlatformReflectionCapabilities {
+
+
+
+/**
+ * ReflectionCapabilities
+ */
+export class ReflectionCapabilities
+              implements PlatformReflectionCapabilities {
+
+  /**
+   * _reflect
+   */
   private _reflect: any;
 
-  constructor(reflect?: any) { this._reflect = reflect || global['Reflect']; }
+  /**
+   * constructor
+   * @param reflect 
+   */
+  constructor(reflect?: any) {
+    this._reflect = reflect || global['Reflect'];
+  }
 
-  isReflectionEnabled(): boolean { return true; }
+  /**
+   * isReflectionEnabled
+   */
+  isReflectionEnabled(): boolean {
+    return true;
+  }
 
-  factory<T>(t: Type<T>): (args: any[]) => T { return (...args: any[]) => new t(...args); }
+  /**
+   * factory
+   */
+  factory<T>(t: Type<T>): (args: any[]) => T {
+    return (...args: any[]) => new t(...args);
+  }
 
+  /**
+   * _zipTypesAndAnnotations
+   */
   /** @internal */
-  _zipTypesAndAnnotations(paramTypes: any[], paramAnnotations: any[]): any[][] {
+  _zipTypesAndAnnotations(
+    paramTypes: any[], paramAnnotations: any[]
+  ): any[][] {
+    
     let result: any[][];
 
     if (typeof paramTypes === 'undefined') {
@@ -56,6 +89,11 @@ export class ReflectionCapabilities implements PlatformReflectionCapabilities {
     return result;
   }
 
+  /**
+   * _ownParameters
+   * @param type 
+   * @param parentCtor 
+   */
   private _ownParameters(type: Type<any>, parentCtor: any): any[][]|null {
     // If we have no decorators, we only have function.length as metadata.
     // In that case, to detect whether a child class declared an own constructor or not,
@@ -102,6 +140,10 @@ export class ReflectionCapabilities implements PlatformReflectionCapabilities {
     return new Array((<any>type.length)).fill(undefined);
   }
 
+  /**
+   * parameters
+   * @param type 
+   */
   parameters(type: Type<any>): any[][] {
     // Note: only report metadata if we have at least one class decorator
     // to stay in sync with the static reflector.
@@ -116,9 +158,20 @@ export class ReflectionCapabilities implements PlatformReflectionCapabilities {
     return parameters || [];
   }
 
-  private _ownAnnotations(typeOrFunc: Type<any>, parentCtor: any): any[]|null {
+  /**
+   * _ownAnnotations
+   * @param typeOrFunc 
+   * @param parentCtor 
+   */
+  private _ownAnnotations(
+    typeOrFunc: Type<any>,
+    parentCtor: any
+  ): any[]|null {
     // Prefer the direct API.
-    if ((<any>typeOrFunc).annotations && (<any>typeOrFunc).annotations !== parentCtor.annotations) {
+    if (
+        (<any>typeOrFunc).annotations &&
+        (<any>typeOrFunc).annotations !== parentCtor.annotations
+    ) {
       let annotations = (<any>typeOrFunc).annotations;
       if (typeof annotations === 'function' && annotations.annotations) {
         annotations = annotations.annotations;
@@ -138,6 +191,9 @@ export class ReflectionCapabilities implements PlatformReflectionCapabilities {
     return null;
   }
 
+  /**
+   * annotations
+   */
   annotations(typeOrFunc: Type<any>): any[] {
     if (!isType(typeOrFunc)) {
       return [];
@@ -148,6 +204,11 @@ export class ReflectionCapabilities implements PlatformReflectionCapabilities {
     return parentAnnotations.concat(ownAnnotations);
   }
 
+  /**
+   * _ownPropMetadata
+   * @param typeOrFunc 
+   * @param parentCtor 
+   */
   private _ownPropMetadata(typeOrFunc: any, parentCtor: any): {[key: string]: any[]}|null {
     // Prefer the direct API.
     if ((<any>typeOrFunc).propMetadata &&
@@ -177,6 +238,10 @@ export class ReflectionCapabilities implements PlatformReflectionCapabilities {
     return null;
   }
 
+  /**
+   * propMetadata
+   * @param typeOrFunc 
+   */
   propMetadata(typeOrFunc: any): {[key: string]: any[]} {
     if (!isType(typeOrFunc)) {
       return {};
@@ -203,22 +268,42 @@ export class ReflectionCapabilities implements PlatformReflectionCapabilities {
     return propMetadata;
   }
 
+  /**
+   * hasLifecycleHook
+   * @param type 
+   * @param lcProperty 
+   */
   hasLifecycleHook(type: any, lcProperty: string): boolean {
     return type instanceof Type && lcProperty in type.prototype;
   }
 
+  /**
+   * getter
+   * @param name 
+   */
   getter(name: string): GetterFn { return <GetterFn>new Function('o', 'return o.' + name + ';'); }
 
+  /**
+   * setter
+   * @param name 
+   */
   setter(name: string): SetterFn {
     return <SetterFn>new Function('o', 'v', 'return o.' + name + ' = v;');
   }
 
+  /**
+   * method
+   * @param name 
+   */
   method(name: string): MethodFn {
     const functionBody = `if (!o.${name}) throw new Error('"${name}" is undefined');
         return o.${name}.apply(o, args);`;
     return <MethodFn>new Function('o', 'args', functionBody);
   }
 
+  /**
+   * importUri
+   */
   // There is not a concept of import uri in Js, but this is useful in developing Dart applications.
   importUri(type: any): string {
     // StaticSymbol
@@ -229,14 +314,42 @@ export class ReflectionCapabilities implements PlatformReflectionCapabilities {
     return `./${stringify(type)}`;
   }
 
+  /**
+   * resourceUri
+   * @param type 
+   */
   resourceUri(type: any): string { return `./${stringify(type)}`; }
 
+  /**
+   * resolveIdentifier
+   * @param name 
+   * @param moduleUrl 
+   * @param members 
+   * @param runtime 
+   */
   resolveIdentifier(name: string, moduleUrl: string, members: string[], runtime: any): any {
     return runtime;
   }
+
+  /**
+   * resolveEnum
+   * @param enumIdentifier 
+   * @param name 
+   */
   resolveEnum(enumIdentifier: any, name: string): any { return enumIdentifier[name]; }
 }
 
+
+
+
+
+
+
+
+/**
+ * convertTsickleDecoratorIntoMetadata
+ * @param decoratorInvocations 
+ */
 function convertTsickleDecoratorIntoMetadata(decoratorInvocations: any[]): any[] {
   if (!decoratorInvocations) {
     return [];
@@ -249,6 +362,10 @@ function convertTsickleDecoratorIntoMetadata(decoratorInvocations: any[]): any[]
   });
 }
 
+/**
+ * getParentCtor
+ * @param ctor 
+ */
 function getParentCtor(ctor: Function): Type<any> {
   const parentProto = Object.getPrototypeOf(ctor.prototype);
   const parentCtor = parentProto ? parentProto.constructor : null;

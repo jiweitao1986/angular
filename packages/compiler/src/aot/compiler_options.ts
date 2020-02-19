@@ -8,6 +8,9 @@
 
 import {MissingTranslationStrategy} from '../core';
 
+/**
+ * AOT编译器配置选项
+ */
 export interface AotCompilerOptions {
   locale?: string;
   i18nFormat?: string;

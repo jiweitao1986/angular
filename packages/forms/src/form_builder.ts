@@ -12,8 +12,10 @@ import {AsyncValidatorFn, ValidatorFn} from './directives/validators';
 import {AbstractControl, FormArray, FormControl, FormGroup} from './model';
 
 /**
+ * 通过用户指定的配置创建控件
  * @whatItDoes Creates an {@link AbstractControl} from a user-specified configuration.
  *
+ * 本质上，它是一个语法糖用来简化大型表单中FormGroup、FormControl、FormArray的创建过程。
  * It is essentially syntactic sugar that shortens the `new FormGroup()`,
  * `new FormControl()`, and `new FormArray()` boilerplate that can build up in larger
  * forms.
@@ -39,12 +41,21 @@ export class FormBuilder {
    *
    * See the {@link FormGroup} constructor for more details.
    */
-  group(controlsConfig: {[key: string]: any}, extra: {[key: string]: any}|null = null): FormGroup {
+  group(
+    controlsConfig: {[key: string]: any},
+    extra: {[key: string]: any}|null = null
+  ): FormGroup {
+
     const controls = this._reduceControls(controlsConfig);
+    
     const validator: ValidatorFn = extra != null ? extra['validator'] : null;
+    
     const asyncValidator: AsyncValidatorFn = extra != null ? extra['asyncValidator'] : null;
+    
     return new FormGroup(controls, validator, asyncValidator);
   }
+
+
   /**
    * Construct a new {@link FormControl} with the given `formState`,`validator`, and
    * `asyncValidator`.
@@ -54,8 +65,10 @@ export class FormBuilder {
    *
    */
   control(
-      formState: Object, validator?: ValidatorFn|ValidatorFn[]|null,
-      asyncValidator?: AsyncValidatorFn|AsyncValidatorFn[]|null): FormControl {
+      formState: Object,
+      validator?: ValidatorFn|ValidatorFn[]|null,
+      asyncValidator?: AsyncValidatorFn|AsyncValidatorFn[]|null
+  ): FormControl {
     return new FormControl(formState, validator, asyncValidator);
   }
 
@@ -64,23 +77,29 @@ export class FormBuilder {
    * configuration, with the given optional `validator` and `asyncValidator`.
    */
   array(
-      controlsConfig: any[], validator?: ValidatorFn|null,
-      asyncValidator?: AsyncValidatorFn|null): FormArray {
+      controlsConfig: any[],
+      validator?: ValidatorFn|null,
+      asyncValidator?: AsyncValidatorFn|null
+  ): FormArray {
     const controls = controlsConfig.map(c => this._createControl(c));
     return new FormArray(controls, validator, asyncValidator);
   }
 
   /** @internal */
   _reduceControls(controlsConfig: {[k: string]: any}): {[key: string]: AbstractControl} {
+
+
     const controls: {[key: string]: AbstractControl} = {};
     Object.keys(controlsConfig).forEach(controlName => {
       controls[controlName] = this._createControl(controlsConfig[controlName]);
     });
     return controls;
+
   }
 
   /** @internal */
   _createControl(controlConfig: any): AbstractControl {
+
     if (controlConfig instanceof FormControl || controlConfig instanceof FormGroup ||
         controlConfig instanceof FormArray) {
       return controlConfig;
@@ -94,5 +113,6 @@ export class FormBuilder {
     } else {
       return this.control(controlConfig);
     }
+
   }
 }

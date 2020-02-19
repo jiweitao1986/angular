@@ -9,10 +9,34 @@
 import {PRIMARY_OUTLET, ParamMap, convertToParamMap} from './shared';
 import {forEach, shallowEqual} from './utils/collection';
 
+
+
+
+
+
+
+
+
+
+// --------------------------------------------------------------------------------
+// 工具方法
+// --------------------------------------------------------------------------------
+
+
+/**
+ * 创建空的UrlTree
+ */
 export function createEmptyUrlTree() {
   return new UrlTree(new UrlSegmentGroup([], {}), {}, null);
 }
 
+
+/**
+ * 
+ * @param container 
+ * @param containee 
+ * @param exact 
+ */
 export function containsTree(container: UrlTree, containee: UrlTree, exact: boolean): boolean {
   if (exact) {
     return equalQueryParams(container.queryParams, containee.queryParams) &&
@@ -23,30 +47,64 @@ export function containsTree(container: UrlTree, containee: UrlTree, exact: bool
       containsSegmentGroup(container.root, containee.root);
 }
 
+
+/**
+ * 比较query params是否相等
+ * @param container
+ * @param containee 
+ */
 function equalQueryParams(
-    container: {[k: string]: string}, containee: {[k: string]: string}): boolean {
+    container: {[k: string]: string},
+    containee: {[k: string]: string}
+): boolean {
   return shallowEqual(container, containee);
 }
 
+
+/**
+ * 比较SegmentGroup是否相等
+ * @param container 
+ * @param containee 
+ */
 function equalSegmentGroups(container: UrlSegmentGroup, containee: UrlSegmentGroup): boolean {
-  if (!equalPath(container.segments, containee.segments)) return false;
-  if (container.numberOfChildren !== containee.numberOfChildren) return false;
+
+  if (!equalPath(container.segments, containee.segments))
+    return false;
+  if (container.numberOfChildren !== containee.numberOfChildren)
+    return false;
+
   for (const c in containee.children) {
-    if (!container.children[c]) return false;
-    if (!equalSegmentGroups(container.children[c], containee.children[c])) return false;
+    if (!container.children[c])
+      return false;
+    if (!equalSegmentGroups(container.children[c], containee.children[c]))
+      return false;
   }
+
   return true;
 }
 
+
+/**
+ * 比较query是否相等，containee中存在，container也存在，并且相等，视为相等，不做完全匹配
+ * @param container 
+ * @param containee 
+ */
 function containsQueryParams(
     container: {[k: string]: string}, containee: {[k: string]: string}): boolean {
   return Object.keys(containee).length <= Object.keys(container).length &&
       Object.keys(containee).every(key => containee[key] === container[key]);
 }
 
+
+/**
+ * 比较SegmentGroup是否相等，只比较containee中存在的属性
+ * @param container 
+ * @param containee 
+ */
 function containsSegmentGroup(container: UrlSegmentGroup, containee: UrlSegmentGroup): boolean {
   return containsSegmentGroupHelper(container, containee, containee.segments);
 }
+
 
 function containsSegmentGroupHelper(
     container: UrlSegmentGroup, containee: UrlSegmentGroup, containeePaths: UrlSegment[]): boolean {
@@ -73,8 +131,22 @@ function containsSegmentGroupHelper(
   }
 }
 
+
+
+
+
+
+
+
+
+
+// --------------------------------------------------------------------------------
+// UrlTree
+// --------------------------------------------------------------------------------
+
 /**
  * @whatItDoes Represents the parsed URL.
+ * UrlTree反应了URL解析之后的结构
  *
  * @howToUse
  *
@@ -98,8 +170,10 @@ function containsSegmentGroupHelper(
  *
  * Since a router state is a tree, and the URL is nothing but a serialized state, the URL is a
  * serialized tree.
+ * 由于router state是一个树，并且URL也只不过是一个序列化之后的状态，所以URL是一个树结构被序列化之后的产物。
+ * 
  * UrlTree is a data structure that provides a lot of affordances in dealing with URLs
- *
+ * UrlTree是一个数据结构
  * @stable
  */
 export class UrlTree {
@@ -125,6 +199,20 @@ export class UrlTree {
   /** @docsNotRequired */
   toString(): string { return DEFAULT_SERIALIZER.serialize(this); }
 }
+
+
+
+
+
+
+
+
+
+
+// --------------------------------------------------------------------------------
+// UrlSegmentGroup
+// --------------------------------------------------------------------------------
+
 
 /**
  * @whatItDoes Represents the parsed URL segment group.
@@ -158,6 +246,19 @@ export class UrlSegmentGroup {
   /** @docsNotRequired */
   toString(): string { return serializePaths(this); }
 }
+
+
+
+
+
+
+
+
+
+
+// --------------------------------------------------------------------------------
+// UrlSegment
+// --------------------------------------------------------------------------------
 
 
 /**
@@ -207,6 +308,14 @@ export class UrlSegment {
   toString(): string { return serializePath(this); }
 }
 
+
+
+
+
+
+
+
+
 export function equalSegments(as: UrlSegment[], bs: UrlSegment[]): boolean {
   return equalPath(as, bs) && as.every((a, i) => shallowEqual(a.parameters, bs[i].parameters));
 }
@@ -231,6 +340,19 @@ export function mapChildrenIntoArray<T>(
   });
   return res;
 }
+
+
+
+
+
+
+
+
+
+
+// --------------------------------------------------------------------------------
+// UrlSerializer
+// --------------------------------------------------------------------------------
 
 
 /**
@@ -270,6 +392,7 @@ export abstract class UrlSerializer {
  * @stable
  */
 export class DefaultUrlSerializer implements UrlSerializer {
+
   /** Parses a url into a {@link UrlTree} */
   parse(url: string): UrlTree {
     const p = new UrlParser(url);
@@ -285,6 +408,7 @@ export class DefaultUrlSerializer implements UrlSerializer {
     return `${segment}${query}${fragment}`;
   }
 }
+
 
 const DEFAULT_SERIALIZER = new DefaultUrlSerializer();
 
@@ -386,6 +510,20 @@ function matchUrlQueryParamValue(str: string): string {
   const match = str.match(QUERY_PARAM_VALUE_RE);
   return match ? match[0] : '';
 }
+
+
+
+
+
+
+
+
+
+
+// --------------------------------------------------------------------------------
+// UrlSegment
+// --------------------------------------------------------------------------------
+
 
 class UrlParser {
   private remaining: string;

@@ -84,6 +84,9 @@ export class RadioControlRegistry {
  *  @stable
  */
 @Directive({
+  // 选择器
+  // input[type=radio][formControlName]
+  //
   selector:
       'input[type=radio][formControlName],input[type=radio][formControl],input[type=radio][ngModel]',
   host: {'(change)': 'onChange()', '(blur)': 'onTouched()'},
@@ -106,7 +109,8 @@ export class RadioControlValueAccessor implements ControlValueAccessor,
 
   constructor(
       private _renderer: Renderer2, private _elementRef: ElementRef,
-      private _registry: RadioControlRegistry, private _injector: Injector) {}
+      private _registry: RadioControlRegistry, private _injector: Injector
+  ) {}
 
   ngOnInit(): void {
     this._control = this._injector.get(NgControl);

@@ -10,6 +10,9 @@ import {Directive, ElementRef, Renderer2, StaticProvider, forwardRef} from '@ang
 
 import {ControlValueAccessor, NG_VALUE_ACCESSOR} from './control_value_accessor';
 
+/**
+ * RANGE_VALUE_ACCESSOR Provider
+ */
 export const RANGE_VALUE_ACCESSOR: StaticProvider = {
   provide: NG_VALUE_ACCESSOR,
   useExisting: forwardRef(() => RangeValueAccessor),
@@ -26,31 +29,76 @@ export const RANGE_VALUE_ACCESSOR: StaticProvider = {
  *  ```
  */
 @Directive({
+
+  // 选择器
+  // input[type=range][formControlName]
+  // input[type=range][formControl]
+  // input[type=range][ngModel]
   selector:
       'input[type=range][formControlName],input[type=range][formControl],input[type=range][ngModel]',
+
+  // host
   host: {
     '(change)': 'onChange($event.target.value)',
     '(input)': 'onChange($event.target.value)',
     '(blur)': 'onTouched()'
   },
+
+  //
   providers: [RANGE_VALUE_ACCESSOR]
 })
 export class RangeValueAccessor implements ControlValueAccessor {
+
+  /**
+   * onChange
+   */
   onChange = (_: any) => {};
+
+  /**
+   * onChange
+   */
   onTouched = () => {};
 
+  /**
+   * 构造函数
+   * @param _renderer
+   * @param _elementRef 
+   */
   constructor(private _renderer: Renderer2, private _elementRef: ElementRef) {}
 
+  /**
+   * 写入值
+   * @param value
+   */
   writeValue(value: any): void {
     this._renderer.setProperty(this._elementRef.nativeElement, 'value', parseFloat(value));
   }
 
+  /**
+   * 注册OnChange处理
+   * @param fn
+   */
   registerOnChange(fn: (_: number|null) => void): void {
-    this.onChange = (value) => { fn(value == '' ? null : parseFloat(value)); };
+    this.onChange = (value) => {
+
+      //如果value是空，则传递一个null给fn，否则转换为float然后传递给fn
+      fn(value == '' ? null : parseFloat(value));
+
+    };
   }
 
-  registerOnTouched(fn: () => void): void { this.onTouched = fn; }
+  /**
+   * 注册
+   * @param fn 
+   */
+  registerOnTouched(fn: () => void): void {
+    this.onTouched = fn;
+  }
 
+  /**
+   * 设置range控件的disabled属性
+   * @param isDisabled
+   */
   setDisabledState(isDisabled: boolean): void {
     this._renderer.setProperty(this._elementRef.nativeElement, 'disabled', isDisabled);
   }

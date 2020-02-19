@@ -8,7 +8,18 @@
 
 import {Type} from '../type';
 
+
+
 /**
+ * --------------------------------------------------------------------------------
+ * decorators相关工具函数
+ * --------------------------------------------------------------------------------
+ */
+
+
+
+/**
+ * 所有angular类型装饰器要实现的接口，通过这个接口这些装饰器可以在es7中被使用
  * An interface implemented by all Angular type decorators, which allows them to be used as ES7
  * decorators as well as
  * Angular DSL syntax.
@@ -22,6 +33,7 @@ import {Type} from '../type';
  * @stable
  */
 export interface TypeDecorator {
+
   /**
    * Invoke as ES7 decorator.
    */
@@ -38,23 +50,45 @@ export const ANNOTATIONS = '__annotations__';
 export const PARAMETERS = '__paramaters__';
 export const PROP_METADATA = '__prop__metadata__';
 
+
+
+
+
+
+
+
+
+
+
 /**
+ * 返回一个装饰器的工厂方法
  * @suppress {globalThis}
  */
 export function makeDecorator(
-    name: string, props?: (...args: any[]) => any, parentClass?: any,
-    chainFn?: (fn: Function) => void):
-    {new (...args: any[]): any; (...args: any[]): any; (...args: any[]): (cls: any) => any;} {
+    name: string,
+    props?: (...args: any[]) => any,
+    parentClass?: any,
+    chainFn?: (fn: Function) => void
+): {
+    new (...args: any[]): any;
+    (...args: any[]): any;
+    (...args: any[]): (cls: any) => any;
+} {
+
+  //
   const metaCtor = makeMetadataCtor(props);
 
   function DecoratorFactory(objOrType: any): (cls: any) => any {
+
     if (this instanceof DecoratorFactory) {
       metaCtor.call(this, objOrType);
       return this;
     }
 
     const annotationInstance = new (<any>DecoratorFactory)(objOrType);
+
     const TypeDecorator: TypeDecorator = <TypeDecorator>function TypeDecorator(cls: Type<any>) {
+
       // Use of Object.defineProperty is important since it creates non-enumerable property which
       // prevents the property is copied during subclassing.
       const annotations = cls.hasOwnProperty(ANNOTATIONS) ?
@@ -62,10 +96,13 @@ export function makeDecorator(
           Object.defineProperty(cls, ANNOTATIONS, {value: []})[ANNOTATIONS];
       annotations.push(annotationInstance);
       return cls;
+
     };
+
     if (chainFn) chainFn(TypeDecorator);
     return TypeDecorator;
   }
+
 
   if (parentClass) {
     DecoratorFactory.prototype = Object.create(parentClass.prototype);
@@ -76,7 +113,13 @@ export function makeDecorator(
   return DecoratorFactory as any;
 }
 
+
+/**
+ * 生成元数据构造函数
+ * @param props
+ */
 function makeMetadataCtor(props?: (...args: any[]) => any): any {
+
   return function ctor(...args: any[]) {
     if (props) {
       const values = props(...args);
@@ -85,11 +128,37 @@ function makeMetadataCtor(props?: (...args: any[]) => any): any {
       }
     }
   };
+
 }
 
+
+
+
+
+
+
+
+/**
+ * --------------------------------------------------------------------------------
+ * Parameters Decorator
+ * --------------------------------------------------------------------------------
+ */
+
+
+/**
+ * 生成参数装饰器
+ * @param name 
+ * @param props 
+ * @param parentClass 
+ */
 export function makeParamDecorator(
-    name: string, props?: (...args: any[]) => any, parentClass?: any): any {
+    name: string,
+    props?: (...args: any[]) => any,
+    parentClass?: any
+): any {
+
   const metaCtor = makeMetadataCtor(props);
+
   function ParamDecoratorFactory(...args: any[]): any {
     if (this instanceof ParamDecoratorFactory) {
       metaCtor.apply(this, args);
@@ -123,10 +192,34 @@ export function makeParamDecorator(
   ParamDecoratorFactory.prototype.ngMetadataName = name;
   (<any>ParamDecoratorFactory).annotationCls = ParamDecoratorFactory;
   return ParamDecoratorFactory;
+
 }
 
+
+
+
+
+
+
+
+/**
+ * --------------------------------------------------------------------------------
+ * Property Decorator
+ * --------------------------------------------------------------------------------
+ */
+
+
+/**
+ * 生成属性装饰器
+ * @param name 
+ * @param props 
+ * @param parentClass 
+ */
 export function makePropDecorator(
-    name: string, props?: (...args: any[]) => any, parentClass?: any): any {
+    name: string,
+    props?: (...args: any[]) => any,
+    parentClass?: any
+): any {
   const metaCtor = makeMetadataCtor(props);
 
   function PropDecoratorFactory(...args: any[]): any {

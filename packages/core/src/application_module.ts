@@ -44,7 +44,8 @@ export function _localeFactory(locale?: string): string {
     {
       provide: LOCALE_ID,
       useFactory: _localeFactory,
-      deps: [[new Inject(LOCALE_ID), new Optional(), new SkipSelf()]]
+      deps: [
+        [new Inject(LOCALE_ID), new Optional(), new SkipSelf()]]
     },
   ]
 })

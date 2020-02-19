@@ -78,21 +78,35 @@ import {RouterLink, RouterLinkWithHref} from './router_link';
   selector: '[routerLinkActive]',
   exportAs: 'routerLinkActive',
 })
-export class RouterLinkActive implements OnChanges,
-    OnDestroy, AfterContentInit {
+export class RouterLinkActive implements OnChanges, OnDestroy, AfterContentInit {
+
   @ContentChildren(RouterLink, {descendants: true}) links: QueryList<RouterLink>;
+
   @ContentChildren(RouterLinkWithHref, {descendants: true})
   linksWithHrefs: QueryList<RouterLinkWithHref>;
 
   private classes: string[] = [];
+
   private subscription: Subscription;
+
   public readonly isActive: boolean = false;
 
-  @Input() routerLinkActiveOptions: {exact: boolean} = {exact: false};
+  @Input()
+  routerLinkActiveOptions: {exact: boolean} = {exact: false};
 
+  /**
+   * 构造函数
+   * @param router 
+   * @param element 
+   * @param renderer 
+   * @param cdr 
+   */
   constructor(
-      private router: Router, private element: ElementRef, private renderer: Renderer2,
-      private cdr: ChangeDetectorRef) {
+      private router: Router,
+      private element: ElementRef,
+      private renderer: Renderer2,
+      private cdr: ChangeDetectorRef
+  ) {
     this.subscription = router.events.subscribe(s => {
       if (s instanceof NavigationEnd) {
         this.update();

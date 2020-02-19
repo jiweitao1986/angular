@@ -6,6 +6,9 @@
  * found in the LICENSE file at https://angular.io/license
  */
 
+
+
+
 /**
  * Defines template and style encapsulation options available for Component's {@link Component}.
  *
@@ -13,6 +16,7 @@
  * @stable
  */
 export enum ViewEncapsulation {
+
   /**
    * Emulate `Native` scoping of styles by adding an attribute containing surrogate id to the Host
    * Element and pre-processing the style rules provided via {@link Component#styles styles} or
@@ -22,6 +26,7 @@ export enum ViewEncapsulation {
    * This is the default option.
    */
   Emulated = 0,
+
   /**
    * Use the native encapsulation mechanism of the renderer.
    *
@@ -29,6 +34,7 @@ export enum ViewEncapsulation {
    * creating a ShadowRoot for Component's Host Element.
    */
   Native = 1,
+
   /**
    * Don't provide any template or style encapsulation.
    */

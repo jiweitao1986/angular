@@ -9,6 +9,7 @@
 import {HttpHeaders} from './headers';
 import {HttpParams} from './params';
 
+
 /**
  * Construction interface for `HttpRequest`s.
  *
@@ -21,6 +22,7 @@ interface HttpRequestInit {
   responseType?: 'arraybuffer'|'blob'|'json'|'text';
   withCredentials?: boolean;
 }
+
 
 /**
  * Determine whether the given HTTP method may include a body.
@@ -64,6 +66,13 @@ function isBlob(value: any): value is Blob {
 function isFormData(value: any): value is FormData {
   return typeof FormData !== 'undefined' && value instanceof FormData;
 }
+
+
+
+
+
+
+
 
 /**
  * An outgoing HTTP request with an optional typed body.

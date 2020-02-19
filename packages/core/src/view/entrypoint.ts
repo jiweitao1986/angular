@@ -32,15 +32,24 @@ export function clearOverrides() {
 
 // Attention: this function is called as top level function.
 // Putting any logic in here will destroy closure tree shaking!
+/**
+ * 创建模块工厂
+ * @param ngModuleType 模块类型
+ * @param bootstrapComponents  启动组件
+ * @param defFactory 模块定义工厂
+ */
 export function createNgModuleFactory(
-    ngModuleType: Type<any>, bootstrapComponents: Type<any>[],
-    defFactory: NgModuleDefinitionFactory): NgModuleFactory<any> {
+    ngModuleType: Type<any>,
+    bootstrapComponents: Type<any>[],
+    defFactory: NgModuleDefinitionFactory
+): NgModuleFactory<any> {
   return new NgModuleFactory_(ngModuleType, bootstrapComponents, defFactory);
 }
 
 class NgModuleFactory_ extends NgModuleFactory<any> {
   constructor(
-      public readonly moduleType: Type<any>, private _bootstrapComponents: Type<any>[],
+      public readonly moduleType: Type<any>,
+      private _bootstrapComponents: Type<any>[],
       private _ngModuleDefFactory: NgModuleDefinitionFactory) {
     // Attention: this ctor is called as top level function.
     // Putting any logic in here will destroy closure tree shaking!

@@ -8,20 +8,47 @@
 
 import {BehaviorSubject} from 'rxjs/BehaviorSubject';
 
-import {DetachedRouteHandleInternal, RouteReuseStrategy} from './route_reuse_strategy';
-import {ActivatedRoute, ActivatedRouteSnapshot, RouterState, RouterStateSnapshot} from './router_state';
+import {
+  DetachedRouteHandleInternal,
+  RouteReuseStrategy
+} from './route_reuse_strategy';
+import {
+  ActivatedRoute,
+  ActivatedRouteSnapshot,
+  RouterState,
+  RouterStateSnapshot
+} from './router_state';
+
 import {TreeNode} from './utils/tree';
 
+/**
+ * createRouterState
+ */
 export function createRouterState(
-    routeReuseStrategy: RouteReuseStrategy, curr: RouterStateSnapshot,
-    prevState: RouterState): RouterState {
-  const root = createNode(routeReuseStrategy, curr._root, prevState ? prevState._root : undefined);
+    routeReuseStrategy: RouteReuseStrategy,
+    curr: RouterStateSnapshot,
+    prevState: RouterState
+): RouterState {
+  const root = createNode(
+    routeReuseStrategy,
+    curr._root,
+    prevState ? prevState._root : undefined
+  );
   return new RouterState(root, curr);
 }
 
+/**
+ * createNode
+ * @param routeReuseStrategy 
+ * @param curr 
+ * @param prevState 
+ */
 function createNode(
-    routeReuseStrategy: RouteReuseStrategy, curr: TreeNode<ActivatedRouteSnapshot>,
-    prevState?: TreeNode<ActivatedRoute>): TreeNode<ActivatedRoute> {
+    routeReuseStrategy: RouteReuseStrategy,
+    curr: TreeNode<ActivatedRouteSnapshot>,
+    prevState?: TreeNode<ActivatedRoute>
+): TreeNode<ActivatedRoute> {
+
   // reuse an activated route that is currently displayed on the screen
   if (prevState && routeReuseStrategy.shouldReuseRoute(curr.value, prevState.value.snapshot)) {
     const value = prevState.value;
@@ -43,6 +70,12 @@ function createNode(
   }
 }
 
+
+/**
+ * setFutureSnapshotsOfActivatedRoutes
+ * @param curr 
+ * @param result 
+ */
 function setFutureSnapshotsOfActivatedRoutes(
     curr: TreeNode<ActivatedRouteSnapshot>, result: TreeNode<ActivatedRoute>): void {
   if (curr.value.routeConfig !== result.value.routeConfig) {
@@ -57,9 +90,18 @@ function setFutureSnapshotsOfActivatedRoutes(
   }
 }
 
+
+/**
+ * createOrReuseChildren
+ * @param routeReuseStrategy 
+ * @param curr 
+ * @param prevState 
+ */
 function createOrReuseChildren(
-    routeReuseStrategy: RouteReuseStrategy, curr: TreeNode<ActivatedRouteSnapshot>,
-    prevState: TreeNode<ActivatedRoute>) {
+    routeReuseStrategy: RouteReuseStrategy,
+    curr: TreeNode<ActivatedRouteSnapshot>,
+    prevState: TreeNode<ActivatedRoute>
+) {
   return curr.children.map(child => {
     for (const p of prevState.children) {
       if (routeReuseStrategy.shouldReuseRoute(p.value.snapshot, child.value)) {
@@ -70,8 +112,20 @@ function createOrReuseChildren(
   });
 }
 
+
+/**
+ * 创建ActivatedRoute
+ * @param c 当前激活的路由快照
+ */
 function createActivatedRoute(c: ActivatedRouteSnapshot) {
   return new ActivatedRoute(
-      new BehaviorSubject(c.url), new BehaviorSubject(c.params), new BehaviorSubject(c.queryParams),
-      new BehaviorSubject(c.fragment), new BehaviorSubject(c.data), c.outlet, c.component, c);
+      new BehaviorSubject(c.url),
+      new BehaviorSubject(c.params),
+      new BehaviorSubject(c.queryParams),
+      new BehaviorSubject(c.fragment),
+      new BehaviorSubject(c.data),
+      c.outlet,
+      c.component,
+      c
+  );
 }

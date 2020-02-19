@@ -9,9 +9,25 @@
 import {Type} from '../type';
 import {GetterFn, MethodFn, SetterFn} from './types';
 
+
+/**
+ * PlatformReflectionCapabilities
+ */
 export interface PlatformReflectionCapabilities {
+
+  /**
+   * 
+   */
   isReflectionEnabled(): boolean;
+
+  /**
+   * PlatformReflectionCapabilities
+   */
   factory(type: Type<any>): Function;
+
+  /**
+   * hasLifecycleHook
+   */
   hasLifecycleHook(type: any, lcProperty: string): boolean;
 
   /**
@@ -28,11 +44,42 @@ export interface PlatformReflectionCapabilities {
    * Return a object literal which describes the annotations on Class fields/properties.
    */
   propMetadata(typeOrFunc: Type<any>): {[key: string]: any[]};
+
+  /**
+   * getter
+   */
   getter(name: string): GetterFn;
+
+  /**
+   * setter
+   */
   setter(name: string): SetterFn;
+
+  /**
+   * method
+   */
   method(name: string): MethodFn;
+
+  /**
+   * importUri
+   */
   importUri(type: Type<any>): string;
+
+  /**
+   * resourceUri
+   */
   resourceUri(type: Type<any>): string;
-  resolveIdentifier(name: string, moduleUrl: string, members: string[], runtime: any): any;
+
+  /**
+   * resolveIdentifier
+   */
+  resolveIdentifier(
+    name: string, moduleUrl: string,
+    members: string[], runtime: any
+  ): any;
+
+  /**
+   * resolveEnum
+   */
   resolveEnum(enumIdentifier: any, name: string): any;
 }

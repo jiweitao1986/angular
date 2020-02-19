@@ -29,10 +29,21 @@
  * @stable
  */
 export class InjectionToken<T> {
+
+  /**
+   * ngMetadataName
+   */
   /** @internal */
   readonly ngMetadataName = 'InjectionToken';
 
+  /**
+   * 构造函数
+   * @param _desc
+   */
   constructor(protected _desc: string) {}
 
+  /**
+   * 转换成字符串
+   */
   toString(): string { return `InjectionToken ${this._desc}`; }
 }

@@ -13,8 +13,20 @@ import {cyclicDependencyError, instantiationError, noProviderError, outOfBoundsE
 import {ReflectiveKey} from './reflective_key';
 import {ReflectiveDependency, ResolvedReflectiveFactory, ResolvedReflectiveProvider, resolveReflectiveProviders} from './reflective_provider';
 
+
+
 // Threshold for the dynamic version
 const UNDEFINED = new Object();
+
+
+
+
+
+
+
+
+
+
 
 /**
  * A ReflectiveDependency injection container used for instantiating objects and resolving
@@ -52,6 +64,8 @@ const UNDEFINED = new Object();
  * @deprecated from v5 - slow and brings in a lot of code, Use `Injector.create` instead.
  */
 export abstract class ReflectiveInjector implements Injector {
+
+
   /**
    * Turns an array of provider definitions into an array of resolved providers.
    *
@@ -116,7 +130,9 @@ export abstract class ReflectiveInjector implements Injector {
    * See {@link ReflectiveInjector#resolve resolve} and
    * {@link ReflectiveInjector#fromResolvedProviders fromResolvedProviders}.
    */
-  static resolveAndCreate(providers: Provider[], parent?: Injector): ReflectiveInjector {
+  static resolveAndCreate(
+    providers: Provider[], parent?: Injector
+  ): ReflectiveInjector {
     const ResolvedReflectiveProviders = ReflectiveInjector.resolve(providers);
     return ReflectiveInjector.fromResolvedProviders(ResolvedReflectiveProviders, parent);
   }
@@ -144,8 +160,10 @@ export abstract class ReflectiveInjector implements Injector {
    * ```
    * @experimental
    */
-  static fromResolvedProviders(providers: ResolvedReflectiveProvider[], parent?: Injector):
-      ReflectiveInjector {
+  static fromResolvedProviders(
+    providers: ResolvedReflectiveProvider[],
+    parent?: Injector
+  ): ReflectiveInjector {
     return new ReflectiveInjector_(providers, parent);
   }
 
@@ -278,15 +296,35 @@ export abstract class ReflectiveInjector implements Injector {
   abstract get(token: any, notFoundValue?: any): any;
 }
 
+
+
+
+
+
+
+
+
+
+/**
+ * ReflectiveInjector_
+ */
 export class ReflectiveInjector_ implements ReflectiveInjector {
+
   private static INJECTOR_KEY = ReflectiveKey.get(Injector);
+  
   /** @internal */
   _constructionCounter: number = 0;
+  
   /** @internal */
   public _providers: ResolvedReflectiveProvider[];
+  
+  
   public readonly parent: Injector|null;
 
+
   keyIds: number[];
+
+
   objs: any[];
   /**
    * Private
@@ -463,10 +501,20 @@ export class ReflectiveInjector_ implements ReflectiveInjector {
   toString(): string { return this.displayName; }
 }
 
-function _mapProviders(injector: ReflectiveInjector_, fn: Function): any[] {
+
+
+
+
+
+function _mapProviders(
+  injector: ReflectiveInjector_,
+  fn: Function
+): any[] {
+
   const res: any[] = new Array(injector._providers.length);
   for (let i = 0; i < injector._providers.length; ++i) {
     res[i] = fn(injector.getProviderAtIndex(i));
   }
   return res;
+
 }

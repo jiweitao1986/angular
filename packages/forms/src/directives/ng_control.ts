@@ -17,6 +17,9 @@ function unimplemented(): any {
 }
 
 /**
+ * control directive的基类
+ * 它绑定一个FormControl到一个DOM元素。
+ * 
  * A base class that all control directive extend.
  * It binds a {@link FormControl} object to a DOM element.
  *
@@ -25,17 +28,48 @@ function unimplemented(): any {
  * @stable
  */
 export abstract class NgControl extends AbstractControlDirective {
+
+  /**
+   * 父控件
+   */
   /** @internal */
   _parent: ControlContainer|null = null;
+
+  /**
+   * 名称
+   */
   name: string|null = null;
+
+  /**
+   * 值访问器
+   */
   valueAccessor: ControlValueAccessor|null = null;
+
+  /**
+   * 同步验证器集合
+   */
   /** @internal */
   _rawValidators: Array<Validator|ValidatorFn> = [];
+
+  /**
+   * 异步验证器集合
+   */
   /** @internal */
   _rawAsyncValidators: Array<AsyncValidator|AsyncValidatorFn> = [];
 
+  /**
+   * 表单验证器
+   */
   get validator(): ValidatorFn|null { return <ValidatorFn>unimplemented(); }
+
+  /**
+   * 异步表单验证器
+   */
   get asyncValidator(): AsyncValidatorFn|null { return <AsyncValidatorFn>unimplemented(); }
 
+  /**
+   * 从视图回写到Model上
+   * @param newValue 
+   */
   abstract viewToModelUpdate(newValue: any): void;
 }

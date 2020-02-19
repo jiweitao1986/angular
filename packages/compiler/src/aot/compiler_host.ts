@@ -12,6 +12,7 @@ import {AotSummaryResolverHost} from './summary_resolver';
 /**
  * The host of the AotCompiler disconnects the implementation from TypeScript / other language
  * services and from underlying file systems.
+ * AotCompilerHost分离了Compiler的实现与Typescript服务、文件系统之间的耦合
  */
 export interface AotCompilerHost extends StaticSymbolResolverHost, AotSummaryResolverHost {
   /**

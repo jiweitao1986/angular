@@ -156,19 +156,25 @@ export class HttpParams {
   /**
    * Construct a new body with an appended value for the given parameter name.
    */
-  append(param: string, value: string): HttpParams { return this.clone({param, value, op: 'a'}); }
+  append(param: string, value: string): HttpParams {
+    return this.clone({param, value, op: 'a'});
+  }
 
   /**
    * Construct a new body with a new value for the given parameter name.
    */
-  set(param: string, value: string): HttpParams { return this.clone({param, value, op: 's'}); }
+  set(param: string, value: string): HttpParams {
+    return this.clone({param, value, op: 's'});
+  }
 
   /**
    * Construct a new body with either the given value for the given parameter
    * removed, if a value is given, or all values for the given parameter removed
    * if not.
    */
-  delete (param: string, value?: string): HttpParams { return this.clone({param, value, op: 'd'}); }
+  delete (param: string, value?: string): HttpParams {
+    return this.clone({param, value, op: 'd'});
+  }
 
   /**
    * Serialize the body to an encoded string, where key-value pairs (separated by `=`) are

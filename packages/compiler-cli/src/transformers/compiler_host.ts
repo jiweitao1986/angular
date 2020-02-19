@@ -6,7 +6,12 @@
  * found in the LICENSE file at https://angular.io/license
  */
 
-import {AotCompilerHost, EmitterVisitorContext, ExternalReference, GeneratedFile, ParseSourceSpan, TypeScriptEmitter, collectExternalReferences, syntaxError} from '@angular/compiler';
+import {
+  AotCompilerHost, EmitterVisitorContext,
+  ExternalReference, GeneratedFile,
+  ParseSourceSpan, TypeScriptEmitter,
+  collectExternalReferences, syntaxError
+} from '@angular/compiler';
 import * as path from 'path';
 import * as ts from 'typescript';
 
@@ -20,26 +25,52 @@ import {DTS, GENERATED_FILES, isInRootDir, relativeToRootDirs} from './util';
 const NODE_MODULES_PACKAGE_NAME = /node_modules\/((\w|-)+|(@(\w|-)+\/(\w|-)+))/;
 const EXT = /(\.ts|\.d\.ts|\.js|\.jsx|\.tsx)$/;
 
+/**
+ * 创建CompilerHost，如果不传递tsHost，则默认使用ts创建一个
+ * @param param0 
+ */
 export function createCompilerHost(
     {options, tsHost = ts.createCompilerHost(options, true)}:
-        {options: CompilerOptions, tsHost?: ts.CompilerHost}): CompilerHost {
+    {options: CompilerOptions, tsHost?: ts.CompilerHost}
+): CompilerHost {
+
   return tsHost;
 }
 
+/**
+ * MetadataProvider
+ */
 export interface MetadataProvider {
   getMetadata(sourceFile: ts.SourceFile): ModuleMetadata|undefined;
 }
 
+/**
+ * GenSourceFile
+ */
 interface GenSourceFile {
   externalReferences: Set<string>;
   sourceFile: ts.SourceFile;
   emitCtx: EmitterVisitorContext;
 }
 
+/**
+ * CodeGenerator
+ */
 export interface CodeGenerator {
   generateFile(genFileName: string, baseFileName?: string): GeneratedFile;
   findGeneratedFileNames(fileName: string): string[];
 }
+
+
+
+
+
+
+
+
+
+
+
 
 /**
  * Implements the following hosts based on an api.CompilerHost:
@@ -69,9 +100,13 @@ export class TsCompilerAotCompilerTypeCheckHostAdapter implements ts.CompilerHos
   directoryExists?: (directoryName: string) => boolean;
 
   constructor(
-      private rootFiles: string[], private options: CompilerOptions, private context: CompilerHost,
-      private metadataProvider: MetadataProvider, private codeGenerator: CodeGenerator,
-      private librarySummaries = new Map<string, LibrarySummary>()) {
+      private rootFiles: string[],
+      private options: CompilerOptions,
+      private context: CompilerHost,
+      private metadataProvider: MetadataProvider,
+      private codeGenerator: CodeGenerator,
+      private librarySummaries = new Map<string, LibrarySummary>()
+  ) {
     this.moduleResolutionCache = ts.createModuleResolutionCache(
         this.context.getCurrentDirectory !(), this.context.getCanonicalFileName.bind(this.context));
     const basePath = this.options.basePath !;
@@ -543,6 +578,15 @@ export class TsCompilerAotCompilerTypeCheckHostAdapter implements ts.CompilerHos
   realPath = (p: string) => p;
   writeFile = this.context.writeFile.bind(this.context);
 }
+
+
+
+
+
+
+
+
+
 
 function genFileExternalReferences(genFile: GeneratedFile): Set<string> {
   return new Set(collectExternalReferences(genFile.stmts !).map(er => er.moduleName !));

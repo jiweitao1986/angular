@@ -9,6 +9,7 @@
 import {ReflectionCapabilities} from './reflection_capabilities';
 import {Reflector} from './reflector';
 
+// 重新导出Reflector
 export {Reflector} from './reflector';
 
 /**

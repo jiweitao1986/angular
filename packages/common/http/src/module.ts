@@ -26,7 +26,9 @@ import {HttpXsrfCookieExtractor, HttpXsrfInterceptor, HttpXsrfTokenExtractor, XS
  * @stable
  */
 export function interceptingHandler(
-    backend: HttpBackend, interceptors: HttpInterceptor[] | null = []): HttpHandler {
+    backend: HttpBackend,
+    interceptors: HttpInterceptor[] | null = []
+): HttpHandler {
   if (!interceptors) {
     return backend;
   }

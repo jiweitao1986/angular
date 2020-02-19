@@ -163,18 +163,23 @@ export function performCompilation({rootNames, options, host, oldProgram, emitCa
 
     const beforeDiags = Date.now();
     allDiagnostics.push(...gatherDiagnostics(program !));
+
+    // diagnostic
     if (options.diagnostics) {
       const afterDiags = Date.now();
       allDiagnostics.push(
           createMessageDiagnostic(`Time for diagnostics: ${afterDiags - beforeDiags}ms.`));
     }
 
+    // 如果没有错误，则输出返回结果并返回
     if (!hasErrors(allDiagnostics)) {
       emitResult = program !.emit({emitCallback, customTransformers, emitFlags});
       allDiagnostics.push(...emitResult.diagnostics);
       return {diagnostics: allDiagnostics, program, emitResult};
     }
+
     return {diagnostics: allDiagnostics, program};
+
   } catch (e) {
     let errMsg: string;
     let code: number;
@@ -193,6 +198,22 @@ export function performCompilation({rootNames, options, host, oldProgram, emitCa
     return {diagnostics: allDiagnostics, program};
   }
 }
+
+
+
+
+
+
+
+
+
+
+
+/**
+ * 重要！！！
+ * 编译的入口
+ * @param program 
+ */
 function defaultGatherDiagnostics(program: api.Program): Diagnostics {
   const allDiagnostics: Diagnostics = [];
 
@@ -205,26 +226,41 @@ function defaultGatherDiagnostics(program: api.Program): Diagnostics {
   }
 
   let checkOtherDiagnostics = true;
+
+  // 检查ts编译的配置和angular编译的配置
   // Check parameter diagnostics
   checkOtherDiagnostics = checkOtherDiagnostics &&
       checkDiagnostics([...program.getTsOptionDiagnostics(), ...program.getNgOptionDiagnostics()]);
 
+  // 检查 ts语法
   // Check syntactic diagnostics
   checkOtherDiagnostics =
       checkOtherDiagnostics && checkDiagnostics(program.getTsSyntacticDiagnostics());
 
+  // 检查ts sementic 和 angular structure
   // Check TypeScript semantic and Angular structure diagnostics
   checkOtherDiagnostics =
       checkOtherDiagnostics &&
       checkDiagnostics(
           [...program.getTsSemanticDiagnostics(), ...program.getNgStructuralDiagnostics()]);
 
+  // 检查angular semantic
   // Check Angular semantic diagnostics
   checkOtherDiagnostics =
       checkOtherDiagnostics && checkDiagnostics(program.getNgSemanticDiagnostics());
 
   return allDiagnostics;
 }
+
+
+
+
+
+
+
+
+
+
 
 function hasErrors(diags: Diagnostics) {
   return diags.some(d => d.category === ts.DiagnosticCategory.Error);

@@ -40,8 +40,19 @@ export interface CollectorOptions {
   substituteExpression?: (value: MetadataValue, node: ts.Node) => MetadataValue;
 }
 
+
+
+
+
+
+
+
+
+
+
 /**
  * Collect decorator metadata from a TypeScript module.
+ * 从一个ts模块上搜集装饰器元数据
  */
 export class MetadataCollector {
   constructor(private options: CollectorOptions = {}) {}
@@ -49,9 +60,11 @@ export class MetadataCollector {
   /**
    * Returns a JSON.stringify friendly form describing the decorators of the exported classes from
    * the source file that is expected to correspond to a module.
+   * 返回一个对JSON.stringify方法友好的格式，用来描述一个导出类的装饰器，这个类所在的源文件和一个模块对应。
    */
   public getMetadata(
-      sourceFile: ts.SourceFile, strict: boolean = false,
+      sourceFile: ts.SourceFile,
+      strict: boolean = false,
       substituteExpression?: (value: MetadataValue, node: ts.Node) => MetadataValue): ModuleMetadata
       |undefined {
     const locals = new Symbols(sourceFile);
@@ -556,6 +569,16 @@ export class MetadataCollector {
     }
   }
 }
+
+
+
+
+
+
+
+
+
+
 
 // This will throw if the metadata entry given contains an error node.
 function validateMetadata(

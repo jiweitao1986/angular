@@ -14,6 +14,8 @@ import {FormBuilder} from './form_builder';
 
 
 /**
+ * Forms模块
+ * 
  * The ng module for forms.
  * @stable
  */
@@ -25,7 +27,10 @@ import {FormBuilder} from './form_builder';
 export class FormsModule {
 }
 
+
 /**
+ * ReactiveForms模块
+ * 
  * The ng module for reactive forms.
  * @stable
  */

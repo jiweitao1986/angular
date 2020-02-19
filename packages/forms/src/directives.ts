@@ -71,6 +71,7 @@ export const REACTIVE_DRIVEN_DIRECTIVES: Type<any>[] =
     [FormControlDirective, FormGroupDirective, FormControlName, FormGroupName, FormArrayName];
 
 /**
+ * 内部模块，用来给FormsModule和ReactiveForms共享指令
  * Internal module used for sharing directives between FormsModule and ReactiveFormsModule
  */
 @NgModule({

@@ -98,6 +98,16 @@ export function errorSymbol(
   return result;
 }
 
+
+
+
+
+
+
+
+
+
+
 /**
  * Produce a symbolic representation of an expression folding values into their final value when
  * possible.
@@ -668,6 +678,16 @@ export class Evaluator {
     return recordEntry(errorSymbol('Expression form not supported', node), node);
   }
 }
+
+
+
+
+
+
+
+
+
+
 
 function isPropertyAssignment(node: ts.Node): node is ts.PropertyAssignment {
   return node.kind == ts.SyntaxKind.PropertyAssignment;

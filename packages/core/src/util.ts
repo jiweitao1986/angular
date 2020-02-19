@@ -31,6 +31,10 @@ export {_global as global};
 // When Symbol.iterator doesn't exist, retrieves the key used in es6-shim
 declare const Symbol: any;
 let _symbolIterator: any = null;
+
+
+
+
 export function getSymbolIterator(): string|symbol {
   if (!_symbolIterator) {
     const Symbol = _global['Symbol'];
@@ -51,14 +55,24 @@ export function getSymbolIterator(): string|symbol {
   return _symbolIterator;
 }
 
+
+
+
+
 export function scheduleMicroTask(fn: Function) {
   Zone.current.scheduleMicroTask('scheduleMicrotask', fn);
 }
+
+
+
 
 // JS has NaN !== NaN
 export function looseIdentical(a: any, b: any): boolean {
   return a === b || typeof a === 'number' && typeof b === 'number' && isNaN(a) && isNaN(b);
 }
+
+
+
 
 export function stringify(token: any): string {
   if (typeof token === 'string') {

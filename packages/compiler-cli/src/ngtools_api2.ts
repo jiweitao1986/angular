@@ -13,6 +13,7 @@
  * they are not broken accidentally.
  *
  * Once the ngc api is public and stable, this can be removed.
+ * 一旦ngc的api
  */
 
 /**

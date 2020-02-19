@@ -17,8 +17,13 @@ import {invalidProviderError, mixingMultiProvidersWithRegularProvidersError, noA
 import {ReflectiveKey} from './reflective_key';
 
 
-interface NormalizedProvider extends TypeProvider, ValueProvider, ClassProvider, ExistingProvider,
-    FactoryProvider {}
+interface NormalizedProvider extends
+  TypeProvider, ValueProvider, ClassProvider,
+  ExistingProvider, FactoryProvider {}
+
+
+
+
 
 /**
  * `Dependency` is used by the framework to extend DI.
@@ -26,7 +31,10 @@ interface NormalizedProvider extends TypeProvider, ValueProvider, ClassProvider,
  */
 export class ReflectiveDependency {
   constructor(
-      public key: ReflectiveKey, public optional: boolean, public visibility: Self|SkipSelf|null) {}
+      public key: ReflectiveKey,
+      public optional: boolean,
+      public visibility: Self|SkipSelf|null
+  ) {}
 
   static fromKey(key: ReflectiveKey): ReflectiveDependency {
     return new ReflectiveDependency(key, false, null);
@@ -34,6 +42,16 @@ export class ReflectiveDependency {
 }
 
 const _EMPTY_LIST: any[] = [];
+
+
+
+
+
+
+
+
+
+
 
 /**
  * An internal resolved representation of a {@link Provider} used by the {@link Injector}.
@@ -54,6 +72,7 @@ const _EMPTY_LIST: any[] = [];
  * @experimental
  */
 export interface ResolvedReflectiveProvider {
+
   /**
    * A key, usually a `Type<any>`.
    */
@@ -70,13 +89,34 @@ export interface ResolvedReflectiveProvider {
   multiProvider: boolean;
 }
 
+
+/**
+ * ResolvedReflectiveProvider_
+ */
 export class ResolvedReflectiveProvider_ implements ResolvedReflectiveProvider {
   constructor(
-      public key: ReflectiveKey, public resolvedFactories: ResolvedReflectiveFactory[],
-      public multiProvider: boolean) {}
+      public key: ReflectiveKey,
+      public resolvedFactories: ResolvedReflectiveFactory[],
+      public multiProvider: boolean
+  ) {}
 
-  get resolvedFactory(): ResolvedReflectiveFactory { return this.resolvedFactories[0]; }
+  /**
+   * 获取第一个工厂
+   */
+  get resolvedFactory(): ResolvedReflectiveFactory {
+    return this.resolvedFactories[0];
+  }
 }
+
+
+
+
+
+
+
+
+
+
 
 /**
  * An internal resolved representation of a factory function created by resolving {@link
@@ -98,27 +138,58 @@ export class ResolvedReflectiveFactory {
 
 
 /**
+ * 
+ * 将一个Provider 转换为一个Factory
+ * 
  * Resolve a single provider.
  */
 function resolveReflectiveFactory(provider: NormalizedProvider): ResolvedReflectiveFactory {
+
   let factoryFn: Function;
   let resolvedDeps: ReflectiveDependency[];
+
   if (provider.useClass) {
+    
+    // useClass
     const useClass = resolveForwardRef(provider.useClass);
     factoryFn = reflector.factory(useClass);
     resolvedDeps = _dependenciesFor(useClass);
+
   } else if (provider.useExisting) {
+
+    // useExisting
     factoryFn = (aliasInstance: any) => aliasInstance;
     resolvedDeps = [ReflectiveDependency.fromKey(ReflectiveKey.get(provider.useExisting))];
+
   } else if (provider.useFactory) {
+
+    //useFactory
     factoryFn = provider.useFactory;
-    resolvedDeps = constructDependencies(provider.useFactory, provider.deps);
+    resolvedDeps = constructDependencies(
+      provider.useFactory, provider.deps
+    );
+
   } else {
+
+    //useValue
     factoryFn = () => provider.useValue;
     resolvedDeps = _EMPTY_LIST;
+
   }
+
   return new ResolvedReflectiveFactory(factoryFn, resolvedDeps);
 }
+
+
+
+
+
+
+
+
+
+
+
 
 /**
  * Converts the {@link Provider} into {@link ResolvedProvider}.
@@ -126,35 +197,53 @@ function resolveReflectiveFactory(provider: NormalizedProvider): ResolvedReflect
  * {@link Injector} internally only uses {@link ResolvedProvider}, {@link Provider} contains
  * convenience provider syntax.
  */
-function resolveReflectiveProvider(provider: NormalizedProvider): ResolvedReflectiveProvider {
+function resolveReflectiveProvider(
+  provider: NormalizedProvider
+): ResolvedReflectiveProvider {
   return new ResolvedReflectiveProvider_(
-      ReflectiveKey.get(provider.provide), [resolveReflectiveFactory(provider)],
-      provider.multi || false);
+      ReflectiveKey.get(provider.provide),
+      [resolveReflectiveFactory(provider)],
+      provider.multi || false
+  );
 }
 
+
 /**
+ * 将Provider[]转换为resolvedReflectiveProvider[]
+ * 
  * Resolve a list of Providers.
  */
-export function resolveReflectiveProviders(providers: Provider[]): ResolvedReflectiveProvider[] {
+export function resolveReflectiveProviders(
+  providers: Provider[]
+): ResolvedReflectiveProvider[] {
   const normalized = _normalizeProviders(providers, []);
   const resolved = normalized.map(resolveReflectiveProvider);
   const resolvedProviderMap = mergeResolvedReflectiveProviders(resolved, new Map());
   return Array.from(resolvedProviderMap.values());
 }
 
+
 /**
+ * mergeResolvedReflectiveProviders
+ * 
  * Merges a list of ResolvedProviders into a list where
  * each key is contained exactly once and multi providers
  * have been merged.
  */
 export function mergeResolvedReflectiveProviders(
     providers: ResolvedReflectiveProvider[],
-    normalizedProvidersMap: Map<number, ResolvedReflectiveProvider>):
-    Map<number, ResolvedReflectiveProvider> {
+    normalizedProvidersMap: Map<number, ResolvedReflectiveProvider>
+): Map<number, ResolvedReflectiveProvider> {
+
+
   for (let i = 0; i < providers.length; i++) {
     const provider = providers[i];
     const existing = normalizedProvidersMap.get(provider.key.id);
+
+
     if (existing) {
+
+
       if (provider.multiProvider !== existing.multiProvider) {
         throw mixingMultiProvidersWithRegularProvidersError(existing, provider);
       }
@@ -165,7 +254,11 @@ export function mergeResolvedReflectiveProviders(
       } else {
         normalizedProvidersMap.set(provider.key.id, provider);
       }
+
+
     } else {
+
+
       let resolvedProvider: ResolvedReflectiveProvider;
       if (provider.multiProvider) {
         resolvedProvider = new ResolvedReflectiveProvider_(
@@ -174,13 +267,22 @@ export function mergeResolvedReflectiveProviders(
         resolvedProvider = provider;
       }
       normalizedProvidersMap.set(provider.key.id, resolvedProvider);
+
+
     }
   }
   return normalizedProvidersMap;
 }
 
+/**
+ * _normalizeProviders
+ * @param providers 
+ * @param res 
+ */
 function _normalizeProviders(providers: Provider[], res: Provider[]): Provider[] {
   providers.forEach(b => {
+
+
     if (b instanceof Type) {
       res.push({provide: b, useClass: b});
 
@@ -198,8 +300,19 @@ function _normalizeProviders(providers: Provider[], res: Provider[]): Provider[]
   return res;
 }
 
+
+
+
+
+
+
+
+
+
+
 export function constructDependencies(
-    typeOrFunc: any, dependencies?: any[]): ReflectiveDependency[] {
+    typeOrFunc: any, dependencies?: any[]
+): ReflectiveDependency[] {
   if (!dependencies) {
     return _dependenciesFor(typeOrFunc);
   } else {
@@ -207,6 +320,11 @@ export function constructDependencies(
     return dependencies.map(t => _extractToken(typeOrFunc, t, params));
   }
 }
+
+
+
+
+
 
 function _dependenciesFor(typeOrFunc: any): ReflectiveDependency[] {
   const params = reflector.parameters(typeOrFunc);
@@ -261,7 +379,22 @@ function _extractToken(
   }
 }
 
+
+
+/**
+ * 创建依赖
+ * @param token 
+ * @param optional 
+ * @param visibility 
+ */
 function _createDependency(
-    token: any, optional: boolean, visibility: Self | SkipSelf | null): ReflectiveDependency {
-  return new ReflectiveDependency(ReflectiveKey.get(token), optional, visibility);
+    token: any,
+    optional: boolean,
+    visibility: Self | SkipSelf | null
+): ReflectiveDependency {
+  return new ReflectiveDependency(
+    ReflectiveKey.get(token),
+    optional,
+    visibility
+  );
 }

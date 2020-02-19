@@ -9,9 +9,13 @@
 import {InjectionToken} from '@angular/core';
 
 /**
+ * ControlValueAccessor扮演了Angular表单API和原生DOM元素之间桥梁的角色。
+ * 
  * A `ControlValueAccessor` acts as a bridge between the Angular forms API and a
  * native element in the DOM.
  *
+ * 
+ * 如果想自定义一个和Angular表单集成的form control directive
  * Implement this interface if you want to create a custom form control directive
  * that integrates with Angular forms.
  *
@@ -35,9 +39,14 @@ export interface ControlValueAccessor {
   writeValue(obj: any): void;
 
   /**
+   * 注册一个回调函数，当在UI界面上改变控件的value的时候，去调用它。
+   * 
    * Registers a callback function that should be called when the control's value
    * changes in the UI.
    *
+   * 当表单 API初始化的时候它会被调用，所以当View上的值改后，它可以更新form model上的值，
+   * 从而实现 view -> model 的传播
+   * 
    * This is called by the forms API on initialization so it can update the form
    * model when values propagate from the view (view -> model).
    *

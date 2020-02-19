@@ -13,7 +13,8 @@ import {ActivatedRouteSnapshot, RouterStateSnapshot} from './router_state';
 /**
  * @whatItDoes Base for events the Router goes through, as opposed to events tied to a specific
  * Route. `RouterEvent`s will only be fired one time for any given navigation.
- *
+ * 路由过程中事件的基类，和绑定到特定Route上的事件相反，RouterEvent对于每个导航只被执行一次。
+ * 
  * Example:
  *
  * ```

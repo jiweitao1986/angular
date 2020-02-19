@@ -22,17 +22,36 @@ import {flatten, wrapIntoObservable} from './utils/collection';
 export const ROUTES = new InjectionToken<Route[][]>('ROUTES');
 
 export class RouterConfigLoader {
-  constructor(
-      private loader: NgModuleFactoryLoader, private compiler: Compiler,
-      private onLoadStartListener?: (r: Route) => void,
-      private onLoadEndListener?: (r: Route) => void) {}
 
+  /**
+   * 路由配置Loader
+   * @param loader 
+   * @param compiler 
+   * @param onLoadStartListener 
+   * @param onLoadEndListener 
+   */
+  constructor(
+      private loader: NgModuleFactoryLoader,
+      private compiler: Compiler,
+      private onLoadStartListener?: (r: Route) => void,
+      private onLoadEndListener?: (r: Route) => void
+  ) {
+  }
+
+  /**
+   * 加载
+   * @param parentInjector 
+   * @param route 
+   */
   load(parentInjector: Injector, route: Route): Observable<LoadedRouterConfig> {
+
     if (this.onLoadStartListener) {
       this.onLoadStartListener(route);
     }
 
+    // 获取moduleFactory
     const moduleFactory$ = this.loadModuleFactory(route.loadChildren !);
+
 
     return map.call(moduleFactory$, (factory: NgModuleFactory<any>) => {
       if (this.onLoadEndListener) {
@@ -45,10 +64,19 @@ export class RouterConfigLoader {
     });
   }
 
+  /**
+   * 通过loadChildren获取NgModuleFactory
+   * @param loadChildren 
+   */
   private loadModuleFactory(loadChildren: LoadChildren): Observable<NgModuleFactory<any>> {
+
     if (typeof loadChildren === 'string') {
+
+      // 即url#moduleName
       return fromPromise(this.loader.load(loadChildren));
+
     } else {
+
       return mergeMap.call(wrapIntoObservable(loadChildren()), (t: any) => {
         if (t instanceof NgModuleFactory) {
           return of (t);
@@ -56,6 +84,8 @@ export class RouterConfigLoader {
           return fromPromise(this.compiler.compileModuleAsync(t));
         }
       });
+
     }
+
   }
 }

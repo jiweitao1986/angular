@@ -27,23 +27,50 @@ export const CHECKBOX_VALUE_ACCESSOR: any = {
  *  @stable
  */
 @Directive({
+
+  //input[type=checkbox][formControlName],
+  //input[type=checkbox][formControl],
+  //input[type=checkbox][ngModel]
   selector:
       'input[type=checkbox][formControlName],input[type=checkbox][formControl],input[type=checkbox][ngModel]',
-  host: {'(change)': 'onChange($event.target.checked)', '(blur)': 'onTouched()'},
+  host: {
+    '(change)': 'onChange($event.target.checked)',
+    '(blur)': 'onTouched()'
+  },
   providers: [CHECKBOX_VALUE_ACCESSOR]
 })
 export class CheckboxControlValueAccessor implements ControlValueAccessor {
+
   onChange = (_: any) => {};
+
   onTouched = () => {};
 
   constructor(private _renderer: Renderer2, private _elementRef: ElementRef) {}
 
+  /**
+   * 写入值
+   * @param value
+   */
   writeValue(value: any): void {
     this._renderer.setProperty(this._elementRef.nativeElement, 'checked', value);
   }
+  
+  /**
+   * 注册OnChange
+   * @param fn 
+   */
   registerOnChange(fn: (_: any) => {}): void { this.onChange = fn; }
+
+  /**
+   * 注册OnTouched事件回调
+   * @param fn 
+   */
   registerOnTouched(fn: () => {}): void { this.onTouched = fn; }
 
+  /**
+   * 设置禁用状态
+   * @param isDisabled
+   */
   setDisabledState(isDisabled: boolean): void {
     this._renderer.setProperty(this._elementRef.nativeElement, 'disabled', isDisabled);
   }

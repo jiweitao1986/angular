@@ -14,6 +14,14 @@ import {TypeDecorator, makeDecorator, makePropDecorator} from '../util/decorator
 import {ViewEncapsulation} from './view';
 
 
+
+/**
+ * --------------------------------------------------------------------------------
+ * Directive
+ * --------------------------------------------------------------------------------
+ */
+
+
 /**
  * Type of the Directive decorator / constructor function.
  *
@@ -38,12 +46,17 @@ export interface DirectiveDecorator {
    *
    * @description
    *
+   * 指令装饰器允许你将一个类标记为一个angular指令，并且提供额外的元数据来决定如何在运行时处理、实例化、使用这个指令。
    * Directive decorator allows you to mark a class as an Angular directive and provide additional
    * metadata that determines how the directive should be processed, instantiated and used at
    * runtime.
-   *
+   * 
+   * 指令允许你给DOM元素附加行为。
    * Directives allow you to attach behavior to elements in the DOM..
    *
+   * 为了在其他的指令、组件、应用中使用指令，一个指令必须从属于一个NgModule。
+   * 为了将指令指定到NgModule的一个成员，你需要将它列在NgModule的declarations字段中
+   * 
    * A directive must belong to an NgModule in order for it to be usable
    * by another directive, component, or application. To specify that a directive is a member of an
    * NgModule,
@@ -52,17 +65,35 @@ export interface DirectiveDecorator {
    * In addition to the metadata configuration specified via the Directive decorator,
    * directives can control their runtime behavior by implementing various Life-Cycle hooks.
    *
+   * 
+   * 元数据属性：
    * **Metadata Properties:**
    *
+   * exports：使用这个name将指令的实例导出到模板，在模板上可以通过它引用指令的实例。
+   * 值可以是一个name，也可以是一个逗号分隔的names字符串。
    * * **exportAs** - name under which the component instance is exported in a template. Can be
    * given a single name or a comma-delimited list of names.
+   * 
+   * 映射events、properties、attribute到到host element。
+   * properties和attribute的区别：property是对象本身的一个成员、attribute是附加的一个特性。
    * * **host** - map of class property to host element bindings for events, properties and
    * attributes
+   * 
+   * 需要数据绑定的类属性列表
    * * **inputs** - list of class property names to data-bind as component inputs
+   * 
+   * 需要对外暴露的事件名称列表
    * * **outputs** - list of class property names that expose output events that others can
+   * 
    * subscribe to
+   * 
+   * //应用于component和子Component的一组provider
    * * **providers** - list of providers available to this component and its children
+   * 
+   * 配置可以注入到component的queries。
    * * **queries** -  configure queries that can be injected into the component
+   * 
+   * 用来在模板中识别component的css选择器
    * * **selector** - css selector that identifies this component in a template
    *
    * @stable
@@ -77,6 +108,7 @@ export interface DirectiveDecorator {
 }
 
 export interface Directive {
+
   /**
    * The CSS selector that triggers the instantiation of a directive.
    *
@@ -112,16 +144,24 @@ export interface Directive {
   selector?: string;
 
   /**
+   * 
+   * // 用来枚举指令中需要绑定数据的属性集合
    * Enumerates the set of data-bound input properties for a directive
    *
+   * Angular在变更检测中，自动更新这些输入属性。
    * Angular automatically updates input properties during change detection.
    *
+   * inputs属性定义了directiveProperty到bindingProperty的映射
+   * directiveProperty指定要写入值的组件属性
+   * bindingProperty指定要从DOM的哪个属性上读取值
+   * 
    * The `inputs` property defines a set of `directiveProperty` to `bindingProperty`
    * configuration:
    *
    * - `directiveProperty` specifies the component property where the value is written.
    * - `bindingProperty` specifies the DOM property where the value is read from.
    *
+   * 当bindingProperty没有指定时，我们就假设它和directiveProperty相同
    * When `bindingProperty` is not provided, it is assumed to be equal to `directiveProperty`.
    *
    * ### Example ([live demo](http://plnkr.co/edit/ivhfXY?p=preview))
@@ -203,18 +243,30 @@ export interface Directive {
   outputs?: string[];
 
   /**
+   * 将events、actions、properties、attributes关联到host element（宿主元素）
    * Specify the events, actions, properties and attributes related to the host element.
    *
+   * 
+   * 
+   * 
+   * 
    * ## Host Listeners
    *
+   * directive通过一组 (event)到method的键值对来监听host element上的event事件
    * Specifies which DOM events a directive listens to via a set of `(event)` to `method`
    * key-value pairs:
    *
+   * event：指令要监听的DOM事件
+   * statement：事件发生时要执行的语句
    * - `event`: the DOM event that the directive listens to.
    * - `statement`: the statement to execute when the event occurs.
+   * 
+   * 如果statement执行返回的结果false，则组织DOM事件向上冒泡。
    * If the evaluation of the statement returns `false`, then `preventDefault`is applied on the DOM
    * event.
    *
+   * 想要监听全局事件，必须将目标添加到event中
+   * 可能的目标有：window、document、body
    * To listen to global events, a target must be added to the event name.
    * The target can be `window`, `document` or `body`.
    *
@@ -247,6 +299,10 @@ export interface Directive {
    * class App {}
    * ```
    *
+   * 
+   * 
+   * 
+   * 
    * ## Host Property Bindings
    *
    * Specifies which DOM properties a directive updates.
@@ -282,6 +338,9 @@ export interface Directive {
    * }
    * ```
    *
+   * 
+   * 
+   * 
    * ## Attributes
    *
    * Specifies static attributes that should be propagated to a host element.
@@ -402,6 +461,22 @@ export interface Directive {
  */
 export const Directive: DirectiveDecorator =
     makeDecorator('Directive', (dir: Directive = {}) => dir);
+
+
+
+
+
+
+
+
+
+
+/**
+ * --------------------------------------------------------------------------------
+ * Component
+ * --------------------------------------------------------------------------------
+ */
+
 
 /**
  * Type of the Component decorator / constructor function.
@@ -756,6 +831,23 @@ export const Component: ComponentDecorator = makeDecorator(
     'Component', (c: Component = {}) => ({changeDetection: ChangeDetectionStrategy.Default, ...c}),
     Directive);
 
+
+
+
+
+
+
+
+
+
+
+/**
+ * --------------------------------------------------------------------------------
+ * Pipe
+ * --------------------------------------------------------------------------------
+ */
+
+
 /**
  * Type of the Pipe decorator / constructor function.
  *
@@ -794,6 +886,21 @@ export interface Pipe {
  * @Annotation
  */
 export const Pipe: PipeDecorator = makeDecorator('Pipe', (p: Pipe) => ({pure: true, ...p}));
+
+
+
+
+
+
+
+
+
+
+/**
+ * --------------------------------------------------------------------------------
+ * Input & Output
+ * --------------------------------------------------------------------------------
+ */
 
 
 /**
@@ -867,6 +974,8 @@ export interface Input {
 export const Input: InputDecorator =
     makePropDecorator('Input', (bindingPropertyName?: string) => ({bindingPropertyName}));
 
+
+
 /**
  * Type of the Output decorator / constructor function.
  *
@@ -933,6 +1042,20 @@ export interface Output { bindingPropertyName?: string; }
 export const Output: OutputDecorator =
     makePropDecorator('Output', (bindingPropertyName?: string) => ({bindingPropertyName}));
 
+
+
+
+
+
+
+
+
+
+/**
+ * --------------------------------------------------------------------------------
+ * HostBinding & HostListener
+ * --------------------------------------------------------------------------------
+ */
 
 /**
  * Type of the HostBinding decorator / constructor function.
