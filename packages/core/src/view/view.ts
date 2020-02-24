@@ -20,12 +20,25 @@ import {ArgumentType, CheckType, ElementData, NodeData, NodeDef, NodeFlags, Prov
 import {NOOP, checkBindingNoChanges, isComponentView, markParentViewsForCheckProjectedViews, resolveDefinition, tokenKey} from './util';
 import {detachProjectedView} from './view_attach';
 
+
+
+
+
+
+/**
+ * 创建
+ * @param flags None、OnPush
+ * @param nodes 
+ * @param updateDirectives 
+ * @param updateRenderer 
+ */
 export function viewDef(
     flags: ViewFlags,
     nodes: NodeDef[],
     updateDirectives?: null | ViewUpdateFn,
     updateRenderer?: null | ViewUpdateFn
 ): ViewDefinition {
+
   // clone nodes and set auto calculated values
   let viewBindingCount = 0;
   let viewDisposableCount = 0;
@@ -37,6 +50,7 @@ export function viewDef(
   let currentElementHasPublicProviders = false;
   let currentElementHasPrivateProviders = false;
   let lastRenderRootNode: NodeDef|null = null;
+
   for (let i = 0; i < nodes.length; i++) {
     const node = nodes[i];
     node.nodeIndex = i;
@@ -48,8 +62,11 @@ export function viewDef(
     viewNodeFlags |= node.flags;
     viewMatchedQueries |= node.matchedQueryIds;
 
+    // 处理ElementDef
     if (node.element) {
       const elDef = node.element;
+      
+      // providers
       elDef.publicProviders =
           currentParent ? currentParent.element !.publicProviders : Object.create(null);
       elDef.allProviders = elDef.publicProviders;
@@ -57,6 +74,7 @@ export function viewDef(
       currentElementHasPublicProviders = false;
       currentElementHasPrivateProviders = false;
 
+      // nodeMatchedQueries
       if (node.element.template) {
         viewMatchedQueries |= node.element.template.nodeMatchedQueries;
       }
@@ -137,6 +155,10 @@ export function viewDef(
     }
   }
 
+
+
+
+
   const handleEvent: ViewHandleEventFn = (view, nodeIndex, eventName, event) =>
       nodes[nodeIndex].element !.handleEvent !(view, eventName, event);
 
@@ -153,6 +175,12 @@ export function viewDef(
     outputCount: viewDisposableCount, lastRenderRootNode
   };
 }
+
+
+
+
+
+
 
 function isNgContainer(node: NodeDef): boolean {
   return (node.flags & NodeFlags.TypeElement) !== 0 && node.element !.name === null;

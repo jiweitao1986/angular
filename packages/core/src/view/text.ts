@@ -35,7 +35,10 @@ export function textDef(
     outputIndex: -1,
     // regular values
     checkIndex,
+
+    // NodeFlags.TypeText
     flags: NodeFlags.TypeText,
+
     childFlags: 0,
     directChildFlags: 0,
     childMatchedQueries: 0,
@@ -53,6 +56,12 @@ export function textDef(
   };
 }
 
+/**
+ * 创建文本
+ * @param view 
+ * @param renderHost 
+ * @param def 
+ */
 export function createText(view: ViewData, renderHost: any, def: NodeDef): TextData {
   let renderNode: any;
   const renderer = view.renderer;
@@ -63,6 +72,8 @@ export function createText(view: ViewData, renderHost: any, def: NodeDef): TextD
   }
   return {renderText: renderNode};
 }
+
+
 
 export function checkAndUpdateTextInline(
     view: ViewData, def: NodeDef, v0: any, v1: any, v2: any, v3: any, v4: any, v5: any, v6: any,
@@ -99,6 +110,8 @@ export function checkAndUpdateTextInline(
   return changed;
 }
 
+
+
 export function checkAndUpdateTextDynamic(view: ViewData, def: NodeDef, values: any[]): boolean {
   const bindings = def.bindings;
   let changed = false;
@@ -120,6 +133,8 @@ export function checkAndUpdateTextDynamic(view: ViewData, def: NodeDef, values: 
   }
   return changed;
 }
+
+
 
 function _addInterpolationPart(value: any, binding: BindingDef): string {
   const valueStr = value != null ? value.toString() : '';

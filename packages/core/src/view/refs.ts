@@ -43,6 +43,10 @@ export function getComponentViewDefinitionFactory(componentFactory: ComponentFac
   return (componentFactory as ComponentFactory_).viewDefFactory;
 }
 
+
+/**
+ * Component工厂实现类
+ */
 class ComponentFactory_ extends ComponentFactory<any> {
   /**
    * @internal
@@ -50,9 +54,16 @@ class ComponentFactory_ extends ComponentFactory<any> {
   viewDefFactory: ViewDefinitionFactory;
 
   constructor(
-      public selector: string, public componentType: Type<any>,
-      viewDefFactory: ViewDefinitionFactory, private _inputs: {[propName: string]: string}|null,
-      private _outputs: {[propName: string]: string}, public ngContentSelectors: string[]) {
+      public selector: string,
+      public componentType: Type<any>,
+      viewDefFactory: ViewDefinitionFactory,
+      private _inputs: {[propName: string]: string}|null,
+      private _outputs: {[propName: string]: string},
+      public ngContentSelectors: string[]
+  ) {
+    
+    // 注意：这个构造函数作为顶层函数被调用
+    // 放在这里的任何逻辑会破坏tree shaking
     // Attention: this ctor is called as top level function.
     // Putting any logic in here will destroy closure tree shaking!
     super();
@@ -80,31 +91,88 @@ class ComponentFactory_ extends ComponentFactory<any> {
 
   /**
    * Creates a new component.
+   * @param injector
+   * @param projectableNodes
+   * @param rootSelectorOrNode
+   * @param ngModule
    */
   create(
-      injector: Injector, projectableNodes?: any[][], rootSelectorOrNode?: string|any,
-      ngModule?: NgModuleRef<any>): ComponentRef<any> {
+      injector: Injector,
+      projectableNodes?: any[][],
+      rootSelectorOrNode?: string|any,
+      ngModule?: NgModuleRef<any>
+  ): ComponentRef<any> {
+    
+    // 组件必须从属于某一个模块
     if (!ngModule) {
       throw new Error('ngModule should be provided');
     }
+    
+    // 创建viewDefinition
     const viewDef = resolveDefinition(this.viewDefFactory);
+    
+    
     const componentNodeIndex = viewDef.nodes[0].element !.componentProvider !.nodeIndex;
+    
+    // 创建ViewData
     const view = Services.createRootView(
-        injector, projectableNodes || [], rootSelectorOrNode, viewDef, ngModule, EMPTY_CONTEXT);
+      injector,
+      projectableNodes || [],
+      rootSelectorOrNode,
+      viewDef,
+      ngModule,
+      EMPTY_CONTEXT
+    );
+
+    //
     const component = asProviderData(view, componentNodeIndex).instance;
+
+    //
     if (rootSelectorOrNode) {
-      view.renderer.setAttribute(asElementData(view, 0).renderElement, 'ng-version', VERSION.full);
+      view.renderer.setAttribute(
+        asElementData(view, 0).renderElement,
+        'ng-version',
+        VERSION.full
+      );
     }
 
+    // 创建ComponentRef
     return new ComponentRef_(view, new ViewRef_(view), component);
   }
 }
 
+
+/**
+ * The implementation class of ComponentRef
+ */
 class ComponentRef_ extends ComponentRef<any> {
+  
+  /**
+   * hostView
+   */
   public readonly hostView: ViewRef;
+  
+  /**
+   * instance
+   */
   public readonly instance: any;
+
+  /**
+   * changeDetectorRef
+   */
   public readonly changeDetectorRef: ChangeDetectorRef;
+  
+  /**
+   * _elDef
+   */
   private _elDef: NodeDef;
+  
+  /**
+   * 构造函数
+   * @param _view 
+   * @param _viewRef 
+   * @param _component 
+   */
   constructor(private _view: ViewData, private _viewRef: ViewRef, private _component: any) {
     super();
     this._elDef = this._view.def.nodes[0];
@@ -112,32 +180,81 @@ class ComponentRef_ extends ComponentRef<any> {
     this.changeDetectorRef = _viewRef;
     this.instance = _component;
   }
+  
+  /**
+   * location
+   */
   get location(): ElementRef {
     return new ElementRef(asElementData(this._view, this._elDef.nodeIndex).renderElement);
   }
+  
+  /**
+   * injector
+   */
   get injector(): Injector { return new Injector_(this._view, this._elDef); }
+  
+  /**
+   * componentType
+   */
   get componentType(): Type<any> { return <any>this._component.constructor; }
 
-  destroy(): void { this._viewRef.destroy(); }
-  onDestroy(callback: Function): void { this._viewRef.onDestroy(callback); }
+  /**
+   * destroy
+   */
+  destroy(): void {
+    this._viewRef.destroy();
+  }
+  
+  /**
+   * onDestroy
+   * @param callback 
+   */
+  onDestroy(callback: Function): void {
+    this._viewRef.onDestroy(callback);
+  }
 }
+
+
+
+
 
 export function createViewContainerData(
     view: ViewData, elDef: NodeDef, elData: ElementData): ViewContainerData {
   return new ViewContainerRef_(view, elDef, elData);
 }
 
+
+
+/**
+ * ViewContainerRef_
+ */
 class ViewContainerRef_ implements ViewContainerData {
   /**
    * @internal
    */
   _embeddedViews: ViewData[] = [];
+
+  /**
+   * 
+   * @param _view 
+   * @param _elDef 
+   * @param _data 
+   */
   constructor(private _view: ViewData, private _elDef: NodeDef, private _data: ElementData) {}
 
+  /**
+   * ElementRef
+   */
   get element(): ElementRef { return new ElementRef(this._data.renderElement); }
 
+  /**
+   * injector
+   */
   get injector(): Injector { return new Injector_(this._view, this._elDef); }
 
+  /**
+   * parentInjector
+   */
   get parentInjector(): Injector {
     let view = this._view;
     let elDef = this._elDef.parent;
@@ -149,6 +266,9 @@ class ViewContainerRef_ implements ViewContainerData {
     return view ? new Injector_(view, elDef) : new Injector_(this._view, null);
   }
 
+  /**
+   * clear
+   */
   clear(): void {
     const len = this._embeddedViews.length;
     for (let i = len - 1; i >= 0; i--) {
@@ -157,6 +277,10 @@ class ViewContainerRef_ implements ViewContainerData {
     }
   }
 
+  /**
+   * get
+   * @param index 
+   */
   get(index: number): ViewRef|null {
     const view = this._embeddedViews[index];
     if (view) {
@@ -167,8 +291,19 @@ class ViewContainerRef_ implements ViewContainerData {
     return null;
   }
 
-  get length(): number { return this._embeddedViews.length; }
+  /**
+   * length
+   */
+  get length(): number {
+    return this._embeddedViews.length;
+  }
 
+  /**
+   * createEmbededView
+   * @param templateRef 
+   * @param context 
+   * @param index 
+   */
   createEmbeddedView<C>(templateRef: TemplateRef<C>, context?: C, index?: number):
       EmbeddedViewRef<C> {
     const viewRef = templateRef.createEmbeddedView(context || <any>{});
@@ -176,6 +311,14 @@ class ViewContainerRef_ implements ViewContainerData {
     return viewRef;
   }
 
+  /**
+   * createComponent
+   * @param componentFactory 
+   * @param index 
+   * @param injector 
+   * @param projectableNodes 
+   * @param ngModuleRef 
+   */
   createComponent<C>(
       componentFactory: ComponentFactory<C>, index?: number, injector?: Injector,
       projectableNodes?: any[][], ngModuleRef?: NgModuleRef<any>): ComponentRef<C> {
@@ -189,6 +332,11 @@ class ViewContainerRef_ implements ViewContainerData {
     return componentRef;
   }
 
+  /**
+   * insert
+   * @param viewRef 
+   * @param index 
+   */
   insert(viewRef: ViewRef, index?: number): ViewRef {
     if (viewRef.destroyed) {
       throw new Error('Cannot insert a destroyed View in a ViewContainer!');
@@ -200,6 +348,11 @@ class ViewContainerRef_ implements ViewContainerData {
     return viewRef;
   }
 
+  /**
+   * move
+   * @param viewRef 
+   * @param currentIndex 
+   */
   move(viewRef: ViewRef_, currentIndex: number): ViewRef {
     if (viewRef.destroyed) {
       throw new Error('Cannot move a destroyed View in a ViewContainer!');
@@ -209,10 +362,18 @@ class ViewContainerRef_ implements ViewContainerData {
     return viewRef;
   }
 
+  /**
+   * indexOf
+   * @param viewRef 
+   */
   indexOf(viewRef: ViewRef): number {
     return this._embeddedViews.indexOf((<ViewRef_>viewRef)._view);
   }
 
+  /**
+   * remove
+   * @param index 
+   */
   remove(index?: number): void {
     const viewData = detachEmbeddedView(this._data, index);
     if (viewData) {
@@ -220,49 +381,128 @@ class ViewContainerRef_ implements ViewContainerData {
     }
   }
 
+  /**
+   * detach
+   * @param index 
+   */
   detach(index?: number): ViewRef|null {
     const view = detachEmbeddedView(this._data, index);
     return view ? new ViewRef_(view) : null;
   }
 }
 
+
+
 export function createChangeDetectorRef(view: ViewData): ChangeDetectorRef {
   return new ViewRef_(view);
 }
 
+
+
+/**
+ * The implementation class of ViewRef
+ */
 export class ViewRef_ implements EmbeddedViewRef<any>, InternalViewRef {
-  /** @internal */
+
+
+  /**
+   * @internal
+   * ViewData
+   *
+   */
   _view: ViewData;
+
+  /**
+   * _viewContainerRef
+   */
   private _viewContainerRef: ViewContainerRef|null;
+
+  /**
+   * _appRef
+   */
   private _appRef: ApplicationRef|null;
 
+  /**
+   * 构造函数
+   * @param _view 
+   */
   constructor(_view: ViewData) {
     this._view = _view;
     this._viewContainerRef = null;
     this._appRef = null;
   }
 
-  get rootNodes(): any[] { return rootRenderNodes(this._view); }
+  /**
+   * rootNodes
+   * rootNodes是个啥？？？
+   */
+  get rootNodes(): any[] {
+    return rootRenderNodes(this._view);
+  }
 
-  get context() { return this._view.context; }
+  /**
+   * context
+   */
+  get context() {
+    return this._view.context;
+  }
 
-  get destroyed(): boolean { return (this._view.state & ViewState.Destroyed) !== 0; }
+  /**
+   * destroyed
+   */
+  get destroyed(): boolean {
+    return (this._view.state & ViewState.Destroyed) !== 0;
+  }
 
-  markForCheck(): void { markParentViewsForCheck(this._view); }
-  detach(): void { this._view.state &= ~ViewState.Attached; }
+  /**
+   * markForCheck
+   */
+  markForCheck(): void {
+    markParentViewsForCheck(this._view);
+  }
+  
+  /**
+   * detach
+   */
+  detach(): void {
+    this._view.state &= ~ViewState.Attached;
+  }
+
+  /**
+   * detectChanges
+   */
   detectChanges(): void {
     const fs = this._view.root.rendererFactory;
     if (fs.begin) {
       fs.begin();
     }
+    
+    //
     Services.checkAndUpdateView(this._view);
     if (fs.end) {
       fs.end();
     }
   }
-  checkNoChanges(): void { Services.checkNoChangesView(this._view); }
+  
+  /**
+   * checkNoChanges
+   */
+  checkNoChanges(): void {
+    Services.checkNoChangesView(this._view);
+  }
 
-  reattach(): void { this._view.state |= ViewState.Attached; }
+  /**
+   * reattach
+   */
+  reattach(): void {
+    this._view.state |= ViewState.Attached;
+  }
+
+
+  /**
+   * onDestroy
+   * @param callback 
+   */
   onDestroy(callback: Function) {
     if (!this._view.disposables) {
       this._view.disposables = [];
@@ -270,6 +510,10 @@ export class ViewRef_ implements EmbeddedViewRef<any>, InternalViewRef {
     this._view.disposables.push(<any>callback);
   }
 
+  /**
+   * destroy
+   * ViewRef被destroy时，要从所属的AppRef或ViewContainerRef中销毁视图
+   */
   destroy() {
     if (this._appRef) {
       this._appRef.detachView(this);
@@ -279,20 +523,36 @@ export class ViewRef_ implements EmbeddedViewRef<any>, InternalViewRef {
     Services.destroyView(this._view);
   }
 
+  /**
+   * detachFromAppRef
+   */
   detachFromAppRef() {
     this._appRef = null;
     renderDetachView(this._view);
     Services.dirtyParentQueries(this._view);
   }
 
+  /**
+   * attachToAppRef
+   * @param appRef 
+   */
   attachToAppRef(appRef: ApplicationRef) {
+    
+    // 如果已经和一个viewContainerRef关联，则不能直接和appRef关联
     if (this._viewContainerRef) {
       throw new Error('This view is already attached to a ViewContainer!');
     }
     this._appRef = appRef;
   }
 
+  /**
+   * attachToViewContainerRef
+   * @param vcRef 
+   */
   attachToViewContainerRef(vcRef: ViewContainerRef) {
+
+    // 如果已经和一个ApplicationRef关联，则不能再和ViewContainerRef关联
+    // The ViewRef can only be attached to either an ApplicationRef or an ViewContainerRef.
     if (this._appRef) {
       throw new Error('This view is already attached directly to the ApplicationRef!');
     }
@@ -300,9 +560,17 @@ export class ViewRef_ implements EmbeddedViewRef<any>, InternalViewRef {
   }
 }
 
+
+
+
+
+
 export function createTemplateData(view: ViewData, def: NodeDef): TemplateData {
   return new TemplateRef_(view, def);
 }
+
+
+
 
 class TemplateRef_ extends TemplateRef<any> implements TemplateData {
   /**
@@ -310,17 +578,36 @@ class TemplateRef_ extends TemplateRef<any> implements TemplateData {
    */
   _projectedViews: ViewData[];
 
+  /**
+   * 构造函数
+   * @param _parentView 
+   * @param _def 
+   */
   constructor(private _parentView: ViewData, private _def: NodeDef) { super(); }
 
+  /**
+   * 创建EmbededView
+   * @param context 
+   */
   createEmbeddedView(context: any): EmbeddedViewRef<any> {
     return new ViewRef_(Services.createEmbeddedView(
         this._parentView, this._def, this._def.element !.template !, context));
   }
 
+  /**
+   * 获取ElementRef
+   */
   get elementRef(): ElementRef {
+    
+    // 先从parentView上获取ElementData（ElementData是NodeData的实现类）
+    // 然后创建一个ElementRef
     return new ElementRef(asElementData(this._parentView, this._def.nodeIndex).renderElement);
   }
 }
+
+
+
+
 
 export function createInjector(view: ViewData, elDef: NodeDef): Injector {
   return new Injector_(view, elDef);
@@ -472,38 +759,93 @@ export function createNgModuleRef(
   return new NgModuleRef_(moduleType, parent, bootstrapComponents, def);
 }
 
+
+
+/**
+ * NgModuleRef
+ */
 class NgModuleRef_ implements NgModuleData, InternalNgModuleRef<any> {
+
+  /**
+   * _destroyListeners
+   */
   private _destroyListeners: (() => void)[] = [];
+  
+  /**
+   * destroyed
+   * 是否被注销
+   */
   private _destroyed: boolean = false;
-  /** @internal */
+
+
+  /**
+   * @internal
+   * _providers
+   */
   _providers: any[];
 
+  /**
+   * 构造函数
+   * @param _moduleType 
+   * @param _parent 
+   * @param _bootstrapComponents 
+   * @param _def 
+   */
   constructor(
       private _moduleType: Type<any>, public _parent: Injector,
       public _bootstrapComponents: Type<any>[], public _def: NgModuleDefinition) {
     initNgModule(this);
   }
 
+  /**
+   * 获取
+   * @param token 
+   * @param notFoundValue 
+   */
   get(token: any, notFoundValue: any = Injector.THROW_IF_NOT_FOUND): any {
     return resolveNgModuleDep(
         this, {token: token, tokenKey: tokenKey(token), flags: DepFlags.None}, notFoundValue);
   }
 
+  /**
+   * 获取Module实例
+   */
   get instance() { return this.get(this._moduleType); }
 
-  get componentFactoryResolver() { return this.get(ComponentFactoryResolver); }
+  /**
+   * 组件工厂处理器
+   */
+  get componentFactoryResolver() {
+    return this.get(ComponentFactoryResolver);
+  }
 
+  /**
+   * 注入器
+   */
   get injector(): Injector { return this; }
 
+  /**
+   * 执行模块销毁
+   */
   destroy(): void {
     if (this._destroyed) {
       throw new Error(
           `The ng module ${stringify(this.instance.constructor)} has already been destroyed.`);
     }
     this._destroyed = true;
+
+    //
     callNgModuleLifecycle(this, NodeFlags.OnDestroy);
+
+    // 遍历所有监听器，依次执行
     this._destroyListeners.forEach((listener) => listener());
   }
 
-  onDestroy(callback: () => void): void { this._destroyListeners.push(callback); }
+  /**
+   * 注册模块销毁监听函数
+   * @param callback 
+   */
+  onDestroy(callback: () => void): void {
+    this._destroyListeners.push(callback);
+  }
 }

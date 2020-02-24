@@ -12,6 +12,15 @@ import {SecurityContext} from '../security';
 import {BindingDef, BindingFlags, ElementData, ElementHandleEventFn, NodeDef, NodeFlags, OutputDef, OutputType, QueryValueType, ViewData, ViewDefinitionFactory, asElementData} from './types';
 import {NOOP, calcBindingFlags, checkAndUpdateBinding, dispatchEvent, elementEventFullName, getParentRenderElement, resolveDefinition, resolveRendererType2, splitMatchedQueriesDsl, splitNamespace} from './util';
 
+/**
+ * anchorDef
+ * @param flags 
+ * @param matchedQueriesDsl 
+ * @param ngContentIndex 
+ * @param childCount 
+ * @param handleEvent 
+ * @param templateFactory 
+ */
 export function anchorDef(
     flags: NodeFlags, matchedQueriesDsl: null | [string | number, QueryValueType][],
     ngContentIndex: null | number, childCount: number, handleEvent?: null | ElementHandleEventFn,
@@ -81,16 +90,27 @@ export function elementDef(
     outputs?: null | ([string, string])[],
     handleEvent?: null | ElementHandleEventFn,
     componentView?: null | ViewDefinitionFactory,
-    componentRendererType?: RendererType2 | null): NodeDef {
+    componentRendererType?: RendererType2 | null
+): NodeDef {
+  
+  // handleEvent
   if (!handleEvent) {
     handleEvent = NOOP;
   }
-  const {matchedQueries, references, matchedQueryIds} = splitMatchedQueriesDsl(matchedQueriesDsl);
+  
+  // matchedQueriesDsl
+  const {
+    matchedQueries, references, matchedQueryIds
+  } = splitMatchedQueriesDsl(matchedQueriesDsl);
+  
+  // namespaceAndName
   let ns: string = null !;
   let name: string = null !;
   if (namespaceAndName) {
     [ns, name] = splitNamespace(namespaceAndName);
   }
+  
+  // bindings
   bindings = bindings || [];
   const bindingDefs: BindingDef[] = new Array(bindings.length);
   for (let i = 0; i < bindings.length; i++) {
@@ -111,6 +131,8 @@ export function elementDef(
     bindingDefs[i] =
         {flags: bindingFlags, ns, name, nonMinifiedName: name, securityContext, suffix};
   }
+
+  // outputs
   outputs = outputs || [];
   const outputDefs: OutputDef[] = new Array(outputs.length);
   for (let i = 0; i < outputs.length; i++) {
@@ -121,16 +143,24 @@ export function elementDef(
       propName: null
     };
   }
+
+  // fixedAttrs
   fixedAttrs = fixedAttrs || [];
   const attrs = <[string, string, string][]>fixedAttrs.map(([namespaceAndName, value]) => {
     const [ns, name] = splitNamespace(namespaceAndName);
     return [ns, name, value];
   });
+
+  // componentRendererType
   componentRendererType = resolveRendererType2(componentRendererType);
   if (componentView) {
     flags |= NodeFlags.ComponentView;
   }
+
+  // flags
   flags |= NodeFlags.TypeElement;
+ 
+ 
   return {
     // will bet set by the view definition
     nodeIndex: -1,
@@ -167,17 +197,29 @@ export function elementDef(
   };
 }
 
+/**
+ * createElement
+ * @param view 
+ * @param renderHost 
+ * @param def 
+ */
 export function createElement(view: ViewData, renderHost: any, def: NodeDef): ElementData {
   const elDef = def.element !;
   const rootSelectorOrNode = view.root.selectorOrNode;
   const renderer = view.renderer;
   let el: any;
+
+  // 创建元素
   if (view.parent || !rootSelectorOrNode) {
+
+    // 创建DOM元素
     if (elDef.name) {
       el = renderer.createElement(elDef.name, elDef.ns);
     } else {
       el = renderer.createComment('');
     }
+
+    // 追加到父元素中
     const parentEl = getParentRenderElement(view, renderHost, def);
     if (parentEl) {
       renderer.appendChild(parentEl, el);
@@ -185,6 +227,8 @@ export function createElement(view: ViewData, renderHost: any, def: NodeDef): El
   } else {
     el = renderer.selectRootElement(rootSelectorOrNode);
   }
+
+  // 设置属性
   if (elDef.attrs) {
     for (let i = 0; i < elDef.attrs.length; i++) {
       const [ns, name, value] = elDef.attrs[i];
@@ -193,6 +237,9 @@ export function createElement(view: ViewData, renderHost: any, def: NodeDef): El
   }
   return el;
 }
+
+
+
 
 export function listenToElementOutputs(view: ViewData, compView: ViewData, def: NodeDef, el: any) {
   for (let i = 0; i < def.outputs.length; i++) {
@@ -271,9 +318,19 @@ function checkAndUpdateElementValue(view: ViewData, def: NodeDef, bindingIdx: nu
   return true;
 }
 
+/**
+ * 设置元素属性
+ * @param view 
+ * @param binding 
+ * @param renderNode 
+ * @param ns 
+ * @param name 
+ * @param value 
+ */
 function setElementAttribute(
     view: ViewData, binding: BindingDef, renderNode: any, ns: string | null, name: string,
-    value: any) {
+    value: any
+) {
   const securityContext = binding.securityContext;
   let renderValue = securityContext ? view.root.sanitizer.sanitize(securityContext, value) : value;
   renderValue = renderValue != null ? renderValue.toString() : null;
@@ -315,9 +372,21 @@ function setElementStyle(
   }
 }
 
+/**
+ * 设置元素的属性值
+ * @param view 
+ * @param binding 
+ * @param renderNode 
+ * @param name 
+ * @param value 
+ */
 function setElementProperty(
-    view: ViewData, binding: BindingDef, renderNode: any, name: string, value: any) {
+    view: ViewData, binding: BindingDef, renderNode: any, name: string, value: any
+) {
   const securityContext = binding.securityContext;
-  let renderValue = securityContext ? view.root.sanitizer.sanitize(securityContext, value) : value;
+  let renderValue = securityContext ?
+    view.root.sanitizer.sanitize(securityContext, value) : value;
+
+  // setProperty
   view.renderer.setProperty(renderNode, name, renderValue);
 }

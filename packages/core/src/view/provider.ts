@@ -25,6 +25,8 @@ const TemplateRefTokenKey = tokenKey(TemplateRef);
 const ChangeDetectorRefTokenKey = tokenKey(ChangeDetectorRef);
 const InjectorRefTokenKey = tokenKey(Injector);
 
+
+
 export function directiveDef(
     checkIndex: number, flags: NodeFlags,
     matchedQueries: null | [string | number, QueryValueType][], childCount: number, ctor: any,
@@ -54,6 +56,8 @@ export function directiveDef(
   return _def(
       checkIndex, flags, matchedQueries, childCount, ctor, ctor, deps, bindings, outputDefs);
 }
+
+
 
 export function pipeDef(flags: NodeFlags, ctor: any, deps: ([DepFlags, any] | any)[]): NodeDef {
   flags |= NodeFlags.TypePipe;

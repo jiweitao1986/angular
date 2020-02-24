@@ -18,9 +18,18 @@ import {Sanitizer, SecurityContext} from '../security';
 import {Type} from '../type';
 
 
-// -------------------------------------
+
+
+
+
+
+
+
+
+
+// --------------------------------------------------------------------------
 // Defs
-// -------------------------------------
+// --------------------------------------------------------------------------
 
 /**
  * Factory for ViewDefinitions/NgModuleDefinitions.
@@ -46,22 +55,65 @@ export interface NgModuleDefinition extends Definition<NgModuleDefinitionFactory
 
 export interface NgModuleDefinitionFactory extends DefinitionFactory<NgModuleDefinition> {}
 
+
+
+
+
+
+
 export interface ViewDefinition extends Definition<ViewDefinitionFactory> {
+  
+  /**
+   * flags
+   */
   flags: ViewFlags;
+
+  /**
+   * updateDirectives
+   */
   updateDirectives: ViewUpdateFn;
+
+  /**
+   * updateRenderer
+   */
   updateRenderer: ViewUpdateFn;
+
+  /**
+   * handleEvent
+   */
   handleEvent: ViewHandleEventFn;
+
   /**
    * Order: Depth first.
    * Especially providers are before elements / anchors.
    */
   nodes: NodeDef[];
+
+
   /** aggregated NodeFlags for all nodes **/
   nodeFlags: NodeFlags;
+
+  /**
+   * rootNodeFlags
+   */
   rootNodeFlags: NodeFlags;
+
+  /**
+   * lastRenderRootNode
+   */
   lastRenderRootNode: NodeDef|null;
+
+  /**
+   * bindingCount
+   */
   bindingCount: number;
+
+  /**
+   * outputCount
+   */
   outputCount: number;
+
+
   /**
    * Binary or of all query ids that are matched by one of the nodes.
    * This includes query ids from templates as well.
@@ -69,6 +121,12 @@ export interface ViewDefinition extends Definition<ViewDefinitionFactory> {
    */
   nodeMatchedQueries: number;
 }
+
+
+
+
+
+
 
 export interface ViewDefinitionFactory extends DefinitionFactory<ViewDefinition> {}
 
@@ -97,6 +155,15 @@ export const enum ViewFlags {
   OnPush = 1 << 1,
 }
 
+
+
+
+
+
+
+
+
+
 /**
  * A node definition in the view.
  *
@@ -104,50 +171,142 @@ export const enum ViewFlags {
  * of a ViewDefinition stay monomorphic!
  */
 export interface NodeDef {
+
+  /**
+   * 
+   */
   flags: NodeFlags;
+
+
+  /**
+   * node在viewData和viewDefinition内的索引
+   */
   // Index of the node in view data and view definition (those are the same)
   nodeIndex: number;
+  
+  /**
+   * 
+   */
   // Index of the node in the check functions
   // Differ from nodeIndex when nodes are added or removed at runtime (ie after compilation)
   checkIndex: number;
+  
+  /**
+   * parent
+   */
   parent: NodeDef|null;
+  
+  /**
+   * renderParent
+   */
   renderParent: NodeDef|null;
+  
+  /**
+   * ngContentIndex
+   */
   /** this is checked against NgContentDef.index to find matched nodes */
   ngContentIndex: number|null;
-  /** number of transitive children */
+
+
+  /**
+   * number of transitive children
+   */
   childCount: number;
-  /** aggregated NodeFlags for all transitive children (does not include self) **/
+
+
+  /**
+   * aggregated NodeFlags for all transitive children (does not include self)
+   **/
   childFlags: NodeFlags;
-  /** aggregated NodeFlags for all direct children (does not include self) **/
+
+
+  /**
+   * aggregated NodeFlags for all direct children (does not include self)
+   **/
   directChildFlags: NodeFlags;
 
+  /**
+   * bindingIndex
+   */
   bindingIndex: number;
+
+  /**
+   * bindings
+   */
   bindings: BindingDef[];
+
+  /**
+   * bindingFlags
+   */
   bindingFlags: BindingFlags;
+  
+  /**
+   * outputIndex
+   */
   outputIndex: number;
+  
+  /**
+   * outputs
+   */
   outputs: OutputDef[];
+
   /**
    * references that the user placed on the element
    */
   references: {[refId: string]: QueryValueType};
+
   /**
    * ids and value types of all queries that are matched by this node.
    */
   matchedQueries: {[queryId: number]: QueryValueType};
-  /** Binary or of all matched query ids of this node. */
+
+  /**
+   * Binary or of all matched query ids of this node.
+   */
   matchedQueryIds: number;
+
   /**
    * Binary or of all query ids that are matched by one of the children.
    * This includes query ids from templates as well.
    * Used as a bloom filter.
    */
   childMatchedQueries: number;
+
+  /**
+   * element
+   */
   element: ElementDef|null;
+
+  /**
+   * provider
+   */
   provider: ProviderDef|null;
+  
+  /**
+   * text
+   */
   text: TextDef|null;
+  
+  /**
+   * query
+   */
   query: QueryDef|null;
+  
+  /**
+   * NgContentDef
+   */
   ngContent: NgContentDef|null;
+
 }
+
+
+
+
+
+
+
+
+
 
 /**
  * Bitmask for NodeDef.flags.
@@ -207,11 +366,32 @@ export interface BindingDef {
   suffix: string|null;
 }
 
+/**
+ * 绑定标志
+ */
 export const enum BindingFlags {
+  
+  /**
+   * 属性
+   */
   TypeElementAttribute = 1 << 0,
+
+  /**
+   * class
+   */
   TypeElementClass = 1 << 1,
+
+  /**
+   * style
+   */
   TypeElementStyle = 1 << 2,
+
+  /**
+   * property
+   */
   TypeProperty = 1 << 3,
+
+
   SyntheticProperty = 1 << 4,
   SyntheticHostProperty = 1 << 5,
   CatSyntheticProperty = SyntheticProperty | SyntheticHostProperty,
@@ -237,29 +417,83 @@ export const enum QueryValueType {
   Provider = 4
 }
 
+
+
+
+
+
+
+
+
+
 export interface ElementDef {
+
+  /**
+   * ElementDef
+   */
   // set to null for `<ng-container>`
   name: string|null;
+
+  /**
+   * ns
+   */
   ns: string|null;
+
+  /**
+   * attrs
+   */
   /** ns, name, value */
   attrs: [string, string, string][]|null;
+
+  /**
+   * ViewDefinition
+   */
   template: ViewDefinition|null;
+
+  /**
+   * componentProvider
+   */
   componentProvider: NodeDef|null;
+
+  /**
+   * componentRendererType
+   */
   componentRendererType: RendererType2|null;
+
+  /**
+   * componentView
+   */
   // closure to allow recursive components
   componentView: ViewDefinitionFactory|null;
+
   /**
+   * publicProviders
    * visible public providers for DI in the view,
    * as see from this element. This does not include private providers.
    */
   publicProviders: {[tokenKey: string]: NodeDef}|null;
+
   /**
+   * allProviders
    * same as visiblePublicProviders, but also includes private providers
    * that are located on this element.
    */
   allProviders: {[tokenKey: string]: NodeDef}|null;
+  
+  /**
+   * handleEvent
+   */
   handleEvent: ElementHandleEventFn|null;
 }
+
+
+
+
+
+
+
+
+
 
 export interface ElementHandleEventFn { (view: ViewData, eventName: string, event: any): boolean; }
 
@@ -319,9 +553,46 @@ export interface NgContentDef {
   index: number;
 }
 
-// -------------------------------------
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// --------------------------------------------------------------------------
 // Data
-// -------------------------------------
+// --------------------------------------------------------------------------
+
 
 export interface NgModuleData extends Injector, NgModuleRef<any> {
   // Note: we are using the prefix _ as NgModuleData is an NgModuleRef and therefore directly
@@ -331,30 +602,87 @@ export interface NgModuleData extends Injector, NgModuleRef<any> {
   _providers: any[];
 }
 
+
+
+
+
+
+
+
 /**
  * View instance data.
  * Attention: Adding fields to this is performance sensitive!
  */
 export interface ViewData {
+
+  /**
+   * def
+   */
   def: ViewDefinition;
+
+  /**
+   * 
+   */
   root: RootData;
+  
+  /**
+   * 
+   */
   renderer: Renderer2;
+  
+  /**
+   * 
+   */
   // index of component provider / anchor.
   parentNodeDef: NodeDef|null;
+  
+  /**
+   * parent
+   */
   parent: ViewData|null;
+  
+  /**
+   * viewContainerParent
+   */
   viewContainerParent: ViewData|null;
+
+  /**
+   * component
+   */
   component: any;
+  
+  /**
+   * context
+   */
   context: any;
+
   // Attention: Never loop over this, as this will
   // create a polymorphic usage site.
   // Instead: Always loop over ViewDefinition.nodes,
   // and call the right accessor (e.g. `elementData`) based on
   // the NodeType.
   nodes: {[key: number]: NodeData};
+
+  /**
+   * state
+   */
   state: ViewState;
+
+  /**
+   * oldValues
+   */
   oldValues: any[];
+
+  /**
+   * disposables
+   */
   disposables: DisposableFn[]|null;
 }
+
+
+
+
+
 
 /**
  * Bitmask of states
@@ -393,7 +721,9 @@ export class NodeData { private __brand: any; }
  *
  * Attention: Adding fields to this is performance sensitive!
  */
-export interface TextData { renderText: any; }
+export interface TextData {
+  renderText: any;
+}
 
 /**
  * Accessor for view.nodes, enforcing that every usage site stays monomorphic.
@@ -408,18 +738,40 @@ export function asTextData(view: ViewData, index: number): TextData {
  * Attention: Adding fields to this is performance sensitive!
  */
 export interface ElementData {
+
+  /**
+   * renderElement
+   */
   renderElement: any;
+
+  /**
+   * componentView
+   */
   componentView: ViewData;
+
+  /**
+   * viewContainer
+   */
   viewContainer: ViewContainerData|null;
+
+  /**
+   * templateData
+   */
   template: TemplateData;
 }
 
+
+/**
+ * ViewContainerData
+ */
 export interface ViewContainerData extends ViewContainerRef {
   // Note: we are using the prefix _ as ViewContainerData is a ViewContainerRef and therefore
   // directly
   // exposed to the user.
   _embeddedViews: ViewData[];
 }
+
+
 
 export interface TemplateData extends TemplateRef<any> {
   // views that have been created from the template
@@ -430,6 +782,7 @@ export interface TemplateData extends TemplateRef<any> {
   // exposed to the user.
   _projectedViews: ViewData[];
 }
+
 
 /**
  * Accessor for view.nodes, enforcing that every usage site stays monomorphic.
@@ -443,7 +796,9 @@ export function asElementData(view: ViewData, index: number): ElementData {
  *
  * Attention: Adding fields to this is performance sensitive!
  */
-export interface ProviderData { instance: any; }
+export interface ProviderData {
+  instance: any;
+}
 
 /**
  * Accessor for view.nodes, enforcing that every usage site stays monomorphic.
@@ -473,16 +828,84 @@ export function asQueryList(view: ViewData, index: number): QueryList<any> {
   return <any>view.nodes[index];
 }
 
+
+
+
+
+
+/**
+ * RootData
+ */
 export interface RootData {
+
+  /**
+   * injector
+   */
   injector: Injector;
+  
+  /**
+   * ngModule
+   */
   ngModule: NgModuleRef<any>;
+
+  /**
+   * projectableNodes
+   */
   projectableNodes: any[][];
+
+  /**
+   * selectorOrNode
+   */
   selectorOrNode: any;
+
+  /**
+   * renderer
+   */
   renderer: Renderer2;
+
+  /**
+   * rendererFactory
+   */
   rendererFactory: RendererFactory2;
+
+  /**
+   * errorHandler
+   */
   errorHandler: ErrorHandler;
+
+  /**
+   * sanitizer
+   */
   sanitizer: Sanitizer;
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// --------------------------------------------------------------------------
+// Services
+// --------------------------------------------------------------------------
+
 
 export abstract class DebugContext {
   abstract get view(): ViewData;
@@ -510,6 +933,9 @@ export interface ProviderOverride {
   deps: ([DepFlags, any]|any)[];
   deprecatedBehavior: boolean;
 }
+
+
+
 
 export interface Services {
   setCurrentNode(view: ViewData, nodeIndex: number): void;
