@@ -164,6 +164,8 @@ export class StaticInjector implements Injector {
 ) {
     this.parent = parent;
     const records = this._records = new Map<any, Record>();
+    
+    // 将this加入到Injector中，方便其他地方注入Injector
     records.set(
         Injector,
         <Record>{
@@ -230,15 +232,40 @@ type SupportedProvider =
 
 /**
  * Record
- * fn
- * useNew
- * deps
- * value
+ * @summary
+ * Record和Provider的关系
+ * 1、Provider会转换为Record存储在Injector的_records属性里面；
+ * 2、_records是个Map，key是个token，这个token是Provider的provide指定的值（注意处理forward_ref）;
+ * 3、对于ValueAccessor，useValue的值=>Record.value
+ * 4、对于FactoryAccessor，factory=>fn;
+ * 5、对于StaticClassProvider， useClass=>fn
  */
 interface Record {
+  
+  /**
+   * 工厂方法
+   * @summary
+   */
   fn: Function;
+  
+  /**
+   * 是否使用new操作符来创建实例
+   * @summary
+   * 1、如果是FactoryProvider，直接调用即可；
+   * 2、如果是StaticClassProvider，则需要使用new操作符
+   */
   useNew: boolean;
+  
+  /**
+   * 所依赖的Record
+   */
   deps: DependencyRecord[];
+  
+  /**
+   * 值
+   * @summary
+   * 用于保存ValueProvider中的useValue指定的值。
+   */
   value: any;
 }
 
@@ -247,7 +274,15 @@ interface Record {
  * DependencyRecord
  */
 interface DependencyRecord {
+
+  /**
+   * 
+   */
   token: any;
+
+  /**
+   * 
+   */
   options: number;
 }
 
@@ -290,6 +325,11 @@ function resolveProvider(provider: SupportedProvider): Record {
         'StaticProvider does not have [useValue|useFactory|useExisting|useClass] or [provide] is not newable',
         provider);
   }
+  
+  // deps：当前这个provider对应的deps
+  // fn: 应该是工厂方法，StaticClassProvider会包装一个fn；
+  // useNew：是否创建新实例
+  // value：用于ValueProvider。
   return {deps, fn, useNew, value};
 }
 
@@ -304,6 +344,8 @@ function multiProviderMixError(token: any) {
  * 递归处理providers
  * @param records 
  * @param provider 
+ * @summary
+ * 将providers处理成records
  */
 function recursivelyProcessProviders(
   records: Map<any, Record>,
@@ -327,6 +369,8 @@ function recursivelyProcessProviders(
       // At this point we have what looks like a provider: {provide: ?, ....}
       let token = resolveForwardRef(provider.provide);
       const resolvedProvider = resolveProvider(provider);
+
+
       if (provider.multi === true) {
         // This is a multi provider.
         let multiProvider: Record|undefined = records.get(token);
@@ -348,6 +392,8 @@ function recursivelyProcessProviders(
         token = provider;
         multiProvider.deps.push({token, options: OptionFlags.Default});
       }
+
+
       const record = records.get(token);
       if (record && record.fn == MULTI_PROVIDER_FN) {
         throw multiProviderMixError(token);
@@ -398,12 +444,20 @@ function tryResolveToken(
  * @param records 
  * @param parent 
  * @param notFoundValue 
+ * @summary
+ * 1、token
  */
 function resolveToken(
-    token: any, record: Record | undefined, records: Map<any, Record>, parent: Injector,
-    notFoundValue: any): any {
+    token: any,
+    record: Record | undefined,
+    records: Map<any, Record>,
+    parent: Injector,
+    notFoundValue: any
+): any {
   let value;
   if (record) {
+    
+    // 如果在当前injector的records里
     // If we don't have a record, this implies that we don't own the provider hence don't know how
     // to resolve it.
     value = record.value;
@@ -437,6 +491,8 @@ function resolveToken(
               options & OptionFlags.Optional ? null : Injector.THROW_IF_NOT_FOUND));
         }
       }
+      
+      // 如果是Empty，则通过工厂函数创建
       record.value = value = useNew ? new (fn as any)(...deps) : fn.apply(obj, deps);
     }
   } else {

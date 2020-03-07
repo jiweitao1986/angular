@@ -105,9 +105,14 @@ export abstract class ReflectiveInjector implements Injector {
 
   /**
    * Resolves an array of providers and creates an injector from those providers.
-   *
+   * 处理Provider，并用这些provider创建一个ReflectiveInjector示例
+   * 1、先将Providers数组转换成ResolvedReflectiveProvider数组；
+   * 2、再使用这里处理好的ResolvedReflectiveProvider来构造Injector。
+   * 
    * The passed-in providers can be an array of `Type`, {@link Provider},
    * or a recursive array of more providers.
+   * 传入的providers参数可以是一个一维的Provider数组；
+   * 也可以嵌套Provider数组[ provider1, provierArray]
    *
    * ### Example ([live demo](http://plnkr.co/edit/ePOccA?p=preview))
    *
@@ -318,14 +323,21 @@ export class ReflectiveInjector_ implements ReflectiveInjector {
   /** @internal */
   public _providers: ResolvedReflectiveProvider[];
   
-  
+  /**
+   * 父Injector
+   */
   public readonly parent: Injector|null;
 
-
+  /**
+   * keyIds
+   */
   keyIds: number[];
 
-
+  /**
+   * objs
+   */
   objs: any[];
+
   /**
    * Private
    */

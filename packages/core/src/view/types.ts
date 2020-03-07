@@ -46,10 +46,24 @@ export interface DefinitionFactory<D extends Definition<any>> { (logger: NodeLog
  */
 export interface NodeLogger { (): () => void; }
 
-export interface Definition<DF extends DefinitionFactory<any>> { factory: DF|null; }
+export interface Definition<DF extends DefinitionFactory<any>> {
+  factory: DF|null;
+}
 
+
+/**
+ * NgModuleDefinition
+ */
 export interface NgModuleDefinition extends Definition<NgModuleDefinitionFactory> {
+
+  /**
+   * providers
+   */
   providers: NgModuleProviderDef[];
+  
+  /**
+   * providersByKey
+   */
   providersByKey: {[tokenKey: string]: NgModuleProviderDef};
 }
 

@@ -786,14 +786,17 @@ class NgModuleRef_ implements NgModuleData, InternalNgModuleRef<any> {
 
   /**
    * 构造函数
-   * @param _moduleType 
-   * @param _parent 
-   * @param _bootstrapComponents 
+   * @param _moduleType 模块实例类型
+   * @param _parent 父的Injector
+   * @param _bootstrapComponents 模块的启动组件（入口组件）
    * @param _def 
    */
   constructor(
-      private _moduleType: Type<any>, public _parent: Injector,
-      public _bootstrapComponents: Type<any>[], public _def: NgModuleDefinition) {
+      private _moduleType: Type<any>,
+      public _parent: Injector,
+      public _bootstrapComponents: Type<any>[],
+      public _def: NgModuleDefinition
+  ) {
     initNgModule(this);
   }
 
@@ -804,13 +807,22 @@ class NgModuleRef_ implements NgModuleData, InternalNgModuleRef<any> {
    */
   get(token: any, notFoundValue: any = Injector.THROW_IF_NOT_FOUND): any {
     return resolveNgModuleDep(
-        this, {token: token, tokenKey: tokenKey(token), flags: DepFlags.None}, notFoundValue);
+      this,
+      {
+        token: token,
+        tokenKey: tokenKey(token),
+        flags: DepFlags.None
+      },
+      notFoundValue
+    );
   }
 
   /**
    * 获取Module实例
    */
-  get instance() { return this.get(this._moduleType); }
+  get instance() {
+    return this.get(this._moduleType);
+  }
 
   /**
    * 组件工厂处理器
@@ -820,7 +832,7 @@ class NgModuleRef_ implements NgModuleData, InternalNgModuleRef<any> {
   }
 
   /**
-   * 注入器
+   * 模块注入器是它自己本身
    */
   get injector(): Injector { return this; }
 

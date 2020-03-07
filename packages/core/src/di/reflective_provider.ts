@@ -85,6 +85,7 @@ export interface ResolvedReflectiveProvider {
 
   /**
    * Indicates if the provider is a multi-provider or a regular provider.
+   * 指定这个provider是一个multi-provider还是一个普通的provider
    */
   multiProvider: boolean;
 }

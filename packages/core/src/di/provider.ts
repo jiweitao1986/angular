@@ -341,7 +341,8 @@ export type StaticProvider =
  *
  * @stable
  */
-export interface TypeProvider extends Type<any> {}
+export interface TypeProvider extends Type<any> {
+}
 
 
 
