@@ -240,8 +240,20 @@ export function getParentRenderElement(view: ViewData, renderHost: any, def: Nod
   }
 }
 
+
+
+
+/**
+ * Definition缓存
+ * key = DefinitionFactory（例如NgModuleDefinitionFactory）
+ * value = Definition（NgModuleDefinition）
+ */
 const DEFINITION_CACHE = new WeakMap<any, Definition<any>>();
 
+/**
+ * 调用DefinitionFactory（是个函数），创建Definition，并缓存到DEFINITION_CACHE中
+ * @param factory 
+ */
 export function resolveDefinition<D extends Definition<any>>(factory: DefinitionFactory<D>): D {
   let value = DEFINITION_CACHE.get(factory) !as D;
   if (!value) {
@@ -251,6 +263,11 @@ export function resolveDefinition<D extends Definition<any>>(factory: Definition
   }
   return value;
 }
+
+
+
+
+
 
 export function rootRenderNodes(view: ViewData): any[] {
   const renderNodes: any[] = [];

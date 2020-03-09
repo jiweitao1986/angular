@@ -37,7 +37,9 @@ import {Type} from '../type';
  * function to log the error from the definition of the node, which is shown in all browser
  * logs.
  */
-export interface DefinitionFactory<D extends Definition<any>> { (logger: NodeLogger): D; }
+export interface DefinitionFactory<D extends Definition<any>> {
+  (logger: NodeLogger): D;
+}
 
 /**
  * Function to call console.error at the right source location. This is an indirection
@@ -53,6 +55,7 @@ export interface Definition<DF extends DefinitionFactory<any>> {
 
 /**
  * NgModuleDefinition
+ * 啥都没有，就是一堆NgModuleProviderDef的存储
  */
 export interface NgModuleDefinition extends Definition<NgModuleDefinitionFactory> {
 

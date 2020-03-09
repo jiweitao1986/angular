@@ -752,10 +752,22 @@ class RendererAdapter implements RendererV1 {
   animate(): any { throw new Error('Renderer.animate is no longer supported!'); }
 }
 
-
+/**
+ * 创建NgModuleRef实例
+ * @param moduleType 模块类型，类似AppModule
+ * @param parent 父Injector，NgModuleRef也是一个Injector的实现类
+ * @param bootstrapComponents 启动模块；
+ * @param def NgModuleDefinition实例
+ * @summary
+ * 1、NgModuleFactory会调用该方法；
+ * 2、在service中还有一个debugCreateNgModuleRef也会转调该方法，并附加一些debug信息；
+ */
 export function createNgModuleRef(
-    moduleType: Type<any>, parent: Injector, bootstrapComponents: Type<any>[],
-    def: NgModuleDefinition): NgModuleRef<any> {
+    moduleType: Type<any>,
+    parent: Injector,
+    bootstrapComponents: Type<any>[],
+    def: NgModuleDefinition
+): NgModuleRef<any> {
   return new NgModuleRef_(moduleType, parent, bootstrapComponents, def);
 }
 

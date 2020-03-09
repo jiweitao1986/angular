@@ -18,9 +18,19 @@ const UNDEFINED_VALUE = new Object();
 const InjectorRefTokenKey = tokenKey(Injector);
 const NgModuleRefTokenKey = tokenKey(NgModuleRef);
 
+/**
+ * 定义模块Provider
+ * @param flags 
+ * @param token 
+ * @param value 
+ * @param deps 
+ */
 export function moduleProvideDef(
-    flags: NodeFlags, token: any, value: any,
-    deps: ([DepFlags, any] | any)[]): NgModuleProviderDef {
+    flags: NodeFlags,
+    token: any,
+    value: any,
+    deps: ([DepFlags, any] | any)[]
+): NgModuleProviderDef {
   // Need to resolve forwardRefs as e.g. for `useValue` we
   // lowered the expression and then stopped evaluating it,
   // i.e. also didn't unwrap it.
@@ -29,10 +39,18 @@ export function moduleProvideDef(
   return {
     // will bet set by the module definition
     index: -1,
-    deps: depDefs, flags, token, value
+    deps: depDefs,
+    flags,
+    token,
+    value
   };
 }
 
+
+/**
+ * 定义模块
+ * @param providers 
+ */
 export function moduleDef(providers: NgModuleProviderDef[]): NgModuleDefinition {
   const providersByKey: {[key: string]: NgModuleProviderDef} = {};
   for (let i = 0; i < providers.length; i++) {
@@ -48,9 +66,29 @@ export function moduleDef(providers: NgModuleProviderDef[]): NgModuleDefinition 
   };
 }
 
+
+/**
+ * 初始化
+ * @param data NgModuleData实例
+ * @summary
+ * 1、NgModuleRef_继承了NgModuleData，这里传递过来的是一个NgModuleRef_实例；
+ * 2、该方法遍历NgModuleRefDefinition中持有的providers（NgModuleProviderDef数组）；
+ * 3、为每个NgModuleProviderDef创建实例，然后塞到NgModuleData的_providers中
+ * TypeClassProvider
+ * new NgModuleProviderDef.value() = provider
+ * TypeFactoryProvider
+ * NgModuleProviderDef.value()  = provider
+ * TypeValueProvider:
+ * NgModuleProviderDef.value  = provider
+ * 
+ */
 export function initNgModule(data: NgModuleData) {
+  
+  // _def = NgModuleDefinition
   const def = data._def;
   const providers = data._providers = new Array(def.providers.length);
+  
+  // 遍历
   for (let i = 0; i < def.providers.length; i++) {
     const provDef = def.providers[i];
     if (!(provDef.flags & NodeFlags.LazyProvider)) {
@@ -60,7 +98,10 @@ export function initNgModule(data: NgModuleData) {
 }
 
 export function resolveNgModuleDep(
-    data: NgModuleData, depDef: DepDef, notFoundValue: any = Injector.THROW_IF_NOT_FOUND): any {
+    data: NgModuleData,
+    depDef: DepDef,
+    notFoundValue: any = Injector.THROW_IF_NOT_FOUND
+): any {
   if (depDef.flags & DepFlags.Value) {
     return depDef.token;
   }
@@ -92,22 +133,34 @@ export function resolveNgModuleDep(
 function _createProviderInstance(ngModule: NgModuleData, providerDef: NgModuleProviderDef): any {
   let injectable: any;
   switch (providerDef.flags & NodeFlags.Types) {
+    
+    // 
     case NodeFlags.TypeClassProvider:
       injectable = _createClass(ngModule, providerDef.value, providerDef.deps);
       break;
+      
+    
     case NodeFlags.TypeFactoryProvider:
       injectable = _callFactory(ngModule, providerDef.value, providerDef.deps);
       break;
+    
     case NodeFlags.TypeUseExistingProvider:
       injectable = resolveNgModuleDep(ngModule, providerDef.deps[0]);
       break;
-    case NodeFlags.TypeValueProvider:
+
+      case NodeFlags.TypeValueProvider:
       injectable = providerDef.value;
       break;
   }
   return injectable === undefined ? UNDEFINED_VALUE : injectable;
 }
 
+/**
+ * 为
+ * @param ngModule 
+ * @param ctor 
+ * @param deps 
+ */
 function _createClass(ngModule: NgModuleData, ctor: any, deps: DepDef[]): any {
   const len = deps.length;
   switch (len) {
