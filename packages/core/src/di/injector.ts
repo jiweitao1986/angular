@@ -17,7 +17,20 @@ import {ConstructorProvider, ExistingProvider, FactoryProvider, StaticClassProvi
 const _THROW_IF_NOT_FOUND = new Object();
 export const THROW_IF_NOT_FOUND = _THROW_IF_NOT_FOUND;
 
+/**
+ * _NullInjector
+ */
 class _NullInjector implements Injector {
+  
+  /**
+   * get
+   * @param token 
+   * @param notFoundValue
+   * @summary
+   * notFoundValue的默认值为_THROW_IF_NOT_FOUND
+   * 如果没有传递该参数，则会报错；
+   * 如果传递了，则返回对应的值
+   */
   get(token: any, notFoundValue: any = _THROW_IF_NOT_FOUND): any {
     if (notFoundValue === _THROW_IF_NOT_FOUND) {
       throw new Error(`NullInjectorError: No provider for ${stringify(token)}!`);
@@ -417,8 +430,12 @@ function recursivelyProcessProviders(
  * @param notFoundValue 
  */
 function tryResolveToken(
-    token: any, record: Record | undefined, records: Map<any, Record>, parent: Injector,
-    notFoundValue: any): any {
+    token: any,
+    record: Record | undefined,
+    records: Map<any, Record>,
+    parent: Injector,
+    notFoundValue: any
+): any {
   try {
     return resolveToken(token, record, records, parent, notFoundValue);
   } catch (e) {
@@ -439,11 +456,11 @@ function tryResolveToken(
 
 /**
  * 处理token
- * @param token
- * @param record 
- * @param records 
- * @param parent 
- * @param notFoundValue 
+ * @param token 注入的token
+ * @param record 已经存在的Record
+ * @param records 所有的Records
+ * @param parent 父Injector
+ * @param notFoundValue 找不到token对应的值的默认返回值
  * @summary
  * 1、token
  */
@@ -462,21 +479,26 @@ function resolveToken(
     // to resolve it.
     value = record.value;
     if (value == CIRCULAR) {
+      
+      // 循环依赖报错
       throw Error(NO_NEW_LINE + 'Circular dependency');
     } else if (value === EMPTY) {
       record.value = CIRCULAR;
+      
+      
       let obj = undefined;
       let useNew = record.useNew;
       let fn = record.fn;
       let depRecords = record.deps;
+      
+      // 递归Record的依赖，为这些依赖创建实例
       let deps = EMPTY;
       if (depRecords.length) {
         deps = [];
         for (let i = 0; i < depRecords.length; i++) {
           const depRecord: DependencyRecord = depRecords[i];
           const options = depRecord.options;
-          const childRecord =
-              options & OptionFlags.CheckSelf ? records.get(depRecord.token) : undefined;
+          const childRecord = options & OptionFlags.CheckSelf ? records.get(depRecord.token) : undefined;
           deps.push(tryResolveToken(
               // Current Token to resolve
               depRecord.token,
@@ -485,6 +507,7 @@ function resolveToken(
               childRecord,
               // Other records we know about.
               records,
+              
               // If we don't know how to resolve dependency and we should not check parent for it,
               // than pass in Null injector.
               !childRecord && !(options & OptionFlags.CheckParent) ? NULL_INJECTOR : parent,
@@ -492,10 +515,14 @@ function resolveToken(
         }
       }
       
-      // 如果是Empty，则通过工厂函数创建
+      // 如果解决了，则将创建的实例赋值给Record的value属性
       record.value = value = useNew ? new (fn as any)(...deps) : fn.apply(obj, deps);
     }
   } else {
+    
+    /**
+     * 如果record不存在，则到parent上获取
+     */
     value = parent.get(token, notFoundValue);
   }
   return value;
