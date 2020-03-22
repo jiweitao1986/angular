@@ -12,8 +12,18 @@ import {QueryList} from '../linker/query_list';
 import {NodeDef, NodeFlags, QueryBindingDef, QueryBindingType, QueryDef, QueryValueType, ViewData, asElementData, asProviderData, asQueryList} from './types';
 import {declaredViewContainer, filterQueryId, isEmbeddedView} from './util';
 
+/**
+ * 定义查询
+ * @param flags 要查询的节点类型 
+ * @param id id
+ * @param bindings 查询结果绑定的属性 
+ */
 export function queryDef(
-    flags: NodeFlags, id: number, bindings: {[propName: string]: QueryBindingType}): NodeDef {
+    flags: NodeFlags,
+    id: number,
+    bindings: {[propName: string]: QueryBindingType}
+): NodeDef {
+
   let bindingDefs: QueryBindingDef[] = [];
   for (let propName in bindings) {
     const bindingType = bindings[propName];

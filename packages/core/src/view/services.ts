@@ -20,13 +20,27 @@ import {isViewDebugError, viewDestroyedError, viewWrappedDebugError} from './err
 import {resolveDep} from './provider';
 import {dirtyParentQueries, getQueryValue} from './query';
 import {createInjector, createNgModuleRef, getComponentViewDefinitionFactory} from './refs';
-import {ArgumentType, BindingFlags, CheckType, DebugContext, DepDef, ElementData, NgModuleDefinition, NgModuleProviderDef, NodeDef, NodeFlags, NodeLogger, ProviderOverride, RootData, Services, ViewData, ViewDefinition, ViewState, asElementData, asPureExpressionData} from './types';
+import {
+  ArgumentType, BindingFlags, CheckType, DebugContext, DepDef, ElementData,
+  NgModuleDefinition, NgModuleProviderDef, NodeDef, NodeFlags, NodeLogger,
+  ProviderOverride, RootData, Services, ViewData, ViewDefinition, ViewState,
+  asElementData, asPureExpressionData
+} from './types';
 import {NOOP, isComponentView, renderNode, resolveDefinition, splitDepsDsl, viewParentEl} from './util';
-import {checkAndUpdateNode, checkAndUpdateView, checkNoChangesNode, checkNoChangesView, createComponentView, createEmbeddedView, createRootView, destroyView} from './view';
+import {
+  checkAndUpdateNode, checkAndUpdateView, checkNoChangesNode, checkNoChangesView, createComponentView,
+  createEmbeddedView, createRootView, destroyView
+} from './view';
 
 
 let initialized = false;
 
+
+/**
+ * 初始化Servcie
+ * @summary
+ * Services是个interface，给一个接口赋属性值，语法？？？
+ */
 export function initServicesIfNeeded() {
   if (initialized) {
     return;

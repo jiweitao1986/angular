@@ -9,6 +9,11 @@
 import {NodeDef, NodeFlags, ViewData} from './types';
 import {RenderNodeAction, getParentRenderElement, visitProjectedRenderNodes} from './util';
 
+/**
+ * 创建NgContentDef
+ * @param ngContentIndex 
+ * @param index 
+ */
 export function ngContentDef(ngContentIndex: null | number, index: number): NodeDef {
   return {
     // will bet set by the view definition

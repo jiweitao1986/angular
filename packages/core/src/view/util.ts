@@ -152,6 +152,8 @@ export function declaredViewContainer(view: ViewData): ElementData|null {
  * for component views, this is the host element.
  * for embedded views, this is the index of the parent node
  * that contains the view container.
+ * 1、对于组件ViewData：viewParentElem=HostElement；
+ * 2、对于embeded views： 是它父节点的索引，包含了ViewContainer
  */
 export function viewParentEl(view: ViewData): NodeDef|null {
   const parentView = view.parent;

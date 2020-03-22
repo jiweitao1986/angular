@@ -609,20 +609,76 @@ class TemplateRef_ extends TemplateRef<any> implements TemplateData {
 
 
 
+
+
+
+
+
+
+
 export function createInjector(view: ViewData, elDef: NodeDef): Injector {
   return new Injector_(view, elDef);
 }
 
+
+/**
+ * Injector_实现类
+ */
 class Injector_ implements Injector {
+  
+  /**
+   * 
+   * @param view ViewData，每个View对应一个ViewData
+   * @param elDef NodeDef
+   */
   constructor(private view: ViewData, private elDef: NodeDef|null) {}
+  
+  /**
+   * 
+   * @param token 
+   * @param notFoundValue 
+   */
   get(token: any, notFoundValue: any = Injector.THROW_IF_NOT_FOUND): any {
+    
+    // 是否允许允许私有服务
+    // 1、elDef存在，并且是NodeFlag是ComponentView的时候，true
+    // 其他情况为false
     const allowPrivateServices =
         this.elDef ? (this.elDef.flags & NodeFlags.ComponentView) !== 0 : false;
-    return Services.resolveDep(
-        this.view, this.elDef, allowPrivateServices,
-        {flags: DepFlags.None, token, tokenKey: tokenKey(token)}, notFoundValue);
+
+        return Services.resolveDep(
+          
+          // 当前ViewData
+          this.view,
+          
+          // 当前的NodeDef
+          this.elDef,
+          
+          // 是否允许PrivateServices
+          allowPrivateServices,
+          
+          // DepDef
+          {
+            flags: DepFlags.None,
+            token,
+            tokenKey: tokenKey(token)
+          },
+          
+          // 默认值
+          notFoundValue
+        );
   }
 }
+
+
+
+
+
+
+
+
+
+
 
 export function nodeValue(view: ViewData, index: number): any {
   const def = view.def.nodes[index];

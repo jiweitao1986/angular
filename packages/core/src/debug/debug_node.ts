@@ -17,11 +17,33 @@ export class EventListener {
  * @experimental All debugging apis are currently experimental.
  */
 export class DebugNode {
+  
+  /**
+   * nativeNode
+   */
   nativeNode: any;
+  
+  /**
+   * listeners
+   */
   listeners: EventListener[];
+  
+  /**
+   * 父元素
+   */
   parent: DebugElement|null;
 
-  constructor(nativeNode: any, parent: DebugNode|null, private _debugContext: DebugContext) {
+  /**
+   * 构造函数
+   * @param nativeNode 
+   * @param parent 
+   * @param _debugContext 
+   */
+  constructor(
+    nativeNode: any,
+    parent: DebugNode|null,
+    private _debugContext: DebugContext
+  ) {
     this.nativeNode = nativeNode;
     if (parent && parent instanceof DebugElement) {
       parent.addChild(this);
@@ -31,14 +53,30 @@ export class DebugNode {
     this.listeners = [];
   }
 
+  /**
+   * 注入器
+   */
   get injector(): Injector { return this._debugContext.injector; }
 
+  /**
+   * 组件实例
+   */
   get componentInstance(): any { return this._debugContext.component; }
 
+  /**
+   * 上下文
+   */
   get context(): any { return this._debugContext.context; }
 
+  
+  /**
+   * references
+   */
   get references(): {[key: string]: any} { return this._debugContext.references; }
 
+  /**
+   * providerTokends
+   */
   get providerTokens(): any[] { return this._debugContext.providerTokens; }
 }
 
@@ -46,15 +84,47 @@ export class DebugNode {
  * @experimental All debugging apis are currently experimental.
  */
 export class DebugElement extends DebugNode {
+
+  /**
+   * 元素名称
+   */
   name: string;
+  
+  /**
+   * properties集合
+   */
   properties: {[key: string]: any};
+  
+  /**
+   * attributes集合
+   */
   attributes: {[key: string]: string | null};
+  
+  /**
+   * classes集合
+   */
   classes: {[key: string]: boolean};
+  
+  /**
+   * styles集合
+   */
   styles: {[key: string]: string | null};
+  
+  /**
+   * 子的DebugNodes数组
+   */
   childNodes: DebugNode[];
+  
+  /**
+   * 原始的DOM元素
+   */
   nativeElement: any;
 
-  constructor(nativeNode: any, parent: any, _debugContext: DebugContext) {
+  constructor(
+    nativeNode: any, 
+    parent: any, 
+    _debugContext: DebugContext
+  ) {
     super(nativeNode, parent, _debugContext);
     this.properties = {};
     this.attributes = {};

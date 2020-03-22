@@ -17,6 +17,10 @@ import {createChangeDetectorRef, createInjector, createRendererV1} from './refs'
 import {BindingDef, BindingFlags, DepDef, DepFlags, NodeDef, NodeFlags, OutputDef, OutputType, ProviderData, QueryValueType, Services, ViewData, ViewFlags, ViewState, asElementData, asProviderData} from './types';
 import {calcBindingFlags, checkBinding, dispatchEvent, isComponentView, splitDepsDsl, splitMatchedQueriesDsl, tokenKey, viewParentEl} from './util';
 
+
+
+
+
 const RendererV1TokenKey = tokenKey(RendererV1);
 const Renderer2TokenKey = tokenKey(Renderer2);
 const ElementRefTokenKey = tokenKey(ElementRef);
@@ -24,6 +28,8 @@ const ViewContainerRefTokenKey = tokenKey(ViewContainerRef);
 const TemplateRefTokenKey = tokenKey(TemplateRef);
 const ChangeDetectorRefTokenKey = tokenKey(ChangeDetectorRef);
 const InjectorRefTokenKey = tokenKey(Injector);
+
+
 
 
 
@@ -235,6 +241,12 @@ export function checkAndUpdateDirectiveDynamic(
   return changed;
 }
 
+
+/**
+ * 创建Provider实例
+ * @param view 
+ * @param def 
+ */
 function _createProviderInstance(view: ViewData, def: NodeDef): any {
   // private services can see other private services
   const allowPrivateServices = (def.flags & NodeFlags.PrivateProvider) > 0;
@@ -253,8 +265,18 @@ function _createProviderInstance(view: ViewData, def: NodeDef): any {
   }
 }
 
+
+/**
+ * 根据Class创建实例
+ * @param view ViewData
+ * @param elDef NodeDef
+ * @param allowPrivateServices 是否允许PrivateServices
+ * @param ctor 构造函数
+ * @param deps 构造函数的依赖
+ */
 function createClass(
-    view: ViewData, elDef: NodeDef, allowPrivateServices: boolean, ctor: any, deps: DepDef[]): any {
+    view: ViewData, elDef: NodeDef, allowPrivateServices: boolean, ctor: any, deps: DepDef[]
+): any {
   const len = deps.length;
   switch (len) {
     case 0:
@@ -279,6 +301,15 @@ function createClass(
   }
 }
 
+
+/**
+ * 根据Factory创建实例
+ * @param view 
+ * @param elDef 
+ * @param allowPrivateServices 
+ * @param factory 
+ * @param deps 
+ */
 function callFactory(
     view: ViewData, elDef: NodeDef, allowPrivateServices: boolean, factory: any,
     deps: DepDef[]): any {
@@ -325,24 +356,47 @@ function callFactory(
 // - mod2.injector.get(token, default)
 export const NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR = {};
 
+
+
+/**
+ * 处理依赖
+ * @param view ViewData
+ * @param elDef 是一个NodeDef，具体包含哪些？
+ * @param allowPrivateServices 是否允许私有服务，只有NodeFlags.ComponentView的时候才有；
+ * @param depDef 依赖定义
+ * @param notFoundValue 默认空值
+ */
 export function resolveDep(
-    view: ViewData, elDef: NodeDef, allowPrivateServices: boolean, depDef: DepDef,
-    notFoundValue: any = Injector.THROW_IF_NOT_FOUND): any {
+    view: ViewData,
+    elDef: NodeDef,
+    allowPrivateServices: boolean,
+    depDef: DepDef,
+    notFoundValue: any = Injector.THROW_IF_NOT_FOUND
+): any {
+  
+  // DepFlags：Node、SkipSelf、Optional、Value
   if (depDef.flags & DepFlags.Value) {
     return depDef.token;
   }
+  
+  // 用初始的ViewData作为startView
   const startView = view;
+
+  // 如果允许Optional，则找不到时默认返回null
   if (depDef.flags & DepFlags.Optional) {
     notFoundValue = null;
   }
-  const tokenKey = depDef.tokenKey;
 
+  
+  // 如果
+  const tokenKey = depDef.tokenKey;
   if (tokenKey === ChangeDetectorRefTokenKey) {
     // directives on the same element as a component should be able to control the change detector
     // of that component as well.
     allowPrivateServices = !!(elDef && elDef.element !.componentView);
   }
 
+  // 如果设置了SkipSelf，则使用父NodeDef
   if (elDef && (depDef.flags & DepFlags.SkipSelf)) {
     allowPrivateServices = false;
     elDef = elDef.parent !;
@@ -352,50 +406,74 @@ export function resolveDep(
     if (elDef) {
       switch (tokenKey) {
         case RendererV1TokenKey: {
+          
+          // 处理RendererV1
           const compView = findCompView(view, elDef, allowPrivateServices);
           return createRendererV1(compView);
         }
         case Renderer2TokenKey: {
+          
+          // 处理Renderer2
           const compView = findCompView(view, elDef, allowPrivateServices);
           return compView.renderer;
         }
         case ElementRefTokenKey:
+          
+          // 处理ElementRef
           return new ElementRef(asElementData(view, elDef.nodeIndex).renderElement);
         case ViewContainerRefTokenKey:
+          
+          // 处理ViewContainerRef
           return asElementData(view, elDef.nodeIndex).viewContainer;
         case TemplateRefTokenKey: {
+          
+          // 处理TemplateRef
           if (elDef.element !.template) {
             return asElementData(view, elDef.nodeIndex).template;
           }
           break;
         }
         case ChangeDetectorRefTokenKey: {
+          
+          // 处理ChangeDetectorRef
           let cdView = findCompView(view, elDef, allowPrivateServices);
           return createChangeDetectorRef(cdView);
         }
         case InjectorRefTokenKey:
+          
+          // 处理Injector
           return createInjector(view, elDef);
         default:
+          
+          // 其他场景
+          // 如果allowPrivateServcies=ture，使用allProviders;
+          // 如果allowPrivateServcies=false,使用publicProviders;
           const providerDef =
               (allowPrivateServices ? elDef.element !.allProviders :
                                       elDef.element !.publicProviders) ![tokenKey];
           if (providerDef) {
             let providerData = asProviderData(view, providerDef.nodeIndex);
             if (!providerData) {
-              providerData = {instance: _createProviderInstance(view, providerDef)};
+              providerData = {
+                instance: _createProviderInstance(view, providerDef)
+              };
               view.nodes[providerDef.nodeIndex] = providerData as any;
             }
             return providerData.instance;
           }
       }
     }
+    
+    // 如果elDef（NodeDef）不存在，则继续向上遍历
     allowPrivateServices = isComponentView(view);
     elDef = viewParentEl(view) !;
     view = view.parent !;
   }
 
+  // 如果上述过程找不到，则在RootData的injector上查找
   const value = startView.root.injector.get(depDef.token, NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR);
 
+  // 如果只允许在ElementInjector上查找，则返回了
   if (value !== NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR ||
       notFoundValue === NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR) {
     // Return the value from the root element injector when
@@ -406,14 +484,28 @@ export function resolveDep(
     return value;
   }
 
+  // 如果允许继续查找，转到模块的injector上查找
   return startView.root.ngModule.injector.get(depDef.token, notFoundValue);
 }
 
+
+
+/**
+ * 查找ComponentView
+ * @param view 
+ * @param elDef 
+ * @param allowPrivateServices 
+ */
 function findCompView(view: ViewData, elDef: NodeDef, allowPrivateServices: boolean) {
   let compView: ViewData;
   if (allowPrivateServices) {
+
+    // 根据elDef（NodeDef）的nodeIndex，在view(ViewData)的nodes（NodeData数组）里找到对应的NodeData；
+    // allowPrivateServices=true，  确定该NodeData，肯定是一个ElementData，上面有一个componentView属性（ViewData）
     compView = asElementData(view, elDef.nodeIndex).componentView;
   } else {
+    
+    // 如果不是ComponentView，则继续向上查找
     compView = view;
     while (compView.parent && !isComponentView(compView)) {
       compView = compView.parent;

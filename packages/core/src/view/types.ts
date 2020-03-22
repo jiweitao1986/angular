@@ -215,31 +215,38 @@ export interface NodeDef {
   
   /**
    * renderParent
+   * 这个是干嘛用的？
    */
   renderParent: NodeDef|null;
   
   /**
    * ngContentIndex
+   * this is checked against NgContentDef.index to find matched nodes
    */
-  /** this is checked against NgContentDef.index to find matched nodes */
   ngContentIndex: number|null;
 
 
   /**
    * number of transitive children
+   * 所有关联后代节点的数量
+   * 1、直接子元素；
+   * 2、间接后代。
    */
   childCount: number;
 
 
   /**
    * aggregated NodeFlags for all transitive children (does not include self)
+   * 聚合所有关联子节点的NodeFlags
+   * 
    **/
   childFlags: NodeFlags;
 
 
   /**
    * aggregated NodeFlags for all direct children (does not include self)
-   **/
+   * 聚合所有直接子子元素的NodeFlags
+   */
   directChildFlags: NodeFlags;
 
   /**
@@ -249,6 +256,7 @@ export interface NodeDef {
 
   /**
    * bindings
+   * 这个Node上绑定的变量
    */
   bindings: BindingDef[];
 
@@ -261,7 +269,10 @@ export interface NodeDef {
    * outputIndex
    */
   outputIndex: number;
-  
+
+
+
+
   /**
    * outputs
    */
@@ -442,7 +453,9 @@ export const enum QueryValueType {
 
 
 
-
+/**
+ * 元素定义
+ */
 export interface ElementDef {
 
   /**
@@ -487,6 +500,11 @@ export interface ElementDef {
    * publicProviders
    * visible public providers for DI in the view,
    * as see from this element. This does not include private providers.
+   * 公共的Providers
+   * {
+   *  key1: NodeDef1,
+   *  key2: NodeDef2
+   * }
    */
   publicProviders: {[tokenKey: string]: NodeDef}|null;
 
@@ -634,37 +652,38 @@ export interface ViewData {
 
   /**
    * def
+   * ViewDefinition的引用
    */
   def: ViewDefinition;
 
   /**
-   * 
+   * 根rootData
    */
   root: RootData;
   
   /**
-   * 
+   * DOM渲染器
    */
   renderer: Renderer2;
   
   /**
-   * 
+   * ???
+   * index of component provider / anchor.
    */
-  // index of component provider / anchor.
   parentNodeDef: NodeDef|null;
   
   /**
-   * parent
+   * 父ViewData
    */
   parent: ViewData|null;
   
   /**
-   * viewContainerParent
+   * 所在的ViewContainer的ViewData
    */
   viewContainerParent: ViewData|null;
 
   /**
-   * component
+   * 对应的组件实例
    */
   component: any;
   
@@ -673,15 +692,21 @@ export interface ViewData {
    */
   context: any;
 
-  // Attention: Never loop over this, as this will
-  // create a polymorphic usage site.
-  // Instead: Always loop over ViewDefinition.nodes,
-  // and call the right accessor (e.g. `elementData`) based on
-  // the NodeType.
+  /**
+   *  Attention: Never loop over this, as this will create a polymorphic usage site.
+   * Instead: Always loop over ViewDefinition.nodes,
+   * and call the right accessor (e.g. `elementData`) based on the NodeType.
+   * 注意：不要迭代这个属性，因为这样会产生一个 polymorphic usage site（咋翻译？多态的使用点？）
+   * 要用迭代ViewDefinition的nodes节点，并调用对应类型的的访问器
+   */
   nodes: {[key: number]: NodeData};
 
   /**
    * state
+   * 目前共8种状态
+   * BeforeFirstCheck、FirstCheck
+   * Attached、ChecksEnabled、Destroyed
+   * IsProjectedView、CheckProjectedView、CheckProjectedViews
    */
   state: ViewState;
 
@@ -722,16 +747,28 @@ export interface DisposableFn { (): void; }
 
 /**
  * Node instance data.
- *
+ * Node实例的Data
+ * 
  * We have a separate type per NodeType to save memory
  * (TextData | ElementData | ProviderData | PureExpressionData | QueryList<any>)
+ * 为了节省内存，我们为每个NodeType使用独立的type。
  *
  * To keep our code monomorphic,
  * we prohibit using `NodeData` directly but enforce the use of accessors (`asElementData`, ...).
  * This way, no usage site can get a `NodeData` from view.nodes and then use it for different
  * purposes.
+ * 为了保持代码一直，我们禁止直接使用NodeData，强制大家使用具体类型NodeData的访问器（例如：asElementData）
+ * 这样，就不会有地方通过view.nodes直接拿到一个NodeData，并用作其他用途。
+ * 
+ * 也就是说NodeData只是给angular内部完成特定功能而设计的，不能用作其他用途。
  */
-export class NodeData { private __brand: any; }
+export class NodeData {
+  
+  /**
+   * _bran
+   */
+  private __brand: any;
+}
 
 /**
  * Data for an instantiated NodeType.Text.
@@ -739,6 +776,10 @@ export class NodeData { private __brand: any; }
  * Attention: Adding fields to this is performance sensitive!
  */
 export interface TextData {
+  
+  /**
+   * 原生的DOM节点（Text）类型
+   */
   renderText: any;
 }
 
@@ -758,6 +799,7 @@ export interface ElementData {
 
   /**
    * renderElement
+   * 原生的DOM节点（元素类型）
    */
   renderElement: any;
 
@@ -950,6 +992,11 @@ export interface ProviderOverride {
   deps: ([DepFlags, any]|any)[];
   deprecatedBehavior: boolean;
 }
+
+
+
+
+
 
 
 
