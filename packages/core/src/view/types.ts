@@ -147,8 +147,12 @@ export interface ViewDefinition extends Definition<ViewDefinitionFactory> {
 
 export interface ViewDefinitionFactory extends DefinitionFactory<ViewDefinition> {}
 
-
-export interface ViewUpdateFn { (check: NodeCheckFn, view: ViewData): void; }
+/**
+ * View更新函数
+ */
+export interface ViewUpdateFn {
+  (check: NodeCheckFn, view: ViewData): void;
+}
 
 // helper functions to create an overloaded function type.
 export interface NodeCheckFn {
@@ -171,6 +175,16 @@ export const enum ViewFlags {
   None = 0,
   OnPush = 1 << 1,
 }
+
+
+
+
+
+
+
+
+
+
 
 
 

@@ -27,10 +27,10 @@ import {detachProjectedView} from './view_attach';
 
 /**
  * 创建
- * @param flags None、OnPush
- * @param nodes 
- * @param updateDirectives 
- * @param updateRenderer 
+ * @param flags 变更检测策略（ None、OnPush）
+ * @param nodes ViewDefinition中各个节点的NodeDef
+ * @param updateDirectives 指令更新函数，一般为null
+ * @param updateRenderer ？？？
  */
 export function viewDef(
     flags: ViewFlags,
