@@ -399,14 +399,49 @@ export const enum NodeFlags {
   Types = CatRenderNode | TypeNgContent | TypePipe | CatPureExpression | CatProvider | CatQuery
 }
 
+
+
+
+
+/**
+ * 变量绑定
+ */
 export interface BindingDef {
+  
+  /**
+   * 绑定类型（TypeElementAttribute、TypeElementClass、TypeElementStyle）
+   */
   flags: BindingFlags;
+
+  /**
+   * ？？？
+   */
   ns: string|null;
+
+  /**
+   * 变量类型
+   */
   name: string|null;
+
+  /**
+   * ？？？
+   */
   nonMinifiedName: string|null;
+
+  /**
+   * ？？？
+   */
   securityContext: SecurityContext|null;
+
+  /**
+   * 后缀，对于TextNode，是跟在变量后边的文字
+   */
   suffix: string|null;
 }
+
+
+
+
 
 /**
  * 绑定标志
@@ -433,14 +468,29 @@ export const enum BindingFlags {
    */
   TypeProperty = 1 << 3,
 
-
+  /**
+   * ？？？
+   */
   SyntheticProperty = 1 << 4,
+
+  /**
+   * ？？？
+   */
   SyntheticHostProperty = 1 << 5,
+
+  /**
+   * SyntheticProperty和SyntheticHostProperty的合并类型
+   */
   CatSyntheticProperty = SyntheticProperty | SyntheticHostProperty,
 
   // mutually exclusive values...
   Types = TypeElementAttribute | TypeElementClass | TypeElementStyle | TypeProperty
 }
+
+
+
+
+
 
 export interface OutputDef {
   type: OutputType;
