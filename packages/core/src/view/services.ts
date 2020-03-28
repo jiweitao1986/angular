@@ -342,6 +342,10 @@ enum DebugAction {
   handleEvent
 }
 
+
+
+
+
 let _currentAction: DebugAction;
 let _currentView: ViewData;
 let _currentNodeIndex: number|null;
@@ -351,21 +355,43 @@ function debugSetCurrentNode(view: ViewData, nodeIndex: number | null) {
   _currentNodeIndex = nodeIndex;
 }
 
+
+
+
+
 function debugHandleEvent(view: ViewData, nodeIndex: number, eventName: string, event: any) {
   debugSetCurrentNode(view, nodeIndex);
   return callWithDebugContext(
       DebugAction.handleEvent, view.def.handleEvent, null, [view, nodeIndex, eventName, event]);
 }
 
+
+
+
+
+
 function debugUpdateDirectives(view: ViewData, checkType: CheckType) {
+  
+  // 如果View处于Destroyed状态，则抛出异常
   if (view.state & ViewState.Destroyed) {
     throw viewDestroyedError(DebugAction[_currentAction]);
   }
   debugSetCurrentNode(view, nextDirectiveWithBinding(view, 0));
   return view.def.updateDirectives(debugCheckDirectivesFn, view);
 
+  /**
+   * 此函数即在component.ngFactory.js中的ck方法。
+   * @param view 
+   * @param nodeIndex 
+   * @param argStyle 
+   * @param values 
+   */
   function debugCheckDirectivesFn(
-      view: ViewData, nodeIndex: number, argStyle: ArgumentType, ...values: any[]) {
+      view: ViewData,
+      nodeIndex: number,
+      argStyle: ArgumentType,
+      ...values: any[]
+  ) {
     const nodeDef = view.def.nodes[nodeIndex];
     if (checkType === CheckType.CheckAndUpdate) {
       debugCheckAndUpdateNode(view, nodeDef, argStyle, values);
@@ -380,6 +406,12 @@ function debugUpdateDirectives(view: ViewData, checkType: CheckType) {
         undefined;
   }
 }
+
+
+
+
+
+
 
 function debugUpdateRenderer(view: ViewData, checkType: CheckType) {
   if (view.state & ViewState.Destroyed) {
@@ -405,8 +437,15 @@ function debugUpdateRenderer(view: ViewData, checkType: CheckType) {
   }
 }
 
+
+
+
 function debugCheckAndUpdateNode(
-    view: ViewData, nodeDef: NodeDef, argStyle: ArgumentType, givenValues: any[]): void {
+    view: ViewData,
+    nodeDef: NodeDef,
+    argStyle: ArgumentType,
+    givenValues: any[]
+): void {
   const changed = (<any>checkAndUpdateNode)(view, nodeDef, argStyle, ...givenValues);
   if (changed) {
     const values = argStyle === ArgumentType.Dynamic ? givenValues[0] : givenValues;
@@ -439,6 +478,11 @@ function debugCheckAndUpdateNode(
     }
   }
 }
+
+
+
+
+
 
 function debugCheckNoChangesNode(
     view: ViewData, nodeDef: NodeDef, argStyle: ArgumentType, values: any[]): void {

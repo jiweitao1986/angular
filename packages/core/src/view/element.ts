@@ -263,6 +263,21 @@ function renderEventHandlerClosure(view: ViewData, index: number, eventName: str
 }
 
 
+/**
+ * 
+ * @param view 
+ * @param def 
+ * @param v0 
+ * @param v1 
+ * @param v2 
+ * @param v3 
+ * @param v4 
+ * @param v5 
+ * @param v6 
+ * @param v7 
+ * @param v8 
+ * @param v9 
+ */
 export function checkAndUpdateElementInline(
     view: ViewData, def: NodeDef, v0: any, v1: any, v2: any, v3: any, v4: any, v5: any, v6: any,
     v7: any, v8: any, v9: any): boolean {
@@ -281,6 +296,12 @@ export function checkAndUpdateElementInline(
   return changed;
 }
 
+/**
+ * checkAndUpdateElementDynamic
+ * @param view 
+ * @param def 
+ * @param values 
+ */
 export function checkAndUpdateElementDynamic(view: ViewData, def: NodeDef, values: any[]): boolean {
   let changed = false;
   for (let i = 0; i < values.length; i++) {
@@ -289,6 +310,14 @@ export function checkAndUpdateElementDynamic(view: ViewData, def: NodeDef, value
   return changed;
 }
 
+
+/**
+ * 更新Element元素
+ * @param view 
+ * @param def 
+ * @param bindingIdx 
+ * @param value 
+ */
 function checkAndUpdateElementValue(view: ViewData, def: NodeDef, bindingIdx: number, value: any) {
   if (!checkAndUpdateBinding(view, def, bindingIdx, value)) {
     return false;
@@ -325,11 +354,16 @@ function checkAndUpdateElementValue(view: ViewData, def: NodeDef, bindingIdx: nu
  * @param renderNode 
  * @param ns 
  * @param name 
- * @param value 
+ * @param value
+ * @summary
+ *  针对这种绑定 [attr.some-attr]="attrValue"
+ * name=some-attr
+ * value=attrValue
+ * 
  */
 function setElementAttribute(
-    view: ViewData, binding: BindingDef, renderNode: any, ns: string | null, name: string,
-    value: any
+    view: ViewData, binding: BindingDef, renderNode: any,
+    ns: string | null, name: string, value: any
 ) {
   const securityContext = binding.securityContext;
   let renderValue = securityContext ? view.root.sanitizer.sanitize(securityContext, value) : value;
@@ -342,6 +376,17 @@ function setElementAttribute(
   }
 }
 
+/**
+ * 设置Class
+ * @param view 
+ * @param renderNode 
+ * @param name 
+ * @param value 
+ * @summary
+ * [class.some-class]="classValue"针对这种场景
+ * name=some-class
+ * value=classValue
+ */
 function setElementClass(view: ViewData, renderNode: any, name: string, value: boolean) {
   const renderer = view.renderer;
   if (value) {
@@ -351,8 +396,21 @@ function setElementClass(view: ViewData, renderNode: any, name: string, value: b
   }
 }
 
+/**
+ * 设置style
+ * @param view ViewData
+ * @param binding 
+ * @param renderNode 
+ * @param name 
+ * @param value 
+ * @summary
+ * [style.color]="styleValue"
+ * name=color
+ * value=styleValue
+ */
 function setElementStyle(
-    view: ViewData, binding: BindingDef, renderNode: any, name: string, value: any) {
+    view: ViewData, binding: BindingDef, renderNode: any, name: string, value: any
+) {
   let renderValue: string|null =
       view.root.sanitizer.sanitize(SecurityContext.STYLE, value as{} | string);
   if (renderValue != null) {

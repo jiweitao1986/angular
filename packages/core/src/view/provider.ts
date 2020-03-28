@@ -32,12 +32,21 @@ const InjectorRefTokenKey = tokenKey(Injector);
 
 
 
-
+/**
+ * DirectiveDef
+ */
 export function directiveDef(
-    checkIndex: number, flags: NodeFlags,
-    matchedQueries: null | [string | number, QueryValueType][], childCount: number, ctor: any,
-    deps: ([DepFlags, any] | any)[], props?: null | {[name: string]: [number, string]},
-    outputs?: null | {[name: string]: string}): NodeDef {
+    checkIndex: number,
+    flags: NodeFlags,
+    matchedQueries: null | [string | number, QueryValueType][],
+    childCount: number,
+    ctor: any,
+    deps: ([DepFlags, any] | any)[],
+    props?: null | {[name: string]: [number, string]},
+    outputs?: null | {[name: string]: string}
+): NodeDef {
+  
+  // 组织bindings
   const bindings: BindingDef[] = [];
   if (props) {
     for (let prop in props) {
@@ -51,40 +60,95 @@ export function directiveDef(
       };
     }
   }
+
+  // 组织outputDefs
   const outputDefs: OutputDef[] = [];
   if (outputs) {
     for (let propName in outputs) {
-      outputDefs.push(
-          {type: OutputType.DirectiveOutput, propName, target: null, eventName: outputs[propName]});
+      outputDefs.push({
+        type: OutputType.DirectiveOutput,
+        propName,
+        target: null,
+        eventName: outputs[propName]
+      });
     }
   }
+  
+  // 设置NodeFlags
   flags |= NodeFlags.TypeDirective;
+  
+  // 返回Node定义
   return _def(
-      checkIndex, flags, matchedQueries, childCount, ctor, ctor, deps, bindings, outputDefs);
+      checkIndex,
+      flags,
+      matchedQueries,
+      childCount,
+      ctor,
+      ctor,
+      deps,
+      bindings,
+      outputDefs
+  );
 }
 
 
 
-export function pipeDef(flags: NodeFlags, ctor: any, deps: ([DepFlags, any] | any)[]): NodeDef {
+/**
+ * Pipe定义
+ * @summary
+ * 1、只是定义了一下NodeFlags；
+ * 2、ctor = token = value
+ */
+export function pipeDef(
+  flags: NodeFlags,
+  ctor: any,
+  deps: ([DepFlags, any] | any)[]
+): NodeDef {
   flags |= NodeFlags.TypePipe;
   return _def(-1, flags, null, 0, ctor, ctor, deps);
 }
 
+
+/**
+ * providerDef
+ */
 export function providerDef(
-    flags: NodeFlags, matchedQueries: null | [string | number, QueryValueType][], token: any,
-    value: any, deps: ([DepFlags, any] | any)[]): NodeDef {
+    flags: NodeFlags,
+    matchedQueries: null | [string | number, QueryValueType][],
+    token: any,
+    value: any,
+    deps: ([DepFlags, any] | any)[]
+): NodeDef {
   return _def(-1, flags, matchedQueries, 0, token, value, deps);
 }
 
+
+
 export function _def(
-    checkIndex: number, flags: NodeFlags,
-    matchedQueriesDsl: [string | number, QueryValueType][] | null, childCount: number, token: any,
-    value: any, deps: ([DepFlags, any] | any)[], bindings?: BindingDef[],
-    outputs?: OutputDef[]): NodeDef {
-  const {matchedQueries, references, matchedQueryIds} = splitMatchedQueriesDsl(matchedQueriesDsl);
+    checkIndex: number,
+    flags: NodeFlags,
+    matchedQueriesDsl: [string | number, QueryValueType][] | null,
+    childCount: number,
+    token: any,
+    value: any,
+    deps: ([DepFlags, any] | any)[],
+    bindings?: BindingDef[],
+    outputs?: OutputDef[]
+): NodeDef {
+
+  // Query
+  const {
+    matchedQueries,
+    references,
+    matchedQueryIds
+  } = splitMatchedQueriesDsl(matchedQueriesDsl);
+
+  // Outputs
   if (!outputs) {
     outputs = [];
   }
+
+  // Bindings
   if (!bindings) {
     bindings = [];
   }
@@ -107,9 +171,15 @@ export function _def(
     flags,
     childFlags: 0,
     directChildFlags: 0,
-    childMatchedQueries: 0, matchedQueries, matchedQueryIds, references,
-    ngContentIndex: -1, childCount, bindings,
-    bindingFlags: calcBindingFlags(bindings), outputs,
+    childMatchedQueries: 0,
+    matchedQueries,
+    matchedQueryIds,
+    references,
+    ngContentIndex: -1,
+    childCount,
+    bindings,
+    bindingFlags: calcBindingFlags(bindings),
+    outputs,
     element: null,
     provider: {token, value, deps: depDefs},
     text: null,
@@ -117,6 +187,11 @@ export function _def(
     ngContent: null
   };
 }
+
+
+
+
+
 
 export function createProviderInstance(view: ViewData, def: NodeDef): any {
   return _createProviderInstance(view, def);
@@ -152,6 +227,9 @@ export function createDirectiveInstance(view: ViewData, def: NodeDef): any {
   }
   return instance;
 }
+
+
+
 
 function eventHandlerClosure(view: ViewData, index: number, eventName: string) {
   return (event: any) => dispatchEvent(view, index, eventName, event);

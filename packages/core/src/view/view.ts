@@ -378,40 +378,89 @@ export function checkNoChangesView(view: ViewData) {
 }
 
 export function checkAndUpdateView(view: ViewData) {
+
+
+  // 处理ViewState的FirstCheck标志
+  // 如果BeforeFirstCheck存在，则清空，同事设置FirstCheck标志位；
+  // 其他情况，清空FirstCheck标志位
   if (view.state & ViewState.BeforeFirstCheck) {
     view.state &= ~ViewState.BeforeFirstCheck;
     view.state |= ViewState.FirstCheck;
   } else {
     view.state &= ~ViewState.FirstCheck;
   }
+
+  //
   markProjectedViewsForCheck(view);
+
+  
+  // 更新Input
+  // 
   Services.updateDirectives(view, CheckType.CheckAndUpdate);
+
+  
+  // 调用扩展视图的变更检测
   execEmbeddedViewsAction(view, ViewAction.CheckAndUpdate);
+
+  
+  // 检查ContentQuery（更新ContentChild、ContentChildren等）
   execQueriesAction(
-      view, NodeFlags.TypeContentQuery, NodeFlags.DynamicQuery, CheckType.CheckAndUpdate);
+      view,
+      NodeFlags.TypeContentQuery,
+      NodeFlags.DynamicQuery,
+      CheckType.CheckAndUpdate
+  );
 
+  // view=ViewData
+  // lifecyles = AfterContentChecked | AfterContentInit(如果是FirstCheck的话)
   callLifecycleHooksChildrenFirst(
-      view, NodeFlags.AfterContentChecked |
-          (view.state & ViewState.FirstCheck ? NodeFlags.AfterContentInit : 0));
+      view,
+      NodeFlags.AfterContentChecked | (view.state & ViewState.FirstCheck ? NodeFlags.AfterContentInit : 0)
+  );
 
+  
+  // 更新DOM元素
   Services.updateRenderer(view, CheckType.CheckAndUpdate);
 
-  execComponentViewsAction(view, ViewAction.CheckAndUpdate);
-  execQueriesAction(
-      view, NodeFlags.TypeViewQuery, NodeFlags.DynamicQuery, CheckType.CheckAndUpdate);
-  callLifecycleHooksChildrenFirst(
-      view, NodeFlags.AfterViewChecked |
-          (view.state & ViewState.FirstCheck ? NodeFlags.AfterViewInit : 0));
 
+  // 遍历所有的Node节点
+  // 更新ComponentView
+  execComponentViewsAction(view, ViewAction.CheckAndUpdate);
+
+  // query??? ViewChild和ContentChild这样的查询吗？
+  execQueriesAction(
+    view,
+    NodeFlags.TypeViewQuery,
+    NodeFlags.DynamicQuery,
+    CheckType.CheckAndUpdate
+  );
+
+
+  // view = ViewData
+  // lifecyles = AfterViewChecked | AfterViewInit(如果是FirstCheck的话)
+  callLifecycleHooksChildrenFirst(
+    view,
+    NodeFlags.AfterViewChecked | (view.state & ViewState.FirstCheck ? NodeFlags.AfterViewInit : 0)
+  );
+
+          
+  // 处理OnPush，如果是OnPush，将ChecksEnabled标志为清空
   if (view.def.flags & ViewFlags.OnPush) {
     view.state &= ~ViewState.ChecksEnabled;
   }
+  
+  // ？？？
+  // 清空CheckProjectViews标志位和CheckProjectedView标志为
   view.state &= ~(ViewState.CheckProjectedViews | ViewState.CheckProjectedView);
 }
 
+
+
 export function checkAndUpdateNode(
-    view: ViewData, nodeDef: NodeDef, argStyle: ArgumentType, v0?: any, v1?: any, v2?: any,
-    v3?: any, v4?: any, v5?: any, v6?: any, v7?: any, v8?: any, v9?: any): boolean {
+    view: ViewData, nodeDef: NodeDef, argStyle: ArgumentType,
+    v0?: any, v1?: any, v2?: any, v3?: any, v4?: any, v5?: any,
+    v6?: any, v7?: any, v8?: any, v9?: any
+): boolean {
   if (argStyle === ArgumentType.Inline) {
     return checkAndUpdateNodeInline(view, nodeDef, v0, v1, v2, v3, v4, v5, v6, v7, v8, v9);
   } else {
@@ -419,13 +468,24 @@ export function checkAndUpdateNode(
   }
 }
 
+
+
+
 function markProjectedViewsForCheck(view: ViewData) {
   const def = view.def;
+  
+  // 判断当前的view是否有ProjectedTempalte，如果没有直接返回；
+  // 判断nodeFlags=是所有子节点的flags的汇总？
   if (!(def.nodeFlags & NodeFlags.ProjectedTemplate)) {
     return;
   }
+  
+  // 遍历所有的nodes；
+  // 判断所有
   for (let i = 0; i < def.nodes.length; i++) {
     const nodeDef = def.nodes[i];
+
+    // 如果当前nodeDef是ProjectedTemplate，则将内部所有，则将该节点
     if (nodeDef.flags & NodeFlags.ProjectedTemplate) {
       const projectedViews = asElementData(view, i).template._projectedViews;
       if (projectedViews) {
@@ -436,6 +496,7 @@ function markProjectedViewsForCheck(view: ViewData) {
         }
       }
     } else if ((nodeDef.childFlags & NodeFlags.ProjectedTemplate) === 0) {
+      // 如果不是，则跳过其下所有的节点
       // a parent with leafs
       // no child is a component,
       // then skip the children
@@ -445,8 +506,10 @@ function markProjectedViewsForCheck(view: ViewData) {
 }
 
 function checkAndUpdateNodeInline(
-    view: ViewData, nodeDef: NodeDef, v0?: any, v1?: any, v2?: any, v3?: any, v4?: any, v5?: any,
-    v6?: any, v7?: any, v8?: any, v9?: any): boolean {
+    view: ViewData, nodeDef: NodeDef,
+    v0?: any, v1?: any, v2?: any, v3?: any, v4?: any, v5?: any,
+    v6?: any, v7?: any, v8?: any, v9?: any
+): boolean {
   switch (nodeDef.flags & NodeFlags.Types) {
     case NodeFlags.TypeElement:
       return checkAndUpdateElementInline(view, nodeDef, v0, v1, v2, v3, v4, v5, v6, v7, v8, v9);
@@ -574,11 +637,20 @@ enum ViewAction {
   Destroy
 }
 
+
+
+
+
 function execComponentViewsAction(view: ViewData, action: ViewAction) {
   const def = view.def;
+  
+  // 如果子节点中没有ComponentView，则返回
   if (!(def.nodeFlags & NodeFlags.ComponentView)) {
     return;
   }
+  
+  // 遍历所有子节点，对NodeFlags=ComponentView节点进行处理；
+  // ComponentView是啥？app-root这种标签？？？
   for (let i = 0; i < def.nodes.length; i++) {
     const nodeDef = def.nodes[i];
     if (nodeDef.flags & NodeFlags.ComponentView) {
@@ -593,6 +665,13 @@ function execComponentViewsAction(view: ViewData, action: ViewAction) {
   }
 }
 
+
+
+/**
+ * 检查扩展视图
+ * @param view 
+ * @param action 
+ */
 function execEmbeddedViewsAction(view: ViewData, action: ViewAction) {
   const def = view.def;
   if (!(def.nodeFlags & NodeFlags.EmbeddedViews)) {
@@ -665,14 +744,20 @@ function callViewAction(view: ViewData, action: ViewAction) {
   }
 }
 
+
+
+
+
+
 function execProjectedViewsAction(view: ViewData, action: ViewAction) {
   execEmbeddedViewsAction(view, action);
   execComponentViewsAction(view, action);
 }
 
 function execQueriesAction(
-    view: ViewData, queryFlags: NodeFlags, staticDynamicQueryFlag: NodeFlags,
-    checkType: CheckType) {
+    view: ViewData, queryFlags: NodeFlags,
+    staticDynamicQueryFlag: NodeFlags, checkType: CheckType
+  ) {
   if (!(view.def.nodeFlags & queryFlags) || !(view.def.nodeFlags & staticDynamicQueryFlag)) {
     return;
   }

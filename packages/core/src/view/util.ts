@@ -79,7 +79,8 @@ export function resolveRendererType2(type?: RendererType2 | null): RendererType2
 }
 
 export function checkBinding(
-    view: ViewData, def: NodeDef, bindingIdx: number, value: any): boolean {
+    view: ViewData, def: NodeDef, bindingIdx: number, value: any
+): boolean {
   const oldValues = view.oldValues;
   if ((view.state & ViewState.FirstCheck) ||
       !looseIdentical(oldValues[def.bindingIndex + bindingIdx], value)) {
@@ -88,8 +89,17 @@ export function checkBinding(
   return false;
 }
 
+
+/**
+ * 检查并更新Binding
+ * @param view 
+ * @param def 
+ * @param bindingIdx 
+ * @param value 
+ */
 export function checkAndUpdateBinding(
-    view: ViewData, def: NodeDef, bindingIdx: number, value: any): boolean {
+    view: ViewData, def: NodeDef, bindingIdx: number, value: any
+): boolean {
   if (checkBinding(view, def, bindingIdx, value)) {
     view.oldValues[def.bindingIndex + bindingIdx] = value;
     return true;
@@ -117,6 +127,12 @@ export function markParentViewsForCheck(view: ViewData) {
   }
 }
 
+
+/**
+ * 
+ * @param view 
+ * @param endView 
+ */
 export function markParentViewsForCheckProjectedViews(view: ViewData, endView: ViewData) {
   let currView: ViewData|null = view;
   while (currView && currView !== endView) {
@@ -185,9 +201,15 @@ export function isEmbeddedView(view: ViewData): boolean {
   return !!view.parent && !(view.parentNodeDef !.flags & NodeFlags.Component);
 }
 
+/**
+ * 这是个啥操作，将0001左移（queryId除以32的余数）
+ * @param queryId 
+ */
 export function filterQueryId(queryId: number): number {
   return 1 << (queryId % 32);
 }
+
+
 
 export function splitMatchedQueriesDsl(
     matchedQueriesDsl: [string | number, QueryValueType][] | null): {

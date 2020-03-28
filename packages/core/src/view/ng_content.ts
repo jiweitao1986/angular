@@ -30,7 +30,11 @@ export function ngContentDef(ngContentIndex: null | number, index: number): Node
     childMatchedQueries: 0,
     matchedQueries: {},
     matchedQueryIds: 0,
-    references: {}, ngContentIndex,
+    references: {},
+    
+    // ngContentIndex = null
+    ngContentIndex,
+
     childCount: 0,
     bindings: [],
     bindingFlags: 0,
@@ -39,7 +43,11 @@ export function ngContentDef(ngContentIndex: null | number, index: number): Node
     provider: null,
     text: null,
     query: null,
-    ngContent: {index}
+    
+    // index = 0
+    ngContent: {
+      index
+    }
   };
 }
 

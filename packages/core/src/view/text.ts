@@ -57,7 +57,7 @@ export function textDef(
 }
 
 /**
- * 创建文本
+ * 创建Text节点
  * @param view 
  * @param renderHost 
  * @param def 
@@ -74,10 +74,16 @@ export function createText(view: ViewData, renderHost: any, def: NodeDef): TextD
 }
 
 
-
+/**
+ * 更新Text节点的值
+ * @param view 
+ * @param def 
+ */
 export function checkAndUpdateTextInline(
-    view: ViewData, def: NodeDef, v0: any, v1: any, v2: any, v3: any, v4: any, v5: any, v6: any,
-    v7: any, v8: any, v9: any): boolean {
+    view: ViewData, def: NodeDef,
+    v0: any, v1: any, v2: any, v3: any, v4: any, v5: any,
+    v6: any, v7: any, v8: any, v9: any
+): boolean {
   let changed = false;
   const bindings = def.bindings;
   const bindLen = bindings.length;
@@ -111,7 +117,17 @@ export function checkAndUpdateTextInline(
 }
 
 
-
+/**
+ * 动态更新文本的值
+ * @param view 
+ * @param def 
+ * @param values 
+ * @summary
+ * 1、和checkAndUpdateTextInline的逻辑基本一致
+ * 2、checkAndUpdateTextInline限制了values的数量为9个；
+ * 3、是不是超过9个的就走这个方法？
+ * 4、为了提高性能
+ */
 export function checkAndUpdateTextDynamic(view: ViewData, def: NodeDef, values: any[]): boolean {
   const bindings = def.bindings;
   let changed = false;

@@ -27,9 +27,9 @@ import {Type} from '../type';
 
 
 
-// --------------------------------------------------------------------------
+// ----------------------------------------------------------------------------------------------------------------------------------------------------
 // Defs
-// --------------------------------------------------------------------------
+// ----------------------------------------------------------------------------------------------------------------------------------------------------
 
 /**
  * Factory for ViewDefinitions/NgModuleDefinitions.
@@ -73,11 +73,9 @@ export interface NgModuleDefinition extends Definition<NgModuleDefinitionFactory
 export interface NgModuleDefinitionFactory extends DefinitionFactory<NgModuleDefinition> {}
 
 
-
-
-
-
-
+/**
+ * 
+ */
 export interface ViewDefinition extends Definition<ViewDefinitionFactory> {
   
   /**
@@ -92,6 +90,9 @@ export interface ViewDefinition extends Definition<ViewDefinitionFactory> {
 
   /**
    * updateRenderer
+   * @summary
+   * 此属性非常关键，该函数负责更新界面，在component.ngFactory中，调用viewDef的最后一个参数，是一个函数；
+   * 
    */
   updateRenderer: ViewUpdateFn;
 
@@ -103,30 +104,49 @@ export interface ViewDefinition extends Definition<ViewDefinitionFactory> {
   /**
    * Order: Depth first.
    * Especially providers are before elements / anchors.
+   * 所有子节点的额数组，采用深度优先算法
    */
   nodes: NodeDef[];
 
 
-  /** aggregated NodeFlags for all nodes **/
+  /**
+   * aggregated NodeFlags for all nodes
+   * @summary
+   * 1、汇总所有子节点的NodeFlag；
+   * 2、用于在父节点上判断是否存在某种NodeFlag的子节点，比如检查有没有ComponentView类型的子节点，直接通过它判断，如果存在，再进行遍历，处理这些ComponentView;
+   * 3、这样可以提高性能，避免了每次都进行循环遍历，典型牺牲内存，换取性能的方式。
+   */
   nodeFlags: NodeFlags;
 
   /**
    * rootNodeFlags
+   * 根节点的NodeFlags
+   * @summary
+   * ？？？
    */
   rootNodeFlags: NodeFlags;
 
   /**
    * lastRenderRootNode
+   * @summary
+   * 看属性名是：最后渲染的根节点
+   * ？？？
    */
   lastRenderRootNode: NodeDef|null;
 
   /**
    * bindingCount
+   * @summary
+   * 绑定数量
+   * ？？？
+   * input的数量？还是末班里引用变量的数量
    */
   bindingCount: number;
 
   /**
    * outputCount
+   * @summary
+   * output数量
    */
   outputCount: number;
 
@@ -140,36 +160,62 @@ export interface ViewDefinition extends Definition<ViewDefinitionFactory> {
 }
 
 
-
-
-
-
-
+/**
+ * ViewDefinitionFactory
+ */
 export interface ViewDefinitionFactory extends DefinitionFactory<ViewDefinition> {}
 
+
 /**
- * View更新函数
+ * View更新函数接口
+ * @summary
+ * 用于规范View更新函数
+ * 这些函数谁定义？ngFactory里？
  */
 export interface ViewUpdateFn {
   (check: NodeCheckFn, view: ViewData): void;
 }
 
-// helper functions to create an overloaded function type.
+
+/**
+ * helper functions to create an overloaded function type.
+ * @summary
+ * 1、节点更新函数；
+ * 2、该函数分两种类型：Inline、Dynamic
+ * 3、Inline：效率更高，但检查的参数个数不超过10个；
+ * 4、Dynamic：参数
+ * 
+ */
 export interface NodeCheckFn {
+
   (view: ViewData, nodeIndex: number, argStyle: ArgumentType.Dynamic, values: any[]): any;
 
   (view: ViewData, nodeIndex: number, argStyle: ArgumentType.Inline, v0?: any, v1?: any, v2?: any,
    v3?: any, v4?: any, v5?: any, v6?: any, v7?: any, v8?: any, v9?: any): any;
 }
 
-export const enum ArgumentType {Inline = 0, Dynamic = 1}
 
+/**
+ * NodeCheckFn的参数类型
+ */
+export const enum ArgumentType {
+  Inline = 0,
+  Dynamic = 1
+}
+
+
+/**
+ * ViewHandleEventFn
+ */
 export interface ViewHandleEventFn {
   (view: ViewData, nodeIndex: number, eventName: string, event: any): boolean;
 }
 
+
 /**
  * Bitmask for ViewDefinition.flags.
+ * @summary
+ * 变更检测策略：None=0 OnPush=2
  */
 export const enum ViewFlags {
   None = 0,
@@ -177,49 +223,40 @@ export const enum ViewFlags {
 }
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 /**
  * A node definition in the view.
  *
  * Note: We use one type for all nodes so that loops that loop over all nodes
  * of a ViewDefinition stay monomorphic!
- */
+ * @summary
+ * 1、我们为所有的node使用统一的类型，为了方便迭代。
+ * 2、DerivedNodeDef出了有NodeDef的属性外，还有自己特有的属性
+ * 3、比如Element类型的Node的NodeDef上，element属性有值（值是一个ElementDef），其他类型，则element属性是null。
+  */
 export interface NodeDef {
 
   /**
-   * 
+   * NodeFlags
    */
   flags: NodeFlags;
 
 
   /**
    * node在viewData和viewDefinition内的索引
+   * Index of the node in view data and view definition (those are the same)
+   * @summary
+   * node在ViewData.nodes中的索引，和在ViewDefinition.nodes中的索引是一样的
+   * 区别是啥？肯定是有区别。
    */
-  // Index of the node in view data and view definition (those are the same)
   nodeIndex: number;
   
   /**
-   * 
+   * Index of the node in the check functions
+   * Differ from nodeIndex when nodes are added or removed at runtime (ie after compilation)
+   * @summary
+   * 1、当前Node在check函数中的索引;
+   * 2、运行时新增或者删除节点后，checkIndex和nodeIndex会有所不同。
    */
-  // Index of the node in the check functions
-  // Differ from nodeIndex when nodes are added or removed at runtime (ie after compilation)
   checkIndex: number;
   
   /**
@@ -284,9 +321,6 @@ export interface NodeDef {
    */
   outputIndex: number;
 
-
-
-
   /**
    * outputs
    */
@@ -294,6 +328,7 @@ export interface NodeDef {
 
   /**
    * references that the user placed on the element
+   * 模板变量：<div #div ></div>
    */
   references: {[refId: string]: QueryValueType};
 
@@ -313,6 +348,7 @@ export interface NodeDef {
    * Used as a bloom filter.
    */
   childMatchedQueries: number;
+
 
   /**
    * element
@@ -339,15 +375,8 @@ export interface NodeDef {
    */
   ngContent: NgContentDef|null;
 
+  
 }
-
-
-
-
-
-
-
-
 
 
 /**
@@ -389,18 +418,25 @@ export const enum NodeFlags {
   AfterViewChecked = 1 << 23,
   EmbeddedViews = 1 << 24,
   ComponentView = 1 << 25,
+
+  // 2^26 = 67108864
   TypeContentQuery = 1 << 26,
+
+  // 2^27 = 134217728
   TypeViewQuery = 1 << 27,
+
+  // 2^28 = 268435456
   StaticQuery = 1 << 28,
+
+  // 2^29 = 536870912
   DynamicQuery = 1 << 29,
+  
+  // 201326592
   CatQuery = TypeContentQuery | TypeViewQuery,
 
   // mutually exclusive values...
   Types = CatRenderNode | TypeNgContent | TypePipe | CatPureExpression | CatProvider | CatQuery
 }
-
-
-
 
 
 /**
@@ -438,9 +474,6 @@ export interface BindingDef {
    */
   suffix: string|null;
 }
-
-
-
 
 
 /**
@@ -491,7 +524,9 @@ export const enum BindingFlags {
 
 
 
-
+/**
+ * OutputDef定义
+ */
 export interface OutputDef {
   type: OutputType;
   target: 'window'|'document'|'body'|'component'|null;
@@ -499,8 +534,22 @@ export interface OutputDef {
   propName: string|null;
 }
 
-export const enum OutputType {ElementOutput, DirectiveOutput}
+/**
+ * Output类型
+ * ElementOutput=元素自身的；
+ * DirectiveOutput=指令的
+ */
+export const enum OutputType {
+  ElementOutput,
+  DirectiveOutput
+}
 
+
+
+
+/**
+ * QueryValue类型
+ */
 export const enum QueryValueType {
   ElementRef = 0,
   RenderElement = 1,
@@ -524,8 +573,9 @@ export interface ElementDef {
 
   /**
    * ElementDef
+   * set to null for `<ng-container>`
+   * 如果是ng-container，这设置为null
    */
-  // set to null for `<ng-container>`
   name: string|null;
 
   /**
@@ -535,8 +585,13 @@ export interface ElementDef {
 
   /**
    * attrs
+   * Element的属性集合
+   * ns, name, value
+   * [
+   *    [ns1, name1, value1],
+   *    [ns2, name2, value2]
+   * ]
    */
-  /** ns, name, value */
   attrs: [string, string, string][]|null;
 
   /**
@@ -576,40 +631,93 @@ export interface ElementDef {
    * allProviders
    * same as visiblePublicProviders, but also includes private providers
    * that are located on this element.
+   * @summary
+   * 和visiablePublicProviders一样，但是还包含了位于这个元素上的私有providers
    */
   allProviders: {[tokenKey: string]: NodeDef}|null;
   
   /**
    * handleEvent
+   * component.ngFactory中生成出来的
+   * <div click="doSomething()"></div>，用来描述click如何调用doSomething()
    */
   handleEvent: ElementHandleEventFn|null;
 }
 
 
+/**
+ * 元素上的事件处理函数接口定义
+ * view = 元素所在View的ViewData；
+ * eventName = 事件名称；
+ * event = 事件本身的信息？类似于event$???
+ */
+export interface ElementHandleEventFn {
+  (view: ViewData, eventName: string, event: any): boolean;
+}
 
 
 
-
-
-
-
-
-export interface ElementHandleEventFn { (view: ViewData, eventName: string, event: any): boolean; }
 
 export interface ProviderDef {
+  
+  /**
+   * token
+   */
   token: any;
+
+  /**
+   * value
+   */
   value: any;
+
+  /**
+   * 这个Provider的依赖数组
+   */
   deps: DepDef[];
 }
 
+
+/**
+ * 模块的依赖
+ * @summary
+ * 1、？？？和ProviderDef的区别
+ * 2、貌似多了个flags和 index两个属性；
+ */
 export interface NgModuleProviderDef {
+
+  /**
+   * 
+   */
   flags: NodeFlags;
+
+  /**
+   * 
+   */
   index: number;
+
+
+  /**
+   * token
+   */
   token: any;
+
+  /**
+   * value
+   */
   value: any;
+
+  /**
+   * 依赖数组
+   */
   deps: DepDef[];
 }
 
+
+/**
+ * DepDef
+ * @summary
+ * 1、依赖定义；
+ */
 export interface DepDef {
   flags: DepFlags;
   token: any;
@@ -626,22 +734,69 @@ export const enum DepFlags {
   Value = 2 << 2,
 }
 
-export interface TextDef { prefix: string; }
 
+
+export interface TextDef {
+  prefix: string;
+}
+
+
+/**
+ * QueryDef
+ */
 export interface QueryDef {
+
   id: number;
+
   // variant of the id that can be used to check against NodeDef.matchedQueryIds, ...
   filterId: number;
+
+  /**
+   * bindings
+   */
   bindings: QueryBindingDef[];
 }
 
+
+/**
+ * QueryBinding定义
+ * 
+ * @ViewChild('tpl', {})
+ * publci tplRef TemplateRef
+ * 
+ * propName是tplRef？
+ * bindingType是First
+ * 
+ * 
+ */
 export interface QueryBindingDef {
+
+  /**
+   * 属性名
+   */
   propName: string;
+  
+  /**
+   * 绑定类型
+   */
   bindingType: QueryBindingType;
 }
 
-export const enum QueryBindingType {First = 0, All = 1}
+/**
+ * QueryBinding类型
+ * First：ViewChild、ContentChild等是这种类型；
+ * All：ViewChildren、ContentChildren是这种类型；
+ */
+export const enum QueryBindingType {
+  First = 0,
+  All = 1
+}
 
+
+
+/**
+ * 
+ */
 export interface NgContentDef {
   /**
    * this index is checked against NodeDef.ngContentIndex to find the nodes
@@ -688,9 +843,9 @@ export interface NgContentDef {
 
 
 
-// --------------------------------------------------------------------------
+// ----------------------------------------------------------------------------------------------------------------------------------------------------
 // Data
-// --------------------------------------------------------------------------
+// ----------------------------------------------------------------------------------------------------------------------------------------------------
 
 
 export interface NgModuleData extends Injector, NgModuleRef<any> {
@@ -858,6 +1013,11 @@ export function asTextData(view: ViewData, index: number): TextData {
  * Data for an instantiated NodeType.Element.
  *
  * Attention: Adding fields to this is performance sensitive!
+ * 存储节点类型为NodeType.Element的数据结构
+ * @summary
+ * 处理方式类似NodeDef？？？
+ * ElementData可能有多种类型，不同类型属性值不一样；
+ * 比如 是ViewContainer时，viewContainer属性=ViewContainerData对象，其他属性为null。
  */
 export interface ElementData {
 

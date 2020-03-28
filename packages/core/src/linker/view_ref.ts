@@ -24,6 +24,9 @@ export abstract class ViewRef extends ChangeDetectorRef {
   abstract onDestroy(callback: Function): any /** TODO #9100 */;
 }
 
+
+
+
 /**
  * Represents an Angular View.
  *
@@ -83,6 +86,10 @@ export abstract class EmbeddedViewRef<C> extends ViewRef {
 
   abstract get rootNodes(): any[];
 }
+
+
+
+
 
 /**
  * 内部的ViewRef
