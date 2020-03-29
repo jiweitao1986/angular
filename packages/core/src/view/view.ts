@@ -505,6 +505,27 @@ function markProjectedViewsForCheck(view: ViewData) {
   }
 }
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/**
+ * 检查并更新NodeDef，
+ * 这里主要针对4中节点：TypeElement、TypeText、TypeDirectie、TypePureExpression
+ * @param view 
+ * @param nodeDef 
+ */
 function checkAndUpdateNodeInline(
     view: ViewData, nodeDef: NodeDef,
     v0?: any, v1?: any, v2?: any, v3?: any, v4?: any, v5?: any,
@@ -543,6 +564,15 @@ function checkAndUpdateNodeDynamic(view: ViewData, nodeDef: NodeDef, values: any
       throw 'unreachable';
   }
 }
+
+
+
+
+
+
+
+
+
 
 export function checkNoChangesNode(
     view: ViewData, nodeDef: NodeDef, argStyle: ArgumentType, v0?: any, v1?: any, v2?: any,

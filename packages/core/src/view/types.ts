@@ -386,17 +386,41 @@ export interface NodeDef {
  * - `Cat...`: union of multiple `Type...` (short for category).
  */
 export const enum NodeFlags {
+  
+  // 0=0000
   None = 0,
+  
+  // 1=0001 元素类型
   TypeElement = 1 << 0,
+  
+  // 2=0010 文本类型
   TypeText = 1 << 1,
+
+  // 4=0100 投射过来的模板（类似于<ng-content></ng-content>加载过来的内容）
   ProjectedTemplate = 1 << 2,
+
+  // 3=0011，渲染节点，会被渲染到DOM中的节点？？？，
   CatRenderNode = TypeElement | TypeText,
+
+  // 8=1000（<ng-content></ng-content>对应的节点）
   TypeNgContent = 1 << 3,
+
+  // 16=10000 管道节点
   TypePipe = 1 << 4,
+
+
+  // --------------------
+  // Expression相关
+  // --------------------
   TypePureArray = 1 << 5,
   TypePureObject = 1 << 6,
   TypePurePipe = 1 << 7,
   CatPureExpression = TypePureArray | TypePureObject | TypePurePipe,
+
+
+  // --------------------
+  // Provider相关钩子相关
+  // --------------------
   TypeValueProvider = 1 << 8,
   TypeClassProvider = 1 << 9,
   TypeFactoryProvider = 1 << 10,
@@ -408,6 +432,11 @@ export const enum NodeFlags {
   CatProviderNoDirective =
       TypeValueProvider | TypeClassProvider | TypeFactoryProvider | TypeUseExistingProvider,
   CatProvider = CatProviderNoDirective | TypeDirective,
+
+
+  // --------------------
+  // Lifecyles钩子相关
+  // --------------------
   OnInit = 1 << 16,
   OnDestroy = 1 << 17,
   DoCheck = 1 << 18,
@@ -416,9 +445,19 @@ export const enum NodeFlags {
   AfterContentChecked = 1 << 21,
   AfterViewInit = 1 << 22,
   AfterViewChecked = 1 << 23,
+
+
+  // --------------------
+  // View相关
+  // --------------------
   EmbeddedViews = 1 << 24,
   ComponentView = 1 << 25,
 
+  
+  
+  // --------------------
+  // Query相关
+  // --------------------
   // 2^26 = 67108864
   TypeContentQuery = 1 << 26,
 
@@ -433,6 +472,8 @@ export const enum NodeFlags {
   
   // 201326592
   CatQuery = TypeContentQuery | TypeViewQuery,
+
+
 
   // mutually exclusive values...
   Types = CatRenderNode | TypeNgContent | TypePipe | CatPureExpression | CatProvider | CatQuery
@@ -1095,7 +1136,9 @@ export function asProviderData(view: ViewData, index: number): ProviderData {
  *
  * Attention: Adding fields to this is performance sensitive!
  */
-export interface PureExpressionData { value: any; }
+export interface PureExpressionData {
+  value: any;
+}
 
 /**
  * Accessor for view.nodes, enforcing that every usage site stays monomorphic.

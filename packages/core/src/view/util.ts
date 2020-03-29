@@ -78,10 +78,27 @@ export function resolveRendererType2(type?: RendererType2 | null): RendererType2
   return type || null;
 }
 
+
+/**
+ * 检查绑定的值是否发生变化
+ * @param view 
+ * @param def 
+ * @param bindingIdx 
+ * @param value 
+ */
 export function checkBinding(
     view: ViewData, def: NodeDef, bindingIdx: number, value: any
 ): boolean {
+
+  // 从ViewData的oldValues中获取该View绑定的全部值
   const oldValues = view.oldValues;
+
+  // 初次检查的时候，不管是否相等，都视为变化
+  // 更具NodeDef的bindingIndex定位到当前NodeDef在oldValues数组中的起始位置；
+  // bindingIndex + bindingIdx定位到当前NodeDef在oldValues中的具体某个绑定的oldValue；
+  // 比如[ A1, A2， A3, B1, B2, C1, C2], 我们根据NodeB的bindingIndex(假设=3)，能定位到B1这个位置，
+  // bindingIdx=0，则定位到B1，bindingIdx=1,则定位到B2
+  //
   if ((view.state & ViewState.FirstCheck) ||
       !looseIdentical(oldValues[def.bindingIndex + bindingIdx], value)) {
     return true;
@@ -210,9 +227,38 @@ export function filterQueryId(queryId: number): number {
 }
 
 
+// export const enum QueryValueType {
+//   ElementRef = 0,
+//   RenderElement = 1,
+//   TemplateRef = 2,
+//   ViewContainerRef = 3,
+//   Provider = 4
+// }
 
+/**
+ * 解析matchedQueriesDsl
+ * @param matchedQueriesDsl
+ * @summary
+ * 举例说明：
+ * @ViewChild("vc", {read: ViewContainerRef}) vc: ViewContainerRef;
+ * @ViewChild("tpl") tpl: TemplateRef<any>;
+ * 
+ * 对于<ng-container #vc></ng-container>节点
+ * [
+ *  [1, 3],   1=位置，声明Viewchild的位置吗？ 3=QueryValueType.ViewContainerRef
+ *  ['vc', 1] vc=模板变量名 1=QueryValuetype.RenderElement
+ * ]
+ * 
+ * 
+ * 对于<ng-tempalte #tpl></ng-template>节点
+ * [
+ *  [2, 2]     2=被ViewChild引用的位置 2=QueryValueType.TemplateRef
+ *  ['tpl', 2] tpl=模板变量名 2=QueryValueType.TemplateRef
+ * ]
+ */
 export function splitMatchedQueriesDsl(
-    matchedQueriesDsl: [string | number, QueryValueType][] | null): {
+    matchedQueriesDsl: [string | number, QueryValueType][] | null
+): {
   matchedQueries: {[queryId: string]: QueryValueType},
   references: {[refId: string]: QueryValueType},
   matchedQueryIds: number
@@ -222,10 +268,15 @@ export function splitMatchedQueriesDsl(
   const references: {[refId: string]: QueryValueType} = {};
   if (matchedQueriesDsl) {
     matchedQueriesDsl.forEach(([queryId, valueType]) => {
+
       if (typeof queryId === 'number') {
+
+        // 查询引用
         matchedQueries[queryId] = valueType;
         matchedQueryIds |= filterQueryId(queryId);
       } else {
+        
+        // 如果queryId是字符串，则表明是一个模板变量
         references[queryId] = valueType;
       }
     });

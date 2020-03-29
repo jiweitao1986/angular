@@ -302,11 +302,23 @@ function applyProviderOverridesToNgModule(def: NgModuleDefinition): NgModuleDefi
   }
 }
 
+/**
+ * 更新NodeDef
+ */
 function prodCheckAndUpdateNode(
-    view: ViewData, checkIndex: number, argStyle: ArgumentType, v0?: any, v1?: any, v2?: any,
-    v3?: any, v4?: any, v5?: any, v6?: any, v7?: any, v8?: any, v9?: any): any {
+    view: ViewData, checkIndex: number, argStyle: ArgumentType,
+    v0?: any, v1?: any, v2?: any, v3?: any, v4?: any,
+    v5?: any, v6?: any, v7?: any, v8?: any, v9?: any
+): any {
+  
+  // 先通过checkIndex从ViewDefinition的nodes中获取对应的NodeDef
   const nodeDef = view.def.nodes[checkIndex];
+
+  // 转调checkAndUpdateNode
   checkAndUpdateNode(view, nodeDef, argStyle, v0, v1, v2, v3, v4, v5, v6, v7, v8, v9);
+  
+  // 如果node节点的类型是TypePureArray | TypePureObject | TypePurePipe
+  // 则返回PureExpressionData的value，否则返回undefined
   return (nodeDef.flags & NodeFlags.CatPureExpression) ?
       asPureExpressionData(view, checkIndex).value :
       undefined;

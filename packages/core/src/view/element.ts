@@ -12,23 +12,45 @@ import {SecurityContext} from '../security';
 import {BindingDef, BindingFlags, ElementData, ElementHandleEventFn, NodeDef, NodeFlags, OutputDef, OutputType, QueryValueType, ViewData, ViewDefinitionFactory, asElementData} from './types';
 import {NOOP, calcBindingFlags, checkAndUpdateBinding, dispatchEvent, elementEventFullName, getParentRenderElement, resolveDefinition, resolveRendererType2, splitMatchedQueriesDsl, splitNamespace} from './util';
 
+
+
 /**
  * anchorDef
- * @param flags 
- * @param matchedQueriesDsl 
- * @param ngContentIndex 
+ * @param flags 标志位=0
+ * @param matchedQueriesDsl 二维数组，里面有模板变量，待进一步分析？？？
+ * @param ngContentIndex = null ？？？，待进一步分析
  * @param childCount 
  * @param handleEvent 
- * @param templateFactory 
+ * @param templateFactory
+ * @summary
+ * 1、定义ng-template节点；
+ * 2、ng-tempalte的内容，是一个单独的View；
+ * 3、所以需要传入tempalte
  */
 export function anchorDef(
-    flags: NodeFlags, matchedQueriesDsl: null | [string | number, QueryValueType][],
-    ngContentIndex: null | number, childCount: number, handleEvent?: null | ElementHandleEventFn,
-    templateFactory?: ViewDefinitionFactory): NodeDef {
+    flags: NodeFlags,
+    matchedQueriesDsl: null | [string | number, QueryValueType][],
+    ngContentIndex: null | number,
+    childCount: number,
+    handleEvent?: null | ElementHandleEventFn,
+    templateFactory?: ViewDefinitionFactory
+): NodeDef {
+  
+  // 合并TypeElement，因为<ng-template></ng-tempalte>也是一个元素？？？
   flags |= NodeFlags.TypeElement;
-  const {matchedQueries, references, matchedQueryIds} = splitMatchedQueriesDsl(matchedQueriesDsl);
+
+  const {
+    matchedQueries,
+    references,
+    matchedQueryIds
+  } = splitMatchedQueriesDsl(matchedQueriesDsl);
+
   const template = templateFactory ? resolveDefinition(templateFactory) : null;
 
+  // 返回的NodeDef有如下特点：
+  // 1、flags = NodeFlags.TypeElement;
+  // 2、element属性是一个ElementDef，他持有一个tempalte属性；
+  // 3、template属性是一个ViewDefinition，它是<ng-tempalte></ng-tempalte>中间的内容的ViewDefinition。
   return {
     // will bet set by the view definition
     nodeIndex: -1,
@@ -41,14 +63,20 @@ export function anchorDef(
     checkIndex: -1,
     childFlags: 0,
     directChildFlags: 0,
-    childMatchedQueries: 0, matchedQueries, matchedQueryIds, references, ngContentIndex, childCount,
+    childMatchedQueries: 0,
+    matchedQueries,
+    matchedQueryIds,
+    references,
+    ngContentIndex,
+    childCount,
     bindings: [],
     bindingFlags: 0,
     outputs: [],
     element: {
       ns: null,
       name: null,
-      attrs: null, template,
+      attrs: null,
+      template,
       componentProvider: null,
       componentView: null,
       componentRendererType: null,
@@ -62,6 +90,10 @@ export function anchorDef(
     ngContent: null
   };
 }
+
+
+
+
 
 /**
  * 定义Element
@@ -100,7 +132,9 @@ export function elementDef(
   
   // matchedQueriesDsl
   const {
-    matchedQueries, references, matchedQueryIds
+    matchedQueries,
+    references,
+    matchedQueryIds
   } = splitMatchedQueriesDsl(matchedQueriesDsl);
   
   // namespaceAndName
@@ -133,13 +167,18 @@ export function elementDef(
   }
 
   // outputs
+  // 格式形如：
+  // [
+  //    [null, 'click']
+   //]
   outputs = outputs || [];
   const outputDefs: OutputDef[] = new Array(outputs.length);
   for (let i = 0; i < outputs.length; i++) {
     const [target, eventName] = outputs[i];
     outputDefs[i] = {
       type: OutputType.ElementOutput,
-      target: <any>target, eventName,
+      target: <any>target,
+      eventName,
       propName: null
     };
   }
@@ -161,6 +200,15 @@ export function elementDef(
   flags |= NodeFlags.TypeElement;
  
  
+  
+  // 返回节点的有如下特点：
+  // flags = NodeFlags.TypeElement
+  // namespaceAndName = 标签名
+  // element是一个ElementDef；
+  // element.componentRendererType = 是调用了createRenderType函数，创建出来的；
+  // element.componentView = 节点对应组件的ViewDefinitionFactory，注意不是HostViewDefinitionFactory;
+  // 通过element.componentView和componentRendererType可以区分普通的Element还是组件Element
+  // 
   return {
     // will bet set by the view definition
     nodeIndex: -1,
@@ -173,7 +221,14 @@ export function elementDef(
     flags,
     childFlags: 0,
     directChildFlags: 0,
-    childMatchedQueries: 0, matchedQueries, matchedQueryIds, references, ngContentIndex, childCount,
+    childMatchedQueries: 0,
+
+    matchedQueries,
+    matchedQueryIds,
+    references,
+
+    ngContentIndex,
+    childCount,
     bindings: bindingDefs,
     bindingFlags: calcBindingFlags(bindingDefs),
     outputs: outputDefs,
@@ -264,19 +319,9 @@ function renderEventHandlerClosure(view: ViewData, index: number, eventName: str
 
 
 /**
- * 
+ * 检查并更新元素
  * @param view 
  * @param def 
- * @param v0 
- * @param v1 
- * @param v2 
- * @param v3 
- * @param v4 
- * @param v5 
- * @param v6 
- * @param v7 
- * @param v8 
- * @param v9 
  */
 export function checkAndUpdateElementInline(
     view: ViewData, def: NodeDef, v0: any, v1: any, v2: any, v3: any, v4: any, v5: any, v6: any,
@@ -326,21 +371,30 @@ function checkAndUpdateElementValue(view: ViewData, def: NodeDef, bindingIdx: nu
   const elData = asElementData(view, def.nodeIndex);
   const renderNode = elData.renderElement;
   const name = binding.name !;
+
+
   switch (binding.flags & BindingFlags.Types) {
+    
+    // [attr.attr-name]="attrValue"的场景
     case BindingFlags.TypeElementAttribute:
       setElementAttribute(view, binding, renderNode, binding.ns, name, value);
       break;
+
+    // [class.class-name]="true"的场景
     case BindingFlags.TypeElementClass:
       setElementClass(view, renderNode, name, value);
       break;
+    
+    // [style.style-name]="red"的场景
     case BindingFlags.TypeElementStyle:
       setElementStyle(view, binding, renderNode, name, value);
       break;
+
+    // 这种是直接给DOM节点对象的属性赋值，不是html属性的值，DOM属性和HTML属性之间部分有映射，部分没有关系。
     case BindingFlags.TypeProperty:
-      const bindView = (def.flags & NodeFlags.ComponentView &&
-                        binding.flags & BindingFlags.SyntheticHostProperty) ?
-          elData.componentView :
-          view;
+      const bindView = 
+        (def.flags & NodeFlags.ComponentView && binding.flags & BindingFlags.SyntheticHostProperty) ?
+        elData.componentView : view;
       setElementProperty(bindView, binding, renderNode, name, value);
       break;
   }

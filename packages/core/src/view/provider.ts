@@ -193,9 +193,27 @@ export function _def(
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 export function createProviderInstance(view: ViewData, def: NodeDef): any {
   return _createProviderInstance(view, def);
 }
+
+
+
 
 export function createPipeInstance(view: ViewData, def: NodeDef): any {
   // deps are looked up from component.
@@ -207,21 +225,33 @@ export function createPipeInstance(view: ViewData, def: NodeDef): any {
   const allowPrivateServices = true;
   // pipes are always eager and classes!
   return createClass(
-      compView.parent !, viewParentEl(compView) !, allowPrivateServices, def.provider !.value,
-      def.provider !.deps);
+      compView.parent !,
+      viewParentEl(compView) !,
+      allowPrivateServices,
+      def.provider !.value,
+      def.provider !.deps
+  );
 }
+
+
 
 export function createDirectiveInstance(view: ViewData, def: NodeDef): any {
   // components can see other private services, other directives can't.
   const allowPrivateServices = (def.flags & NodeFlags.Component) > 0;
   // directives are always eager and classes!
   const instance = createClass(
-      view, def.parent !, allowPrivateServices, def.provider !.value, def.provider !.deps);
+      view,
+      def.parent !,
+      allowPrivateServices,
+      def.provider !.value,
+      def.provider !.deps
+  );
   if (def.outputs.length) {
     for (let i = 0; i < def.outputs.length; i++) {
       const output = def.outputs[i];
       const subscription = instance[output.propName !].subscribe(
-          eventHandlerClosure(view, def.parent !.nodeIndex, output.eventName));
+          eventHandlerClosure(view, def.parent !.nodeIndex, output.eventName)
+      );
       view.disposables ![def.outputIndex + i] = subscription.unsubscribe.bind(subscription);
     }
   }
@@ -229,11 +259,37 @@ export function createDirectiveInstance(view: ViewData, def: NodeDef): any {
 }
 
 
-
-
 function eventHandlerClosure(view: ViewData, index: number, eventName: string) {
   return (event: any) => dispatchEvent(view, index, eventName, event);
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 export function checkAndUpdateDirectiveInline(
     view: ViewData, def: NodeDef, v0: any, v1: any, v2: any, v3: any, v4: any, v5: any, v6: any,
@@ -318,6 +374,23 @@ export function checkAndUpdateDirectiveDynamic(
   }
   return changed;
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 /**
@@ -436,7 +509,28 @@ export const NOT_FOUND_CHECK_ONLY_ELEMENT_INJECTOR = {};
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 /**
+ * ！！！！！！！！！！！！！！！！！！！
+ * 重要，处理组件的注入查找
+ * ！！！！！！！！！！！！！！！！！！！
  * 处理依赖
  * @param view ViewData
  * @param elDef 是一个NodeDef，具体包含哪些？
@@ -567,7 +661,6 @@ export function resolveDep(
 }
 
 
-
 /**
  * 查找ComponentView
  * @param view 
@@ -592,53 +685,156 @@ function findCompView(view: ViewData, elDef: NodeDef, allowPrivateServices: bool
   return compView;
 }
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 function updateProp(
-    view: ViewData, providerData: ProviderData, def: NodeDef, bindingIdx: number, value: any,
-    changes: SimpleChanges): SimpleChanges {
+    view: ViewData,
+    providerData: ProviderData,
+    def: NodeDef,
+    bindingIdx: number,
+    value: any,
+    changes: SimpleChanges
+): SimpleChanges {
+
+  // ？？？ 什么样的节点的Nodeflags是Component? 是HostView这种node吗？类似于<app-xxx></app-xxx>这种标签对应的元素的Node
+  // 如果前档节点采用了OnPush方式，此时它的ChecksEnabled没有设置，这里要打开这个标志，进行一次检测（Input变化的时候，对OnPush的也要进行一次检测）
   if (def.flags & NodeFlags.Component) {
     const compView = asElementData(view, def.parent !.nodeIndex).componentView;
     if (compView.def.flags & ViewFlags.OnPush) {
       compView.state |= ViewState.ChecksEnabled;
     }
   }
+
+  // 获取属性名
   const binding = def.bindings[bindingIdx];
   const propName = binding.name !;
+
+
+  // 通过providerData找到对应的 Instance（ComponentInstance、DirectiveInstance），并赋上最新的值；
   // Note: This is still safe with Closure Compiler as
   // the user passed in the property name as an object has to `providerDef`,
   // so Closure Compiler will have renamed the property correctly already.
   providerData.instance[propName] = value;
+
+  // 检查是否有OnChanges钩子
   if (def.flags & NodeFlags.OnChanges) {
     changes = changes || {};
+    
+    // 获取旧值，注意这里的计算index的方式
     let oldValue = view.oldValues[def.bindingIndex + bindingIdx];
     if (oldValue instanceof WrappedValue) {
       oldValue = oldValue.wrapped;
     }
+
+    // 前边不是获取了一次binding了吗？怎么还要获取一次？？？
     const binding = def.bindings[bindingIdx];
+    
+    // 将这次变化组织为一个SimpleChanges，放到changes中
     changes[binding.nonMinifiedName !] =
         new SimpleChange(oldValue, value, (view.state & ViewState.FirstCheck) !== 0);
   }
+  
+  // 老的值已经利用完了（用来生成SimpleChange），将当前值跟您到oldValues里面
   view.oldValues[def.bindingIndex + bindingIdx] = value;
+
+  // 返回changes
   return changes;
 }
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/**
+ * 声明周期钩子调用
+ * @param view 当前View的ViewData
+ * @param lifecycles 要调用的声明周期钩子
+ */
 export function callLifecycleHooksChildrenFirst(view: ViewData, lifecycles: NodeFlags) {
+  
+  // 1、ViewDefinition会归集所有子节点的NodeFlags到自己的NodeFlags上；
+  // 2、在调用父的生命周期钩子之前，先检查父的NodeFlag上，来判断后代节点是否有该Liecyles；
+  // 3、如果没有，则提前退出，来提高性能
   if (!(view.def.nodeFlags & lifecycles)) {
     return;
   }
+  
   const nodes = view.def.nodes;
   for (let i = 0; i < nodes.length; i++) {
     const nodeDef = nodes[i];
     let parent = nodeDef.parent;
+
+    // 如果parent不存在，但声明周期钩子存在，则直接调用
     if (!parent && nodeDef.flags & lifecycles) {
       // matching root node (e.g. a pipe)
       callProviderLifecycles(view, i, nodeDef.flags & lifecycles);
     }
+
+    // 如果存在下级节点，跳过所有下级节点
     if ((nodeDef.childFlags & lifecycles) === 0) {
       // no child matches one of the lifecycles
       i += nodeDef.childCount;
     }
-    while (parent && (parent.flags & NodeFlags.TypeElement) &&
-           i === parent.nodeIndex + parent.childCount) {
+
+    // ？？？此处逻辑待进一步跟踪，调用父节点对应的lifecyles？？？
+    // 1、如果parnet存在；
+    // 2、parent是TypeElement类型；
+    // 3、??? 当前节点的索引=父节点索引+父节点所有自己节点个数，啥意思？判断当前节点是不是父节点的最后一个节点吗？
+    while (
+      parent &&
+      (parent.flags & NodeFlags.TypeElement) &&
+      i === parent.nodeIndex + parent.childCount
+    ) {
       // last child of an element
       if (parent.directChildFlags & lifecycles) {
         callElementProvidersLifecycles(view, parent, lifecycles);
@@ -648,6 +844,15 @@ export function callLifecycleHooksChildrenFirst(view: ViewData, lifecycles: Node
   }
 }
 
+/**
+ * 调用elDef上所有子节点及其子节点的声明周期钩子
+ * @param view 
+ * @param elDef 
+ * @param lifecycles 
+ * @summary
+ * 1、从for循环的是方式上看，elDef和它下面的子节点，都在当一个ViewDef内；
+ * 2、循环的时候，从elDef开始，加上elDef.childCount结束；
+ */
 function callElementProvidersLifecycles(view: ViewData, elDef: NodeDef, lifecycles: NodeFlags) {
   for (let i = elDef.nodeIndex + 1; i <= elDef.nodeIndex + elDef.childCount; i++) {
     const nodeDef = view.def.nodes[i];
@@ -659,6 +864,12 @@ function callElementProvidersLifecycles(view: ViewData, elDef: NodeDef, lifecycl
   }
 }
 
+/**
+ * 调用声明周期钩子函数
+ * @param view ViewData
+ * @param index nodeIndex
+ * @param lifecycles 构造
+ */
 function callProviderLifecycles(view: ViewData, index: number, lifecycles: NodeFlags) {
   const providerData = asProviderData(view, index);
   if (!providerData) {
