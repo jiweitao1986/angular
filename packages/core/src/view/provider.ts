@@ -34,6 +34,31 @@ const InjectorRefTokenKey = tokenKey(Injector);
 
 /**
  * DirectiveDef
+ * @summary
+ * --------------------------------------------------------------------------------
+ * 使用场景
+ * @Component({
+ *  selector: ''
+ *  template: '<app-child>'
+ * })
+ * class AppComponent {
+ * }
+ * @Component({
+ *  selector: ''
+ *  template: '<div>WelcomeComponent</div>'
+ * })
+ * class WelcomeComponent {
+ * }
+ * 
+ * 针对WelcomeComponent，angular会创建两个ViewDefinition
+ * 1、View_WelcomeComponent_0：它用来定义tempalte里面内容的的ViewDefinitionFactory；
+ * 2、View_WelcomeComponent_Host_0：它用来定义组件自身的HostView（app-welcome）；
+ * 3、这个HostViewFactory的作用，
+ * --------------------------------------------------------------------------------
+ * 
+ * --------------------------------------------------------------------------------
+ * 
+ * 
  */
 export function directiveDef(
     checkIndex: number,

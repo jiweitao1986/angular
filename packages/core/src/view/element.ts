@@ -16,6 +16,7 @@ import {NOOP, calcBindingFlags, checkAndUpdateBinding, dispatchEvent, elementEve
 
 /**
  * anchorDef
+ * ----------------------------------------
  * @param flags 标志位=0
  * @param matchedQueriesDsl 二维数组，里面有模板变量，待进一步分析？？？
  * @param ngContentIndex = null ？？？，待进一步分析
@@ -23,9 +24,23 @@ import {NOOP, calcBindingFlags, checkAndUpdateBinding, dispatchEvent, elementEve
  * @param handleEvent 
  * @param templateFactory
  * @summary
- * 1、定义ng-template节点；
- * 2、ng-tempalte的内容，是一个单独的View；
- * 3、所以需要传入tempalte
+ * --------------------------------------------------------------------------------
+ * 1、模板中的<ng-tempalte></ng-tempalte>会调用该方法，创建一个对应的NodeDef
+ * --------------------------------------------------------------------------------
+ * 该类型的NodeDef有如下特点：
+ * 1、flags = NodeFlags.TypeElement;
+ * 2、element = { xxx, xxx}
+ * 3、element.template = ViewDefinition，在component.ngfactory.js中，会为<ng-template></ng-tempalte>的内容创建一个ViewDefinitionFactory，用来创建<ng-tempalte>内部包含内容的ViewDefinition；
+ * 4、element.handleEvent
+ * --------------------------------------------------------------------------------
+ * 关于matchedQueriesDsl的说明
+ * 1、类型：[string | number, QueryValueType][]，是一个二维数组
+ * 2、二维数组的每个元素是一个包含两个值的的一维数组；
+ * 3、一维数组中，第一个是 Query对应的索引或者模板变量名称，第二个值是QueryValueType类型的枚举（ ElementRef = 0, RenderElement = 1, TemplateRef = 2, ViewContainerRef = 3, Provider = 4）
+ * 
+ * 例如
+ * <ng-container #vc></ng-container>
+ * <ng-template></ng-tempalte>
  */
 export function anchorDef(
     flags: NodeFlags,
@@ -45,6 +60,7 @@ export function anchorDef(
     matchedQueryIds
   } = splitMatchedQueriesDsl(matchedQueriesDsl);
 
+  // ViewDefinition
   const template = templateFactory ? resolveDefinition(templateFactory) : null;
 
   // 返回的NodeDef有如下特点：
@@ -109,6 +125,9 @@ export function anchorDef(
  * @params handleEvent
  * @params componentView
  * @params componentRendererType
+ * 
+ * 
+ * 
  */
 export function elementDef(
     checkIndex: number,

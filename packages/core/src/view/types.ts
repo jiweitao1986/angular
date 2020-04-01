@@ -958,6 +958,8 @@ export interface ViewData {
    * and call the right accessor (e.g. `elementData`) based on the NodeType.
    * 注意：不要迭代这个属性，因为这样会产生一个 polymorphic usage site（咋翻译？多态的使用点？）
    * 要用迭代ViewDefinition的nodes节点，并调用对应类型的的访问器
+   * @summary
+   * 一般的使用方式，是通过NodeDef的index来这里的nodes数组里查找对应的NodeData
    */
   nodes: {[key: number]: NodeData};
 
@@ -972,11 +974,13 @@ export interface ViewData {
 
   /**
    * oldValues
+   * 存储了当前绑定的值
    */
   oldValues: any[];
 
   /**
    * disposables
+   * 当前View注销时的回调方法数组
    */
   disposables: DisposableFn[]|null;
 }
@@ -1025,10 +1029,16 @@ export interface DisposableFn { (): void; }
 export class NodeData {
   
   /**
-   * _bran
+   * _brand
    */
   private __brand: any;
 }
+
+
+
+
+
+
 
 /**
  * Data for an instantiated NodeType.Text.
@@ -1050,6 +1060,14 @@ export function asTextData(view: ViewData, index: number): TextData {
   return <any>view.nodes[index];
 }
 
+
+
+
+
+
+
+
+
 /**
  * Data for an instantiated NodeType.Element.
  *
@@ -1070,11 +1088,13 @@ export interface ElementData {
 
   /**
    * componentView
+   * 如果当前的Element对应了一个Component的话，指向该Component的ViewData
    */
   componentView: ViewData;
 
   /**
    * viewContainer
+   * 
    */
   viewContainer: ViewContainerData|null;
 
@@ -1089,17 +1109,24 @@ export interface ElementData {
  * ViewContainerData
  */
 export interface ViewContainerData extends ViewContainerRef {
+  
+  /**
+   * 扩展的ViewData集合
+   * 由于ViewContainerData继承了ViewContainerRef，会直接暴露给用户，所以我们使用_前缀来标记_embededViews
+   * 属性是一个内部属性，不要直接使用。
+   */
   // Note: we are using the prefix _ as ViewContainerData is a ViewContainerRef and therefore
-  // directly
-  // exposed to the user.
+  // directly exposed to the user.
   _embeddedViews: ViewData[];
 }
 
 
-
+/**
+ * <ng-tempalte></ng-template>对应的Data
+ */
 export interface TemplateData extends TemplateRef<any> {
-  // views that have been created from the template
-  // of this element,
+
+  // views that have been created from the template of this element,
   // but inserted into the embeddedViews of another element.
   // By default, this is undefined.
   // Note: we are using the prefix _ as TemplateData is a TemplateRef and therefore directly
@@ -1114,6 +1141,12 @@ export interface TemplateData extends TemplateRef<any> {
 export function asElementData(view: ViewData, index: number): ElementData {
   return <any>view.nodes[index];
 }
+
+
+
+
+
+
 
 /**
  * Data for an instantiated NodeType.Provider.
@@ -1130,6 +1163,13 @@ export interface ProviderData {
 export function asProviderData(view: ViewData, index: number): ProviderData {
   return <any>view.nodes[index];
 }
+
+
+
+
+
+
+
 
 /**
  * Data for an instantiated NodeType.PureExpression.

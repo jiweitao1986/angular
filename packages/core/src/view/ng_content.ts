@@ -10,11 +10,22 @@ import {NodeDef, NodeFlags, ViewData} from './types';
 import {RenderNodeAction, getParentRenderElement, visitProjectedRenderNodes} from './util';
 
 /**
- * 创建NgContentDef
- * @param ngContentIndex 
+ * 创建NgContentDef（<ng-content></ng-template>）
+ * @param ngContentIndex 啥作用？？？
  * @param index 
+ * @summary
+ * --------------------------------------------------------------------------------
+ * 模板中的<ng-content></ng-content>会调用此方法创建对应类型的NodeDef
+ * --------------------------------------------------------------------------------
+ * <ng-content></ng-content>对应的NodeDef有如下特点：
+ * 1、flags = NodeFlags.TypeNgContent
+ * 2、ngContextIndex =
+ * 3、ngContent = { index: 1}，这里的index，是在当前ViewDefinition中的索引，比如当前ViewDefainition中有多个<ng-content>，用index来标记他们的位置。
+ * --------------------------------------------------------------------------------
  */
 export function ngContentDef(ngContentIndex: null | number, index: number): NodeDef {
+
+
   return {
     // will bet set by the view definition
     nodeIndex: -1,

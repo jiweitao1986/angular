@@ -9,9 +9,21 @@
 import {ElementData, NodeDef, NodeFlags, Services, ViewData, ViewDefinition, ViewState} from './types';
 import {RenderNodeAction, declaredViewContainer, isComponentView, renderNode, visitRootRenderNodes} from './util';
 
+
+
+/**
+ * 将view附加到elementData对应的
+ * @param parentView 父ViewData
+ * @param elementData ViewContainerRef对应的ElementData
+ * @param viewIndex 要追加的位置
+ * @param view 要追加的ViewData
+ */
 export function attachEmbeddedView(
-    parentView: ViewData, elementData: ElementData, viewIndex: number | undefined | null,
-    view: ViewData) {
+    parentView: ViewData,
+    elementData: ElementData,
+    viewIndex: number | undefined | null,
+    view: ViewData
+) {
   let embeddedViews = elementData.viewContainer !._embeddedViews;
   if (viewIndex === null || viewIndex === undefined) {
     viewIndex = embeddedViews.length;
@@ -26,12 +38,16 @@ export function attachEmbeddedView(
   renderAttachEmbeddedView(elementData, prevView, view);
 }
 
+
+
+
 function attachProjectedView(vcElementData: ElementData, view: ViewData) {
+  
   const dvcElementData = declaredViewContainer(view);
-  if (!dvcElementData || dvcElementData === vcElementData ||
-      view.state & ViewState.IsProjectedView) {
+  if (!dvcElementData || dvcElementData === vcElementData || view.state & ViewState.IsProjectedView) {
     return;
   }
+
   // Note: For performance reasons, we
   // - add a view to template._projectedViews only 1x throughout its lifetime,
   //   and remove it not until the view is destroyed.
@@ -45,10 +61,15 @@ function attachProjectedView(vcElementData: ElementData, view: ViewData) {
     projectedViews = dvcElementData.template._projectedViews = [];
   }
   projectedViews.push(view);
+
   // Note: we are changing the NodeDef here as we cannot calculate
   // the fact whether a template is used for projection during compilation.
   markNodeAsProjectedTemplate(view.parent !.def, view.parentNodeDef !);
 }
+
+
+
+
 
 function markNodeAsProjectedTemplate(viewDef: ViewDefinition, nodeDef: NodeDef) {
   if (nodeDef.flags & NodeFlags.ProjectedTemplate) {
@@ -62,6 +83,9 @@ function markNodeAsProjectedTemplate(viewDef: ViewDefinition, nodeDef: NodeDef) 
     parentNodeDef = parentNodeDef.parent;
   }
 }
+
+
+
 
 export function detachEmbeddedView(elementData: ElementData, viewIndex?: number): ViewData|null {
   const embeddedViews = elementData.viewContainer !._embeddedViews;
@@ -83,6 +107,9 @@ export function detachEmbeddedView(elementData: ElementData, viewIndex?: number)
   return view;
 }
 
+
+
+
 export function detachProjectedView(view: ViewData) {
   if (!(view.state & ViewState.IsProjectedView)) {
     return;
@@ -96,6 +123,9 @@ export function detachProjectedView(view: ViewData) {
     }
   }
 }
+
+
+
 
 export function moveEmbeddedView(
     elementData: ElementData, oldViewIndex: number, newViewIndex: number): ViewData {
@@ -119,6 +149,10 @@ export function moveEmbeddedView(
   return view;
 }
 
+
+
+
+
 function renderAttachEmbeddedView(
     elementData: ElementData, prevView: ViewData | null, view: ViewData) {
   const prevRenderNode = prevView ? renderNode(prevView, prevView.def.lastRenderRootNode !) :
@@ -130,10 +164,16 @@ function renderAttachEmbeddedView(
   visitRootRenderNodes(view, RenderNodeAction.InsertBefore, parentNode, nextSibling, undefined);
 }
 
+
+
+
 export function renderDetachView(view: ViewData) {
   visitRootRenderNodes(view, RenderNodeAction.RemoveChild, null, null, undefined);
 }
 
+/**
+ * 向数组arr的index位置，插入一个value元素
+ */
 function addToArray(arr: any[], index: number, value: any) {
   // perf: array.push is faster than array.splice!
   if (index >= arr.length) {
@@ -143,6 +183,9 @@ function addToArray(arr: any[], index: number, value: any) {
   }
 }
 
+/**
+ * 将数组arr的index位置的元素移除
+ */
 function removeFromArray(arr: any[], index: number) {
   // perf: array.pop is faster than array.splice!
   if (index >= arr.length - 1) {
